@@ -208,3 +208,12 @@ h1,h2,h3,h4{margin:0 0 .45em;line-height:1.25}
   .grid-cards{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px}
   .footer-grid{grid-template-columns:1fr}
 }
+
+/* category strip + card play badge */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.cat-card{display:flex;flex-direction:column;gap:3px;padding:14px 16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);transition:.18s}
+.cat-card:hover{border-color:#3d3d5c;transform:translateY(-2px);color:inherit}
+.cat-card b{font-size:15px}
+.play-badge{position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2));display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(4px);transition:.18s;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.4)}
+.card:hover .play-badge{opacity:1;transform:translateY(0)}
+.play-badge .ic{width:16px;height:16px}

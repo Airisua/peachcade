@@ -9,6 +9,16 @@
 <link rel="stylesheet" href="/css/style.css">
 <% if (typeof adminCss !== 'undefined' && adminCss) { %><link rel="stylesheet" href="/css/admin.css"><% } %>
 <meta name="robots" content="<%= (typeof noindex !== 'undefined' && noindex) ? 'noindex' : 'index' %>">
+<% var _ogTitle = (typeof ogTitle !== 'undefined' && ogTitle) ? ogTitle : ((typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle : site.name); %>
+<% var _ogImg = (typeof ogImage !== 'undefined' && ogImage) ? (String(ogImage).indexOf('http') === 0 ? ogImage : siteUrl + ogImage) : ''; %>
+<meta property="og:site_name" content="<%= site.name %>">
+<meta property="og:type" content="website">
+<meta property="og:title" content="<%= _ogTitle %>">
+<meta property="og:description" content="<%= (typeof ogDesc !== 'undefined' && ogDesc) ? ogDesc : site.tagline %>">
+<meta property="og:url" content="<%= siteUrl + path %>">
+<% if (_ogImg) { %><meta property="og:image" content="<%= _ogImg %>"><% } %>
+<meta name="twitter:card" content="<%= _ogImg ? 'summary_large_image' : 'summary' %>">
+<link rel="canonical" href="<%= siteUrl + path %>">
 </head>
 <body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
 <script>window.CSRF = <%- JSON.stringify(csrf) %>; window.I18N = <%- JSON.stringify({ copied: t('js.copied'), likeLogin: t('js.likeLogin'), confirmDelete: t('common.confirmDelete') }) %>;</script>

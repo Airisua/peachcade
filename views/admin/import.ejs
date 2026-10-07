@@ -1,0 +1,28 @@
+<%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
+<div class="panel">
+  <h2><%= t('admin.import') %></h2>
+  <% if (done !== null) { %>
+  <div class="notice ok"><%= t('admin.importDone', { n: done }) %> · <%= t('admin.importSkipped', { n: skipped }) %></div>
+  <% } %>
+  <p class="muted small"><%= t('admin.importHint') %></p>
+  <form method="post" action="/admin/import/preview" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="form-grid">
+      <label><%= t('admin.importProvider') %>
+        <select name="provider">
+          <% providerList.forEach(function (p, i) { %><option value="<%= p.id %>" <%= i === 0 ? 'selected' : '' %>><%= p.label %></option><% }); %>
+        </select>
+      </label>
+      <label><%= t('admin.importCount') %><input type="number" name="num" value="24" min="1" max="48"></label>
+      <label class="span2"><%= t('admin.importUrl') %><input name="url" placeholder="https://gamemonetize.com/feed.php?format=json&amp;num={num}&amp;page={page}"></label>
+      <label><%= t('admin.importPage') %><input type="number" name="page" value="1" min="1"></label>
+    </div>
+    <div class="form-row">
+      <label class="check"><input type="checkbox" name="publish"><%= t('admin.importPublish') %></label>
+      <button class="btn btn-primary" type="submit"><%= t('admin.importPreviewBtn') %></button>
+    </div>
+  </form>
+  <p class="muted small"><%= t('admin.importNote') %></p>
+</div>
+<%- include('../partials/admin_bottom') %>
+

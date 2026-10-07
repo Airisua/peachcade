@@ -4,5 +4,11 @@
   <h1 class="big-code"><%= status || 500 %></h1>
   <p class="muted"><%= message %></p>
   <p><a class="btn btn-primary" href="/"><%= t('common.backHome') %></a></p>
+  <% if (typeof suggestions !== 'undefined' && suggestions.length) { %>
+  <div style="margin-top:34px;text-align:left">
+    <h2 style="text-align:center"><%= t('home.popular') %></h2>
+    <div class="grid-cards"><% suggestions.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
+  </div>
+  <% } %>
 </main>
 <%- include('partials/footer') %>

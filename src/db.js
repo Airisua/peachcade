@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS games (
   tags TEXT NOT NULL DEFAULT '',
   thumb TEXT NOT NULL DEFAULT '/img/games/default.svg',
   embed_url TEXT NOT NULL DEFAULT '',
+  source TEXT NOT NULL DEFAULT '',
   plays INTEGER NOT NULL DEFAULT 0,
   likes INTEGER NOT NULL DEFAULT 0,
   featured INTEGER NOT NULL DEFAULT 0,
@@ -91,6 +92,12 @@ CREATE INDEX IF NOT EXISTS idx_plays_log_user ON plays_log(user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_comments_game ON comments(game_id, created_at);
 `;
 db.exec(SCHEMA);
+
+// lightweight migrations for databases created by earlier versions
+const gameCols = db.pragma('table_info(games)');
+if (!gameCols.some((c) => c.name === 'source')) {
+  db.exec('ALTER TABLE games ADD COLUMN source TEXT NOT NULL DEFAULT ""');
+}
 
 function getSetting(key, def = '') {
   const row = db.prepare('SELECT value FROM settings WHERE key=?').get(key);

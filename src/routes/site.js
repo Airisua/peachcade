@@ -4,6 +4,9 @@ const router = express.Router();
 const { db } = require('../db');
 const { listGames } = require('../queries');
 const { requireLogin } = require('../auth');
+const { rateLimit } = require('../ratelimit');
+
+const commentLimiter = rateLimit({ windowMs: 60000, max: 10, scope: 'comment' });
 
 function page(n) { const v = parseInt(n, 10); return !v || v < 1 ? 1 : v; }
 function safeSort(s) { return ['popular', 'new', 'likes', 'name'].includes(s) ? s : 'popular'; }
@@ -77,7 +80,7 @@ router.get('/game/:slug', (req, res, next) => {
   res.render('game', { pageTitle: res.locals.gt(game), game, related, comments, liked, favorited });
 });
 
-router.post('/game/:id/comment', requireLogin, (req, res) => {
+router.post('/game/:id/comment', requireLogin, commentLimiter, (req, res) => {
   const game = db.prepare('SELECT id, slug FROM games WHERE id=?').get(parseInt(req.params.id, 10) || 0);
   if (!game) return res.redirect('/games');
   const content = String(req.body.content || '').trim();
@@ -111,6 +114,23 @@ router.get('/about', (req, res) => {
 
 router.get('/healthz', (req, res) => {
   res.json({ ok: true, uptime: process.uptime() });
+});
+
+router.get('/robots.txt', (req, res) => {
+  res.type('text/plain').send('User-agent: *\nAllow: /\nSitemap: ' + res.locals.siteUrl + '/sitemap.xml\n');
+});
+
+router.get('/sitemap.xml', (req, res) => {
+  const games = db.prepare('SELECT slug, created_at FROM games WHERE published=1 ORDER BY id DESC LIMIT 2000').all();
+  const cats = db.prepare('SELECT slug FROM categories ORDER BY sort').all();
+  const urls = [
+    { loc: '/', pri: '1.0' },
+    { loc: '/games', pri: '0.9' },
+    { loc: '/about', pri: '0.3' }
+  ].concat(cats.map((c) => ({ loc: '/category/' + c.slug, pri: '0.6' })))
+    .concat(games.map((g) => ({ loc: '/game/' + g.slug, pri: '0.8', last: String(g.created_at || '').slice(0, 10) })));
+  const body = urls.map((u) => '  <url><loc>' + res.locals.siteUrl + u.loc + '</loc>' + (u.last ? '<lastmod>' + u.last + '</lastmod>' : '') + '<priority>' + u.pri + '</priority></url>').join('\n');
+  res.type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + body + '\n</urlset>\n');
 });
 
 module.exports = router;

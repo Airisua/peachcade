@@ -17,6 +17,19 @@
     <a class="hero-art" href="/game/<%= hero.slug %>"><img src="<%= hero.thumb %>" alt="<%= gt(hero) %>"></a>
   </section>
   <% } %>
+  <% if (navCategories.length) { %>
+  <section class="section">
+    <div class="section-head"><h2><%= t('home.browseByCategory') %></h2></div>
+    <div class="cat-grid">
+      <% navCategories.forEach(function (c) { %>
+      <a class="cat-card" href="/category/<%= c.slug %>">
+        <b><%= catName(c) %></b>
+        <small class="muted"><%= c.n %> <%= t('home.totalGames') %></small>
+      </a>
+      <% }); %>
+    </div>
+  </section>
+  <% } %>
   <% if (continueList.length) { %>
   <section class="section">
     <div class="section-head"><h2><%= t('home.continue') %></h2></div>

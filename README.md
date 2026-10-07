@@ -42,9 +42,10 @@ Default accounts (created on first start, change them!):
 
 Useful scripts:
 
-    npm run smoke        # end-to-end HTTP test of the running site (50 checks)
+    npm run smoke        # end-to-end HTTP test of the running site (57 checks)
     npm run check:games  # validate the 5 built-in games (syntax + jsdom boot)
     npm run check:i18n   # verify all translation keys exist in EN and ZH
+    npm run check:providers  # unit checks for the game feed parsers
     npm run reset:db     # delete the SQLite database (re-seeded on next start)
 
 ## Docker deployment (one command)
@@ -95,6 +96,22 @@ database and set new values.
 - Settings: /admin/settings - site name, taglines (EN/ZH), footer text,
   ads on/off, registration open/closed.
 
+## Importing games from a distribution platform
+
+The admin panel includes a feed importer at /admin/import:
+
+- GameMonetize works out of the box: pick the preset and click "Preview feed".
+- GameDistribution / GamePix / any other platform: register as a publisher
+  there first, then choose "Custom JSON feed" (or RSS) and paste the feed URL
+  from the dashboard.
+- The preview shows title, thumbnail, mapped category and embed URL; games
+  that were already imported are detected and skipped automatically.
+- Imported games default to drafts (uncheck "Publish immediately") so you can
+  polish the EN/ZH copy before going live.
+- Whitelist your domain on the platform: ads and revenue tracking inside
+  embedded games are handled by the provider SDK, while your own ad slots keep
+  running around the player.
+
 ## Project structure
 
     server.js               Express app entry (middleware order, routes, errors)
@@ -104,6 +121,7 @@ database and set new values.
     src/csrf.js             CSRF token issue + validation
     src/ratelimit.js        small in-memory rate limiter for login/register
     src/queries.js          shared game list/search queries
+    src/providers.js        game feed importers (GameMonetize, custom RSS/JSON)
     src/common.js           per-request view locals (site, categories, helpers)
     src/upload.js           multer upload for thumbnails (2 MB, png/jpg/webp/gif)
     src/routes/site.js      home, listing, search, category, game page, comments
@@ -113,7 +131,7 @@ database and set new values.
     views/                  EJS templates (public site + admin panel)
     public/css|js|img       styles, front-end JS, SVG icon sprite, thumbnails
     public/games/<slug>/    the 5 built-in games (standalone HTML5 pages)
-    scripts/                smoke test, game checker, i18n checker, db reset
+    scripts/                smoke test, game checker, i18n checker, provider checker, db reset
     Dockerfile, docker-compose.yml, .env.example
 
 ## Security notes
@@ -143,6 +161,9 @@ crazygames.com，代码与内置游戏均为原创。核心能力：
 - 广告位：6 个可配置位置，支持 AdSense 等 HTML 代码或图片横幅，未配置时显示占位。
 - 中英文切换：默认英文，页头 / 页脚一键切换中文。
 - Docker 一键部署：docker compose up -d --build，含 /healthz 健康检查。
+- 游戏导入：后台「导入游戏」(/admin/import) 支持从 GameMonetize（免注册可先预览）
+  或任意自定义 RSS/JSON 游戏源批量导入，自动去重、默认存草稿；正式接入前请先在
+  平台注册出版商并登记你的站点域名。
 - 文档：README（本文件）、docs/ARCHITECTURE.md、docs/DEPLOY.md、docs/GAMES_SPEC.md。
 
 本地启动：npm install && npm start，默认管理员 admin / admin123（请尽快修改）。

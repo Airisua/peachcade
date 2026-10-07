@@ -88,6 +88,14 @@
     });
   });
 
+  $$('[data-check-all]').forEach(function (master) {
+    master.addEventListener('change', function () {
+      var form = master.closest('form');
+      if (!form) return;
+      $$('input[name="sel"]', form).forEach(function (cb) { if (!cb.disabled) cb.checked = master.checked; });
+    });
+  });
+
   document.addEventListener('submit', function (e) {
     var f = e.target;
     if (f && f.matches && f.matches('[data-confirm-form]') && !f.getAttribute('data-confirmed')) {
@@ -101,4 +109,3 @@
     });
   });
 })();
-

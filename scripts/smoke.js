@@ -58,6 +58,14 @@ function client() {
   ok(r.status === 200 && r.text.includes('Snake Classic'), 'search page', r.status);
   r = await user.get('/category/puzzle');
   ok(r.status === 200 && r.text.includes('Minesweeper'), 'category page', r.status);
+  r = await user.get('/sitemap.xml');
+  ok(r.status === 200 && r.text.includes('<urlset') && r.text.includes('/game/2048'), 'sitemap.xml', r.status);
+  r = await user.get('/robots.txt');
+  ok(r.status === 200 && r.text.includes('Sitemap:'), 'robots.txt', r.status);
+  r = await user.get('/');
+  ok(r.text.includes('cat-card'), 'home shows category strip');
+  r = await user.get('/game/2048');
+  ok(r.text.includes('og:title') && r.text.includes('rel="canonical"'), 'game page has OG tags + canonical');
   r = await user.get('/game/2048');
   ok(r.status === 200 && r.text.includes('/games/2048/'), 'game page embeds iframe', r.status);
   for (const slug of ['2048', 'snake', 'memory-match', 'tic-tac-toe', 'minesweeper']) {
@@ -88,6 +96,8 @@ function client() {
   r = await user.get('/profile');
   ok(r.text.includes('2048'), 'favorite listed in profile', r.status);
   const ctext = 'Smoke comment ' + Date.now();
+  r = await user.post('/game/1/comment', { content: 'missing csrf' });
+  ok(r.status === 403, 'missing CSRF token rejected (403)', r.status);
   resp = await user.post('/game/1/comment', { _csrf: user.csrf(), content: ctext });
   ok(resp.status === 302, 'comment posted', resp.status);
   r = await user.get('/game/2048');
@@ -98,10 +108,12 @@ function client() {
   await admin.get('/login');
   resp = await admin.post('/login', { _csrf: admin.csrf(), username: 'admin', password: process.env.ADMIN_PASSWORD || 'admin123' });
   ok(resp.status === 302 && resp.location === '/', 'admin login', resp.status + ' ' + resp.location);
-  for (const p of ['/admin', '/admin/games', '/admin/users', '/admin/comments', '/admin/ads', '/admin/settings']) {
+  for (const p of ['/admin', '/admin/games', '/admin/import', '/admin/users', '/admin/comments', '/admin/ads', '/admin/settings']) {
     r = await admin.get(p);
     ok(r.status === 200, 'admin page ' + p, r.status);
   }
+  resp = await admin.post('/admin/import/preview', { _csrf: admin.csrf(), provider: 'json', url: 'http://127.0.0.1:9/nope', num: 5, page: 1 });
+  ok(resp.status === 302 && resp.location.indexOf('/admin/import') === 0, 'import preview handles unreachable feed', resp.status + ' ' + resp.location);
   const slug = 'smoke-game-' + Date.now().toString().slice(-6);
   resp = await admin.post('/admin/games', { _csrf: admin.csrf(), title_en: 'Smoke Game', slug: slug, category: 'puzzle', embed_url: '/games/2048/', published: 'on' });
   ok(resp.status === 302, 'admin creates game', resp.status);

@@ -1,4 +1,5 @@
 'use strict';
+const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const { db, getSetting, setSetting } = require('../db');
@@ -6,6 +7,7 @@ const { requireAdmin } = require('../auth');
 const { listGames } = require('../queries');
 const { isValid } = require('../csrf');
 const upload = require('../upload');
+const providers = require('../providers');
 
 router.use(requireAdmin);
 
@@ -228,6 +230,98 @@ router.post('/settings', (req, res) => {
     else setSetting(k, String(b[k] || '').slice(0, 500));
   }
   res.redirect('/admin/settings?ok=saved');
+});
+
+// ---- game feed importer (GameMonetize / custom RSS / custom JSON) ----
+
+const importCache = new Map();
+
+function pruneImportCache() {
+  const now = Date.now();
+  for (const [k, v] of importCache) {
+    if (now - v.ts > 15 * 60 * 1000) importCache.delete(k);
+  }
+}
+
+router.get('/import', (req, res) => {
+  res.render('admin/import', {
+    pageTitle: res.locals.t('admin.import'),
+    providerList: providers.list(),
+    done: req.query.done != null ? parseInt(req.query.done, 10) || 0 : null,
+    skipped: parseInt(req.query.skip, 10) || 0
+  });
+});
+
+router.post('/import/preview', async (req, res) => {
+  if (csrfFail(req, res)) return;
+  try {
+    const provider = String(req.body.provider || 'gamemonetize');
+    const result = await providers.fetchGames({
+      provider,
+      url: String(req.body.url || ''),
+      num: req.body.num,
+      page: req.body.page
+    });
+    const cats = db.prepare('SELECT * FROM categories ORDER BY sort').all();
+    const items = result.items.map((it) => {
+      const slug = providers.slugFor(provider, it);
+      return {
+        sourceId: it.sourceId,
+        title: it.title,
+        desc: (it.description || '').slice(0, 500),
+        howto: (it.instructions || '').slice(0, 2000),
+        category: providers.mapCategory(it.category, cats),
+        catLabel: it.category || '',
+        size: it.width && it.height ? it.width + 'x' + it.height : '',
+        slug: slug,
+        thumb: it.thumb || '/img/games/default.svg',
+        url: it.url,
+        tags: providers.tagsFor(provider, it.tags),
+        existing: !!db.prepare('SELECT 1 FROM games WHERE slug=? OR embed_url=?').get(slug, it.url)
+      };
+    });
+    const token = crypto.randomBytes(12).toString('hex');
+    pruneImportCache();
+    importCache.set(token, { items: items, ts: Date.now(), provider: provider, publish: !!req.body.publish });
+    res.render('admin/import_preview', {
+      pageTitle: res.locals.t('admin.importPreviewTitle'),
+      token: token,
+      items: items,
+      provider: provider,
+      publish: !!req.body.publish,
+      feedUrl: result.url
+    });
+  } catch (e) {
+    res.redirect('/admin/import?err=importFailed');
+  }
+});
+
+router.post('/import/confirm', (req, res) => {
+  if (csrfFail(req, res)) return;
+  const token = String(req.body.token || '');
+  const entry = importCache.get(token);
+  pruneImportCache();
+  if (!entry) return res.redirect('/admin/import?err=importFailed');
+  let sel = req.body.sel || [];
+  if (!Array.isArray(sel)) sel = [sel];
+  sel = sel.map((v) => String(v)).join(',').split(',');
+  const idxs = new Set(sel.map((v) => parseInt(v, 10)));
+  const publish = entry.publish || !!req.body.publish;
+  let done = 0;
+  let skipped = 0;
+  const ins = db.prepare('INSERT INTO games(slug,title_en,title_zh,desc_en,desc_zh,howto_en,howto_zh,category,tags,thumb,embed_url,source,featured,published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,0,?)');
+  const check = db.prepare('SELECT 1 FROM games WHERE slug=? OR embed_url=?');
+  const tx = db.transaction(() => {
+    entry.items.forEach((it, i) => {
+      if (!idxs.has(i)) return;
+      if (check.get(it.slug, it.url)) { skipped++; return; }
+      ins.run(it.slug, it.title, '', it.desc, '', it.howto, '', it.category, it.tags, it.thumb, it.url, entry.provider, publish ? 1 : 0);
+      done++;
+    });
+  });
+  tx();
+  importCache.delete(token);
+  res.redirect('/admin/import?done=' + done + '&skip=' + skipped);
 });
 
 module.exports = router;

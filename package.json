@@ -10,6 +10,7 @@
     "smoke": "node scripts/smoke.js",
     "check:games": "node scripts/check-games.js",
     "check:i18n": "node scripts/check-i18n.js",
+    "check:providers": "node scripts/check-providers.js",
     "reset:db": "node scripts/reset-db.js"
   },
   "engines": {

@@ -3,12 +3,13 @@ const { db, getSetting } = require('./db');
 const { gt, gd, gh } = require('./queries');
 
 const OK_CODES = ['saved', 'created', 'updated', 'deleted', 'password', 'comment', 'login', 'registered'];
-const ERR_CODES = ['commentEmpty', 'commentLong', 'wrongPassword', 'slugTaken', 'fileType', 'fileTooBig', 'badRequest', 'notFound', 'forbidden', 'registrationClosed'];
+const ERR_CODES = ['commentEmpty', 'commentLong', 'wrongPassword', 'slugTaken', 'fileType', 'fileTooBig', 'badRequest', 'notFound', 'forbidden', 'registrationClosed', 'importFailed'];
 
 function common(req, res, next) {
   const lang = req.lang;
   res.locals.path = req.path;
   res.locals.year = new Date().getFullYear();
+  res.locals.siteUrl = String(process.env.SITE_URL || (req.protocol + '://' + (req.get('host') || 'localhost'))).replace(/\/+$/, '');
   res.locals.site = {
     name: getSetting('site_name', 'PixelPlay'),
     tagline: lang === 'zh' ? getSetting('tagline_zh', '') : getSetting('tagline_en', ''),

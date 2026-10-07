@@ -1,0 +1,33 @@
+<%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
+<div class="panel">
+  <h2><%= t('admin.importPreviewTitle') %></h2>
+  <p class="muted small"><code><%= feedUrl %></code> · <code><%= provider %></code></p>
+  <% if (!items.length) { %>
+  <p class="muted"><%= t('admin.importEmpty') %></p>
+  <% } else { %>
+  <form method="post" action="/admin/import/confirm">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="token" value="<%= token %>">
+    <table class="tbl">
+      <tr><th><input type="checkbox" data-check-all checked></th><th></th><th><%= t('admin.tblTitle') %></th><th><%= t('admin.tblCategory') %></th><th>Embed URL</th><th></th></tr>
+      <% items.forEach(function (it, i) { %>
+      <tr class="<%= it.existing ? 'row-hidden' : '' %>">
+        <td><input type="checkbox" name="sel" value="<%= i %>" <%= it.existing ? 'disabled' : 'checked' %>></td>
+        <td><img class="tbl-thumb" src="<%= it.thumb %>" alt="" loading="lazy"></td>
+        <td><%= it.title %><br><small class="muted"><%= it.slug %><%= it.size ? ' · ' + it.size : '' %></small></td>
+        <td><%= it.catLabel %> → <code><%= it.category %></code></td>
+        <td class="comment-cell"><code><%= it.url %></code></td>
+        <td><% if (it.existing) { %><span class="badge off"><%= t('admin.importExisting') %></span><% } %></td>
+      </tr>
+      <% }); %>
+    </table>
+    <div class="form-row">
+      <label class="check"><input type="checkbox" name="publish" <%= publish ? 'checked' : '' %>><%= t('admin.importPublish') %></label>
+      <button class="btn btn-primary" type="submit"><%= t('admin.importConfirm') %></button>
+      <a class="btn btn-ghost" href="/admin/import"><%= t('admin.importBack') %></a>
+    </div>
+  </form>
+  <% } %>
+</div>
+<%- include('../partials/admin_bottom') %>
+

@@ -5,6 +5,7 @@
     <nav class="admin-nav">
       <a href="/admin" class="<%= path === '/admin' ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-dashboard"></use></svg><%= t('admin.dashboard') %></a>
       <a href="/admin/games" class="<%= path.indexOf('/admin/games') === 0 ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-gamepad"></use></svg><%= t('admin.games') %></a>
+      <a href="/admin/import" class="<%= path.indexOf('/admin/import') === 0 ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-download"></use></svg><%= t('admin.import') %></a>
       <a href="/admin/comments" class="<%= path.indexOf('/admin/comments') === 0 ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-message"></use></svg><%= t('admin.comments') %></a>
       <a href="/admin/users" class="<%= path.indexOf('/admin/users') === 0 ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-users"></use></svg><%= t('admin.users') %></a>
       <a href="/admin/ads" class="<%= path.indexOf('/admin/ads') === 0 ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-megaphone"></use></svg><%= t('admin.ads') %></a>

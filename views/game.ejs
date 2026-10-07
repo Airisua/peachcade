@@ -1,4 +1,4 @@
-<%- include('partials/head', { pageTitle: gt(game) }) %>
+<%- include('partials/head', { pageTitle: gt(game), ogTitle: gt(game), ogDesc: gd(game), ogImage: game.thumb }) %>
 <%- include('partials/header') %>
 <%- include('partials/ad', { slot: 'header' }) %>
 <main class="container">

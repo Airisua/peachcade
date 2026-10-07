@@ -6,7 +6,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 
-require('./src/db');
+const { db } = require('./src/db');
 const { i18nMiddleware } = require('./src/i18n');
 const { loadUser } = require('./src/auth');
 const { csrfMiddleware, csrfGuard } = require('./src/csrf');
@@ -33,8 +33,8 @@ app.use(cookieParser());
 app.use(i18nMiddleware);
 app.use(loadUser);
 app.use(csrfMiddleware);
-app.use(csrfGuard);
 app.use(common);
+app.use(csrfGuard);
 
 app.use('/', siteRouter);
 app.use('/', authRouter);
@@ -46,7 +46,11 @@ app.use('/admin', adminRouter);
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h' }));
 
 app.use((req, res) => {
-  res.status(404).render('error', { status: 404, message: res.locals.t('err.notFound') });
+  let suggestions = [];
+  try {
+    suggestions = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.published=1 ORDER BY g.plays DESC LIMIT 4').all();
+  } catch (e) { /* ignore */ }
+  res.status(404).render('error', { status: 404, message: res.locals.t('err.notFound'), suggestions });
 });
 
 app.use((err, req, res, next) => {

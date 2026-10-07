@@ -22,6 +22,7 @@ it in the x-csrf-token header. Multipart requests validate after multer runs.
 - categories   slug, name_en, name_zh, sort
 - games        slug, title/desc/howto in EN+ZH, category, tags, thumb,
                embed_url (iframe source: local path or external URL),
+               source (feed importer origin, empty for manual/built-in games),
                plays, likes, featured, published, created_at
 - likes        (user_id, game_id) unique pair
 - favorites    (user_id, game_id) unique pair
@@ -38,12 +39,12 @@ inserted only when the corresponding table is empty.
 ## Routes
 
 Public:  GET /  /games  /game/:slug  /category/:slug  /search  /random  /about
-         GET /lang/:code  GET /healthz
+         GET /lang/:code  /healthz  /sitemap.xml  /robots.txt
          POST /game/:id/comment  POST /comment/:id/delete
 Auth:    GET/POST /login  GET/POST /register  POST /logout
          GET /profile  POST /profile/password
 API:     GET /api/games (search suggestions)  POST /api/like/:id  POST /api/favorite/:id
-Admin:   GET /admin  /admin/games (+new, edit)  /admin/users  /admin/comments
+Admin:   GET /admin  /admin/games (+new, edit)  /admin/import (+preview, confirm)  /admin/users  /admin/comments
          /admin/ads  /admin/settings and their POST actions
 
 ## i18n
@@ -65,9 +66,18 @@ scripts/check-games.js validates all five games: file size, inline script
 syntax (new Function) and a jsdom boot test (300 ms, no uncaught errors,
 #game-root present): npm run check:games
 
+## Game importing
+
+src/providers.js fetches and normalises external game feeds (GameMonetize
+preset, custom RSS, custom JSON). /admin/import keeps a short-lived preview in
+memory, then inserts the selected games in one transaction. Slugs are
+deterministic (title + provider + source id), so re-importing the same feed is
+detected as duplicates and skipped. Imported rows carry games.source.
+scripts/check-providers.js unit-tests both parsers (npm run check:providers).
+
 ## Verification
 
-- npm run smoke      - 50 end-to-end HTTP checks (auth, admin CRUD, ads, i18n)
-- npm run check:games / check:i18n
+- npm run smoke      - 57 end-to-end HTTP checks (auth, admin CRUD, ads, i18n)
+- npm run check:games / check:i18n / check:providers
 - docker compose up -d --build + GET /healthz for containerised runs
 
