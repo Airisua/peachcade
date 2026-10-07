@@ -1,0 +1,88 @@
+<%- include('partials/head', { pageTitle: gt(game) }) %>
+<%- include('partials/header') %>
+<%- include('partials/ad', { slot: 'header' }) %>
+<main class="container">
+  <nav class="breadcrumb muted small">
+    <a href="/"><%= t('nav.home') %></a><span>/</span>
+    <a href="/category/<%= game.category %>"><%= game['cat_' + lang] || game.category %></a><span>/</span>
+    <span><%= gt(game) %></span>
+  </nav>
+  <% if (!game.published) { %><div class="notice warn"><%= t('game.unpublishedBadge') %></div><% } %>
+  <div class="game-head">
+    <h1><%= gt(game) %></h1>
+    <div class="game-stats muted small">
+      <span><svg class="ic"><use href="/img/icons.svg#i-play"></use></svg><%= fmt(game.plays) %> <%= t('game.plays') %></span>
+      <span><svg class="ic"><use href="/img/icons.svg#i-heart"></use></svg><%= fmt(game.likes) %></span>
+    </div>
+  </div>
+  <div class="player-wrap">
+    <div class="player-box" id="player-box">
+      <iframe id="game-frame" src="<%= game.embed_url %>" title="<%= gt(game) %>" allowfullscreen sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups allow-orientation-lock"></iframe>
+    </div>
+    <div class="player-bar">
+      <button class="btn btn-icon <%= liked ? 'on' : '' %>" id="like-btn" data-like="<%= game.id %>" title="<%= t('game.like') %>"><svg class="ic"><use href="/img/icons.svg#i-heart"></use></svg><span class="n"><%= fmt(game.likes) %></span></button>
+      <button class="btn btn-icon <%= favorited ? 'on' : '' %>" id="fav-btn" data-fav="<%= game.id %>" title="<%= t('game.favorite') %>"><svg class="ic"><use href="/img/icons.svg#i-star"></use></svg></button>
+      <button class="btn btn-icon" data-fs="#player-box" title="<%= t('game.fullscreen') %>"><svg class="ic"><use href="/img/icons.svg#i-maximize"></use></svg></button>
+      <a class="btn btn-icon" href="<%= game.embed_url %>" target="_blank" rel="noopener" title="<%= t('game.newTab') %>"><svg class="ic"><use href="/img/icons.svg#i-external"></use></svg></a>
+      <button class="btn btn-icon" data-share title="<%= t('game.share') %>"><svg class="ic"><use href="/img/icons.svg#i-share"></use></svg></button>
+    </div>
+  </div>
+  <%- include('partials/ad', { slot: 'game-under' }) %>
+  <div class="game-cols">
+    <div class="game-main">
+      <section class="panel">
+        <h2><%= t('game.howto') %></h2>
+        <p><%= gh(game) || '—' %></p>
+      </section>
+      <section class="panel">
+        <h2><%= t('game.about') %></h2>
+        <p><%= gd(game) %></p>
+        <% if (game.tags) { %>
+        <div class="tags"><% game.tags.split(',').forEach(function (tag) { var tt = tag.trim(); if (tt) { %><a class="chip" href="/search?q=<%= encodeURIComponent(tt) %>"><%= tt %></a><% } }); %></div>
+        <% } %>
+      </section>
+      <section class="panel" id="comments">
+        <h2><%= t('game.comments') %></h2>
+        <% if (user) { %>
+        <form method="post" action="/game/<%= game.id %>/comment" class="comment-form">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <textarea name="content" rows="3" maxlength="1000" placeholder="<%= t('game.commentPlaceholder') %>" required></textarea>
+          <div class="form-row"><button class="btn btn-primary" type="submit"><%= t('game.postComment') %></button></div>
+        </form>
+        <% } else { %>
+        <p class="muted"><a href="/login?next=<%= encodeURIComponent('/game/' + game.slug) %>"><%= t('game.loginToComment') %></a></p>
+        <% } %>
+        <% if (!comments.length) { %><p class="muted"><%= t('game.noComments') %></p><% } %>
+        <div class="comments">
+          <% comments.forEach(function (c) { %>
+          <div class="comment">
+            <div class="avatar sm"><%= c.username.charAt(0).toUpperCase() %></div>
+            <div class="comment-body">
+              <div class="comment-head"><b><%= c.username %></b><span class="muted small"><%= fmtDate(c.created_at) %></span></div>
+              <p><%= c.content %></p>
+              <% if (user && (user.id === c.user_id || user.role === 'admin')) { %>
+              <form method="post" action="/comment/<%= c.id %>/delete" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button type="submit" class="linklike danger small" data-confirm="1"><%= t('game.deleteComment') %></button></form>
+              <% } %>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </section>
+    </div>
+    <aside class="game-side">
+      <section class="panel">
+        <h2><%= t('game.related') %></h2>
+        <div class="mini-list">
+          <% related.forEach(function (g) { %>
+          <a class="mini-card" href="/game/<%= g.slug %>">
+            <img src="<%= g.thumb %>" alt="<%= gt(g) %>" loading="lazy">
+            <span class="mini-meta"><b><%= gt(g) %></b><small class="muted"><%= fmt(g.plays) %> <%= t('game.plays') %></small></span>
+          </a>
+          <% }); %>
+        </div>
+      </section>
+      <%- include('partials/ad', { slot: 'sidebar' }) %>
+    </aside>
+  </div>
+</main>
+<%- include('partials/footer') %>

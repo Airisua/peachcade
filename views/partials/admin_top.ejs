@@ -1,0 +1,21 @@
+<%- include('../partials/head', { pageTitle: pageTitle, adminCss: true, noindex: true, bodyClass: 'admin' }) %>
+<div class="admin-shell">
+  <aside class="admin-side">
+    <div class="admin-brand"><svg class="ic"><use href="/img/icons.svg#i-shield"></use></svg><span><%= site.name %></span><em class="muted"><%= t('admin.brand') %></em></div>
+    <nav class="admin-nav">
+      <a href="/admin" class="<%= path === '/admin' ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-dashboard"></use></svg><%= t('admin.dashboard') %></a>
+      <a href="/admin/games" class="<%= path.indexOf('/admin/games') === 0 ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-gamepad"></use></svg><%= t('admin.games') %></a>
+      <a href="/admin/comments" class="<%= path.indexOf('/admin/comments') === 0 ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-message"></use></svg><%= t('admin.comments') %></a>
+      <a href="/admin/users" class="<%= path.indexOf('/admin/users') === 0 ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-users"></use></svg><%= t('admin.users') %></a>
+      <a href="/admin/ads" class="<%= path.indexOf('/admin/ads') === 0 ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-megaphone"></use></svg><%= t('admin.ads') %></a>
+      <a href="/admin/settings" class="<%= path.indexOf('/admin/settings') === 0 ? 'active' : '' %>"><svg class="ic"><use href="/img/icons.svg#i-settings"></use></svg><%= t('admin.settings') %></a>
+    </nav>
+    <div class="admin-side-foot">
+      <a href="/" target="_blank"><%= t('admin.backToSite') %></a>
+      <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linklike" type="submit"><%= t('nav.logout') %></button></form>
+    </div>
+  </aside>
+  <main class="admin-main">
+    <div class="admin-topbar"><h1><%= pageTitle %></h1><span class="muted small"><%= user.username %></span></div>
+    <% if (okMsg) { %><div class="notice ok"><%= okMsg %></div><% } %>
+    <% if (errMsg) { %><div class="notice error"><%= errMsg %></div><% } %>

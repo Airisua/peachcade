@@ -1,0 +1,67 @@
+'use strict';
+require('dotenv').config();
+const path = require('path');
+const express = require('express');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
+
+require('./src/db');
+const { i18nMiddleware } = require('./src/i18n');
+const { loadUser } = require('./src/auth');
+const { csrfMiddleware, csrfGuard } = require('./src/csrf');
+const common = require('./src/common');
+
+const siteRouter = require('./src/routes/site');
+const authRouter = require('./src/routes/auth');
+const apiRouter = require('./src/routes/api');
+const adminRouter = require('./src/routes/admin');
+
+const app = express();
+const PORT = parseInt(process.env.PORT, 10) || 3000;
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+app.use(morgan('tiny'));
+app.use(express.urlencoded({ extended: false, limit: '300kb' }));
+app.use(express.json({ limit: '300kb' }));
+app.use(cookieParser());
+app.use(i18nMiddleware);
+app.use(loadUser);
+app.use(csrfMiddleware);
+app.use(csrfGuard);
+app.use(common);
+
+app.use('/', siteRouter);
+app.use('/', authRouter);
+app.use('/api', apiRouter);
+app.use('/admin', adminRouter);
+
+// static files are served after routes so that page routes such as /games
+// are never shadowed by same-named directories inside public/
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h' }));
+
+app.use((req, res) => {
+  res.status(404).render('error', { status: 404, message: res.locals.t('err.notFound') });
+});
+
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const multerish = err && (err.code === 'LIMIT_FILE_SIZE' || err.message === 'bad-file-type');
+  const status = multerish ? 400 : 500;
+  if ((req.originalUrl || '').startsWith('/api')) return res.status(status).json({ error: 'error' });
+  let message = res.locals.t('err.serverError');
+  if (err && err.code === 'LIMIT_FILE_SIZE') message = res.locals.t('err.fileTooBig');
+  else if (err && err.message === 'bad-file-type') message = res.locals.t('err.fileType');
+  res.status(status).render('error', { status, message });
+});
+
+app.listen(PORT, () => {
+  console.log('[PixelPlay] listening on http://localhost:' + PORT);
+});
+
+module.exports = app;

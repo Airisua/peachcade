@@ -1,0 +1,22 @@
+<%- include('partials/head', { pageTitle: pageTitle }) %>
+<%- include('partials/header') %>
+<%- include('partials/ad', { slot: 'list-top' }) %>
+<main class="container">
+  <div class="list-head">
+    <h1><%= heading %></h1>
+    <div class="muted small"><%= totalGames %> <%= t('home.totalGames') %></div>
+  </div>
+  <div class="filterbar">
+    <span class="muted small"><%= t('list.sort') %></span>
+    <% [['popular','list.sortPopular'],['new','list.sortNew'],['likes','list.sortLikes'],['name','list.sortName']].forEach(function (s) { %>
+    <a class="chip <%= sort === s[0] ? 'chip-active' : '' %>" href="<%= basePath %>sort=<%= s[0] %>"><%= t(s[1]) %></a>
+    <% }); %>
+  </div>
+  <% if (games.length) { %>
+  <div class="grid-cards"><% games.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
+  <%- include('partials/pagination', { page: page, pages: pages, base: basePath + 'sort=' + sort + '&' }) %>
+  <% } else { %>
+  <p class="empty"><%= t('list.noResults') %></p>
+  <% } %>
+</main>
+<%- include('partials/footer') %>

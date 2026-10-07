@@ -1,0 +1,14 @@
+<% if (adsEnabled) { const ad = adFor(slot); %>
+<div class="ad-slot ad-slot-<%= slot %>">
+  <span class="ad-label"><%= t('common.advertisement') %></span>
+  <% if (ad) { %>
+    <% if (ad.type === 'image' && ad.image_url) { %>
+    <a href="<%= ad.link_url || '#' %>" target="_blank" rel="noopener nofollow sponsored"><img src="<%= ad.image_url %>" alt="<%= ad.title || 'Sponsor' %>"></a>
+    <% } else { %>
+    <%- ad.html %>
+    <% } %>
+  <% } else { %>
+  <div class="ad-ph"><b><%= t('ads.slot_' + slot) %></b><small><%= t('ads.placeholder') %></small></div>
+  <% } %>
+</div>
+<% } %>

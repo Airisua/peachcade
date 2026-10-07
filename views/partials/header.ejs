@@ -1,0 +1,45 @@
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="/">
+      <svg class="ic ic-logo" aria-hidden="true"><use href="/img/icons.svg#i-gamepad"></use></svg>
+      <span><%= site.name %></span>
+    </a>
+    <nav class="main-nav">
+      <a href="/" class="<%= path === '/' ? 'active' : '' %>"><%= t('nav.home') %></a>
+      <a href="/games" class="<%= path.indexOf('/games') === 0 || path.indexOf('/category') === 0 ? 'active' : '' %>"><%= t('nav.games') %></a>
+      <details class="dropdown">
+        <summary><%= t('nav.categories') %><svg class="ic"><use href="/img/icons.svg#i-chevron"></use></svg></summary>
+        <div class="dropdown-panel">
+          <% navCategories.forEach(function (c) { %>
+          <a href="/category/<%= c.slug %>"><span><%= catName(c) %></span><b><%= c.n %></b></a>
+          <% }); %>
+          <a class="dropdown-all" href="/games"><span><%= t('common.allGames') %></span></a>
+        </div>
+      </details>
+    </nav>
+    <form class="searchbox" action="/search" method="get" autocomplete="off">
+      <svg class="ic"><use href="/img/icons.svg#i-search"></use></svg>
+      <input id="nav-search" name="q" placeholder="<%= t('nav.searchPlaceholder') %>" value="<%= typeof q !== 'undefined' ? q : '' %>">
+      <div class="suggest" id="search-suggest"></div>
+    </form>
+    <div class="header-actions">
+      <a class="lang-switch" href="/lang/<%= otherLang %>?next=<%= encodeURIComponent(path) %>" title="<%= t('nav.language') %>">
+        <svg class="ic"><use href="/img/icons.svg#i-globe"></use></svg><%= otherLang === 'zh' ? '中文' : 'EN' %>
+      </a>
+      <% if (user) { %>
+      <details class="dropdown usermenu">
+        <summary class="avatar" title="<%= user.username %>"><%= user.username.charAt(0).toUpperCase() %></summary>
+        <div class="dropdown-panel">
+          <div class="menu-head"><b><%= user.username %></b><small><%= user.email %></small></div>
+          <a href="/profile"><svg class="ic"><use href="/img/icons.svg#i-user"></use></svg><%= t('nav.profile') %></a>
+          <% if (user.role === 'admin') { %><a href="/admin"><svg class="ic"><use href="/img/icons.svg#i-shield"></use></svg><%= t('nav.admin') %></a><% } %>
+          <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrf %>"><button type="submit" class="linklike"><svg class="ic"><use href="/img/icons.svg#i-logout"></use></svg><%= t('nav.logout') %></button></form>
+        </div>
+      </details>
+      <% } else { %>
+      <a class="btn btn-ghost" href="/login"><%= t('nav.login') %></a>
+      <a class="btn btn-primary" href="/register"><%= t('nav.register') %></a>
+      <% } %>
+    </div>
+  </div>
+</header>

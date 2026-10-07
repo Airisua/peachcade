@@ -1,0 +1,8 @@
+<%- include('partials/head', { pageTitle: String(status || 500) }) %>
+<%- include('partials/header') %>
+<main class="container pad-y center">
+  <h1 class="big-code"><%= status || 500 %></h1>
+  <p class="muted"><%= message %></p>
+  <p><a class="btn btn-primary" href="/"><%= t('common.backHome') %></a></p>
+</main>
+<%- include('partials/footer') %>

@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="<%= lang %>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= (typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle + ' · ' + site.name : site.name + ' · ' + site.tagline %></title>
+<meta name="description" content="<%= site.tagline %>">
+<link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="/css/style.css">
+<% if (typeof adminCss !== 'undefined' && adminCss) { %><link rel="stylesheet" href="/css/admin.css"><% } %>
+<meta name="robots" content="<%= (typeof noindex !== 'undefined' && noindex) ? 'noindex' : 'index' %>">
+</head>
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
+<script>window.CSRF = <%- JSON.stringify(csrf) %>; window.I18N = <%- JSON.stringify({ copied: t('js.copied'), likeLogin: t('js.likeLogin'), confirmDelete: t('common.confirmDelete') }) %>;</script>

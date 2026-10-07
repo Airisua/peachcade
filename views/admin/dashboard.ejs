@@ -1,0 +1,34 @@
+<%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
+<div class="stat-grid">
+  <div class="stat"><b><%= fmt(stats.users) %></b><span><%= t('admin.statUsers') %></span></div>
+  <div class="stat"><b><%= fmt(stats.games) %></b><span><%= t('admin.statGames') %></span></div>
+  <div class="stat"><b><%= fmt(stats.plays) %></b><span><%= t('admin.statPlays') %></span></div>
+  <div class="stat"><b><%= fmt(stats.comments) %></b><span><%= t('admin.statComments') %></span></div>
+</div>
+<div class="admin-cols">
+  <section class="panel">
+    <h2><%= t('admin.topGames') %></h2>
+    <table class="tbl">
+      <tr><th><%= t('admin.tblId') %></th><th><%= t('admin.tblTitle') %></th><th><%= t('admin.tblPlays') %></th></tr>
+      <% topGames.forEach(function (g) { %>
+      <tr><td><%= g.id %></td><td><a href="/game/<%= g.slug %>" target="_blank"><%= g.title_en %></a></td><td><%= fmt(g.plays) %></td></tr>
+      <% }); %>
+    </table>
+  </section>
+  <section class="panel">
+    <h2><%= t('admin.latestUsers') %></h2>
+    <table class="tbl">
+      <tr><th><%= t('admin.tblUser') %></th><th>Email</th><th><%= t('admin.tblRole') %></th></tr>
+      <% latestUsers.forEach(function (u) { %>
+      <tr><td><%= u.username %></td><td class="muted small"><%= u.email %></td><td><%= u.role %></td></tr>
+      <% }); %>
+    </table>
+  </section>
+  <section class="panel">
+    <h2><%= t('admin.latestComments') %></h2>
+    <% if (latestComments.length) { latestComments.forEach(function (c) { %>
+      <div class="mini-comment"><b><%= c.username %></b> · <a href="/game/<%= c.game_slug %>" target="_blank"><%= c.game_title_en %></a><p><%= c.content %></p></div>
+    <% }); } else { %><p class="muted"><%= t('admin.noComments') %></p><% } %>
+  </section>
+</div>
+<%- include('../partials/admin_bottom') %>

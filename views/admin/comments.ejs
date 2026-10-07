@@ -1,0 +1,18 @@
+<%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
+<% if (!comments.length) { %><p class="muted"><%= t('admin.noComments') %></p><% } %>
+<table class="tbl">
+  <% comments.forEach(function (c) { %>
+  <tr class="<%= c.hidden ? 'row-hidden' : '' %>">
+    <td><%= c.id %></td>
+    <td><%= c.username %></td>
+    <td><a href="/game/<%= c.game_slug %>" target="_blank"><%= lang === 'zh' && c.game_title_zh ? c.game_title_zh : c.game_title_en %></a></td>
+    <td class="comment-cell"><%= c.content %></td>
+    <td class="muted small"><%= fmtDate(c.created_at) %></td>
+    <td class="actions">
+      <form method="post" action="/admin/comments/<%= c.id %>/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.toggleHide') %></button></form>
+      <form method="post" action="/admin/comments/<%= c.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
+    </td>
+  </tr>
+  <% }); %>
+</table>
+<%- include('../partials/admin_bottom') %>

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minesweeper</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:#0f0f1a;color:#e8e8f2;font-family:Arial,"Segoe UI",sans-serif;display:flex;align-items:center;justify-content:center;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#game-root{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:10px;position:relative}
+.top{display:flex;gap:12px;align-items:center}
+.score{background:#1b1b2c;border:1px solid #2a2a3e;padding:7px 15px;border-radius:10px;text-align:center;min-width:78px}
+.score small{display:block;color:#9a9ab2;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.score b{font-size:19px}
+button{background:linear-gradient(135deg,#8b5cf6,#ec4899);border:0;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+.grid{display:grid;gap:4px;background:#1b1b2c;border:1px solid #2a2a3e;border-radius:12px;padding:8px;width:min(88vw,440px);aspect-ratio:1/1}
+.cell{background:#2a2a42;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(12px,3.4vw,20px);cursor:pointer;color:#cfcfe6}
+.cell:hover{background:#33334f}
+.cell.open{background:#1d1d30;cursor:default}
+.cell.mine{background:#7f1d1d}
+.cell.flag{color:#fbbf24}
+.cell.n1{color:#60a5fa}.cell.n2{color:#4ade80}.cell.n3{color:#f87171}.cell.n4{color:#c084fc}.cell.n5{color:#fb923c}.cell.n6{color:#2dd4bf}.cell.n7{color:#f472b6}.cell.n8{color:#94a3b8}
+.overlay{position:absolute;inset:0;background:rgba(10,10,18,.85);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:16px}
+.overlay.show{display:flex}
+.overlay h2{margin:0;font-size:26px}
+.hint{color:#9a9ab2;font-size:12.5px}
+</style>
+</head>
+<body>
+<div id="game-root">
+  <div class="top">
+    <div class="score"><small>Mines</small><b id="flags">10</b></div>
+    <div class="score"><small>Time</small><b id="time">0</b></div>
+    <button id="restart">Restart</button>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="hint">Left click: reveal - Right click / long press: flag</div>
+  <div class="overlay" id="overlay"><h2 id="ovmsg">Boom!</h2><div id="ovsub" class="hint"></div><button id="ovbtn">Play again</button></div>
+</div>
+<script>
+(function () {
+  var N = 9, MINES = 10;
+  var grid = document.getElementById('grid');
+  var flagsEl = document.getElementById('flags');
+  var timeEl = document.getElementById('time');
+  var overlay = document.getElementById('overlay');
+  var ovmsg = document.getElementById('ovmsg');
+  var ovsub = document.getElementById('ovsub');
+  var ovbtn = document.getElementById('ovbtn');
+  var mine, open, flag, started, dead, won, flags, revealed, timer, seconds;
+  var cells = [];
+  grid.style.gridTemplateColumns = 'repeat(' + N + ',1fr)';
+  for (var i = 0; i < N * N; i++) {
+    var c = document.createElement('div');
+    c.className = 'cell';
+    c.dataset.i = String(i);
+    c.addEventListener('click', revealClick);
+    c.addEventListener('contextmenu', flagEvent);
+    bindLongPress(c);
+    grid.appendChild(c);
+    cells.push(c);
+  }
+  function bindLongPress(c) {
+    var t = null;
+    c.addEventListener('touchstart', function (e) {
+      t = setTimeout(function () { t = null; toggleFlag(parseInt(c.dataset.i, 10)); }, 420);
+    }, { passive: true });
+    c.addEventListener('touchend', function () { if (t) { clearTimeout(t); t = null; } }, { passive: true });
+    c.addEventListener('touchmove', function () { if (t) { clearTimeout(t); t = null; } }, { passive: true });
+  }
+  function reset() {
+    mine = []; open = []; flag = [];
+    for (var i = 0; i < N * N; i++) { mine.push(false); open.push(false); flag.push(false); }
+    started = false; dead = false; won = false; flags = 0; revealed = 0; seconds = 0;
+    clearInterval(timer);
+    timeEl.textContent = '0';
+    flagsEl.textContent = String(MINES);
+    overlay.classList.remove('show');
+    cells.forEach(function (c) { c.className = 'cell'; c.textContent = ''; });
+  }
+  function placeMines(safe) {
+    var safeSet = {};
+    safeSet[safe] = true;
+    neighbors(safe).forEach(function (j) { safeSet[j] = true; });
+    var placed = 0;
+    while (placed < MINES) {
+      var k = Math.floor(Math.random() * N * N);
+      if (!mine[k] && !safeSet[k]) { mine[k] = true; placed++; }
+    }
+  }
+  function neighbors(i) {
+    var x = i % N, y = Math.floor(i / N), out = [];
+    for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      var nx = x + dx, ny = y + dy;
+      if (nx >= 0 && ny >= 0 && nx < N && ny < N) out.push(ny * N + nx);
+    }
+    return out;
+  }
+  function count(i) { return neighbors(i).filter(function (j) { return mine[j]; }).length; }
+  function revealClick(e) {
+    var i = parseInt(e.currentTarget.dataset.i, 10);
+    if (dead || won || flag[i]) return;
+    if (!started) { started = true; placeMines(i); timer = setInterval(function () { seconds++; timeEl.textContent = String(seconds); }, 1000); }
+    if (mine[i]) { boom(i); return; }
+    reveal(i);
+    checkWin();
+  }
+  function flagEvent(e) {
+    e.preventDefault();
+    if (dead || won) return;
+    toggleFlag(parseInt(e.currentTarget.dataset.i, 10));
+  }
+  function toggleFlag(i) {
+    if (dead || won || open[i]) return;
+    flag[i] = !flag[i];
+    flags += flag[i] ? 1 : -1;
+    flagsEl.textContent = String(Math.max(0, MINES - flags));
+    cells[i].classList.toggle('flag', flag[i]);
+    cells[i].textContent = flag[i] ? '⚑' : '';
+  }
+  function reveal(i) {
+    if (open[i] || flag[i] || mine[i]) return;
+    open[i] = true;
+    revealed++;
+    var c = cells[i];
+    c.classList.add('open');
+    var n = count(i);
+    if (n > 0) { c.textContent = String(n); c.classList.add('n' + n); }
+    if (n === 0) neighbors(i).forEach(reveal);
+  }
+  function boom(i) {
+    dead = true;
+    clearInterval(timer);
+    for (var j = 0; j < N * N; j++) if (mine[j]) { cells[j].classList.add('open', 'mine'); cells[j].textContent = '✱'; }
+    cells[i].textContent = '💥';
+    ovmsg.textContent = 'Boom!';
+    ovsub.textContent = 'You hit a mine. Back to base.';
+    overlay.classList.add('show');
+  }
+  function checkWin() {
+    if (dead || revealed !== N * N - MINES) return;
+    won = true;
+    clearInterval(timer);
+    ovmsg.textContent = 'You Win!';
+    ovsub.textContent = 'Cleared in ' + seconds + ' seconds.';
+    overlay.classList.add('show');
+  }
+  document.getElementById('restart').addEventListener('click', reset);
+  ovbtn.addEventListener('click', reset);
+  reset();
+})();
+</script>
+</body>
+</html>

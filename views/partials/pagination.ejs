@@ -1,0 +1,7 @@
+<% if (pages > 1) { %>
+<nav class="pagination">
+  <% if (page > 1) { %><a class="btn btn-ghost btn-sm" href="<%= base %>page=<%= page - 1 %>"><%= t('common.prev') %></a><% } %>
+  <span class="muted small"><%= page %> / <%= pages %></span>
+  <% if (page < pages) { %><a class="btn btn-ghost btn-sm" href="<%= base %>page=<%= page + 1 %>"><%= t('common.next') %></a><% } %>
+</nav>
+<% } %>

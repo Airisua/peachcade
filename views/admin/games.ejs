@@ -1,0 +1,28 @@
+<%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
+<div class="toolbar">
+  <form class="searchbox small" action="/admin/games" method="get"><svg class="ic"><use href="/img/icons.svg#i-search"></use></svg><input name="q" value="<%= q %>" placeholder="<%= t('nav.searchPlaceholder') %>"></form>
+  <a class="btn btn-primary" href="/admin/games/new"><svg class="ic"><use href="/img/icons.svg#i-plus"></use></svg><%= t('admin.newGame') %></a>
+</div>
+<table class="tbl">
+  <tr><th><%= t('admin.tblId') %></th><th></th><th><%= t('admin.tblTitle') %></th><th><%= t('admin.tblSlug') %></th><th><%= t('admin.tblCategory') %></th><th><%= t('admin.tblPlays') %></th><th>F</th><th>P</th><th><%= t('admin.tblActions') %></th></tr>
+  <% games.forEach(function (g) { %>
+  <tr>
+    <td><%= g.id %></td>
+    <td><img class="tbl-thumb" src="<%= g.thumb %>" alt=""></td>
+    <td><%= g.title_en %><% if (g.title_zh) { %><br><small class="muted"><%= g.title_zh %></small><% } %></td>
+    <td><code><%= g.slug %></code></td>
+    <td><%= g.category %></td>
+    <td><%= fmt(g.plays) %></td>
+    <td><%= g.featured ? '★' : '' %></td>
+    <td><%= g.published ? '✓' : '—' %></td>
+    <td class="actions">
+      <a class="btn btn-sm btn-ghost" href="/admin/games/<%= g.id %>/edit"><%= t('admin.edit') %></a>
+      <form method="post" action="/admin/games/<%= g.id %>/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.togglePublish') %></button></form>
+      <form method="post" action="/admin/games/<%= g.id %>/feature" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.toggleFeature') %></button></form>
+      <form method="post" action="/admin/games/<%= g.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
+    </td>
+  </tr>
+  <% }); %>
+</table>
+<%- include('../partials/pagination', { page: page, pages: pages, base: base }) %>
+<%- include('../partials/admin_bottom') %>

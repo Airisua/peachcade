@@ -1,0 +1,28 @@
+<%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
+<form method="post" action="<%= game ? '/admin/games/' + game.id : '/admin/games' %>" enctype="multipart/form-data" class="panel form wide">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="form-grid">
+    <label><%= t('admin.gameTitle_en') %><input name="title_en" value="<%= game ? game.title_en : '' %>" required></label>
+    <label><%= t('admin.gameTitle_zh') %><input name="title_zh" value="<%= game ? game.title_zh : '' %>"></label>
+    <label><%= t('admin.gameSlug') %><input name="slug" value="<%= game ? game.slug : '' %>" placeholder="auto-from-english-title"></label>
+    <label><%= t('admin.gameCategory') %><select name="category"><% categories.forEach(function (c) { %><option value="<%= c.slug %>" <%= game && game.category === c.slug ? 'selected' : '' %>><%= c.name_en %></option><% }); %></select></label>
+    <label class="span2"><%= t('admin.gameDesc_en') %><input name="desc_en" value="<%= game ? game.desc_en : '' %>"></label>
+    <label class="span2"><%= t('admin.gameDesc_zh') %><input name="desc_zh" value="<%= game ? game.desc_zh : '' %>"></label>
+    <label class="span2"><%= t('admin.gameHowto_en') %><textarea name="howto_en" rows="2"><%= game ? game.howto_en : '' %></textarea></label>
+    <label class="span2"><%= t('admin.gameHowto_zh') %><textarea name="howto_zh" rows="2"><%= game ? game.howto_zh : '' %></textarea></label>
+    <label><%= t('admin.gameTags') %><input name="tags" value="<%= game ? game.tags : '' %>"></label>
+    <label><%= t('admin.gameThumb') %><input name="thumb" value="<%= game ? game.thumb : '' %>"></label>
+    <label class="span2"><%= t('admin.gameThumbFile') %><input type="file" name="thumb_file" accept="image/png,image/jpeg,image/webp,image/gif"></label>
+    <label class="span2"><%= t('admin.gameEmbed') %><input name="embed_url" value="<%= game ? game.embed_url : '' %>" placeholder="/games/slug/ or https://..."></label>
+  </div>
+  <div class="form-row">
+    <label class="check"><input type="checkbox" name="featured" <%= game && game.featured ? 'checked' : '' %>><%= t('admin.gameFeatured') %></label>
+    <label class="check"><input type="checkbox" name="published" <%= !game || game.published ? 'checked' : '' %>><%= t('admin.gamePublished') %></label>
+  </div>
+  <div class="form-row">
+    <button class="btn btn-primary" type="submit"><%= t('admin.saveGame') %></button>
+    <a class="btn btn-ghost" href="/admin/games"><%= t('common.cancel') %></a>
+    <% if (game) { %><span class="muted small"><a href="/game/<%= game.slug %>" target="_blank"><%= t('admin.backToSite') %> →</a></span><% } %>
+  </div>
+</form>
+<%- include('../partials/admin_bottom') %>

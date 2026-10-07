@@ -1,0 +1,233 @@
+'use strict';
+const express = require('express');
+const router = express.Router();
+const { db, getSetting, setSetting } = require('../db');
+const { requireAdmin } = require('../auth');
+const { listGames } = require('../queries');
+const { isValid } = require('../csrf');
+const upload = require('../upload');
+
+router.use(requireAdmin);
+
+function csrfFail(req, res) {
+  if (isValid(req)) return false;
+  res.status(403).render('error', { status: 403, message: res.locals.t('err.forbidden') });
+  return true;
+}
+
+router.get('/', (req, res) => {
+  const stats = {
+    users: db.prepare('SELECT COUNT(*) n FROM users').get().n,
+    games: db.prepare('SELECT COUNT(*) n FROM games').get().n,
+    plays: db.prepare('SELECT COALESCE(SUM(plays),0) n FROM games').get().n,
+    comments: db.prepare('SELECT COUNT(*) n FROM comments').get().n
+  };
+  const latestUsers = db.prepare('SELECT id,username,email,role,created_at FROM users ORDER BY id DESC LIMIT 6').all();
+  const topGames = db.prepare('SELECT id,slug,title_en,plays,likes FROM games ORDER BY plays DESC LIMIT 6').all();
+  const latestComments = db.prepare('SELECT cm.id, cm.content, cm.created_at, u.username, g.slug AS game_slug, g.title_en AS game_title_en FROM comments cm JOIN users u ON u.id=cm.user_id JOIN games g ON g.id=cm.game_id ORDER BY cm.id DESC LIMIT 6').all();
+  res.render('admin/dashboard', { pageTitle: res.locals.t('admin.dashboard'), stats, latestUsers, topGames, latestComments });
+});
+
+router.get('/games', (req, res) => {
+  const q = String(req.query.q || '').slice(0, 64);
+  const data = listGames({ q, sort: 'new', page: parseInt(req.query.page, 10) || 1, per: 24, includeUnpublished: true });
+  res.render('admin/games', {
+    pageTitle: res.locals.t('admin.games'),
+    games: data.games, page: data.page, pages: data.pages, q,
+    base: '/admin/games?q=' + encodeURIComponent(q) + '&'
+  });
+});
+
+function gameForm(res, game) {
+  res.render('admin/game_form', {
+    pageTitle: game ? res.locals.t('admin.edit') + ': ' + game.title_en : res.locals.t('admin.newGame'),
+    game: game || null
+  });
+}
+
+router.get('/games/new', (req, res) => gameForm(res, null));
+
+router.get('/games/:id/edit', (req, res, next) => {
+  const g = db.prepare('SELECT * FROM games WHERE id=?').get(parseInt(req.params.id, 10) || 0);
+  if (!g) return next();
+  gameForm(res, g);
+});
+
+function slugify(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 64);
+}
+
+function saveGame(req, res, id) {
+  const b = req.body;
+  const title_en = String(b.title_en || '').trim().slice(0, 120);
+  const title_zh = String(b.title_zh || '').trim().slice(0, 120);
+  if (!title_en) return res.redirect('/admin/games?err=badRequest');
+  const slug = slugify(b.slug || title_en) || 'game-' + Date.now();
+  const thumb = req.file ? ('/uploads/' + req.file.filename) : (String(b.thumb || '').trim() || '/img/games/default.svg');
+  const embed_url = String(b.embed_url || '').trim() || ('/games/' + slug + '/');
+  const data = {
+    slug, title_en, title_zh,
+    desc_en: String(b.desc_en || '').slice(0, 500),
+    desc_zh: String(b.desc_zh || '').slice(0, 500),
+    howto_en: String(b.howto_en || '').slice(0, 2000),
+    howto_zh: String(b.howto_zh || '').slice(0, 2000),
+    category: String(b.category || 'casual').slice(0, 32),
+    tags: String(b.tags || '').slice(0, 200),
+    thumb, embed_url,
+    featured: b.featured ? 1 : 0,
+    published: b.published ? 1 : 0
+  };
+  try {
+    if (id) {
+      db.prepare('UPDATE games SET slug=@slug,title_en=@title_en,title_zh=@title_zh,desc_en=@desc_en,desc_zh=@desc_zh,howto_en=@howto_en,howto_zh=@howto_zh,category=@category,tags=@tags,thumb=@thumb,embed_url=@embed_url,featured=@featured,published=@published WHERE id=@id').run(Object.assign({}, data, { id }));
+      res.redirect('/admin/games/' + id + '/edit?ok=updated');
+    } else {
+      const info = db.prepare('INSERT INTO games(slug,title_en,title_zh,desc_en,desc_zh,howto_en,howto_zh,category,tags,thumb,embed_url,featured,published) VALUES(@slug,@title_en,@title_zh,@desc_en,@desc_zh,@howto_en,@howto_zh,@category,@tags,@thumb,@embed_url,@featured,@published)').run(data);
+      res.redirect('/admin/games/' + info.lastInsertRowid + '/edit?ok=created');
+    }
+  } catch (e) {
+    if (String(e.message).includes('UNIQUE')) return res.redirect('/admin/games?err=slugTaken');
+    throw e;
+  }
+}
+
+router.post('/games', upload.single('thumb_file'), (req, res) => {
+  if (csrfFail(req, res)) return;
+  saveGame(req, res, null);
+});
+
+router.post('/games/:id', upload.single('thumb_file'), (req, res) => {
+  if (csrfFail(req, res)) return;
+  saveGame(req, res, parseInt(req.params.id, 10) || 0);
+});
+
+router.post('/games/:id/delete', (req, res) => {
+  if (csrfFail(req, res)) return;
+  db.prepare('DELETE FROM games WHERE id=?').run(parseInt(req.params.id, 10) || 0);
+  res.redirect('/admin/games?ok=deleted');
+});
+
+router.post('/games/:id/toggle', (req, res) => {
+  if (csrfFail(req, res)) return;
+  const id = parseInt(req.params.id, 10) || 0;
+  db.prepare('UPDATE games SET published=1-published WHERE id=?').run(id);
+  res.redirect('/admin/games?ok=updated');
+});
+
+router.post('/games/:id/feature', (req, res) => {
+  if (csrfFail(req, res)) return;
+  const id = parseInt(req.params.id, 10) || 0;
+  db.prepare('UPDATE games SET featured=1-featured WHERE id=?').run(id);
+  res.redirect('/admin/games?ok=updated');
+});
+
+router.get('/users', (req, res) => {
+  const users = db.prepare('SELECT id,username,email,role,banned,created_at,(SELECT COUNT(*) FROM comments cm WHERE cm.user_id=users.id) AS comments FROM users ORDER BY id ASC').all();
+  res.render('admin/users', { pageTitle: res.locals.t('admin.users'), users });
+});
+
+router.post('/users/:id/role', (req, res) => {
+  if (csrfFail(req, res)) return;
+  const id = parseInt(req.params.id, 10) || 0;
+  if (id === req.user.id) return res.redirect('/admin/users?err=badRequest');
+  const u = db.prepare('SELECT role FROM users WHERE id=?').get(id);
+  if (u) db.prepare('UPDATE users SET role=? WHERE id=?').run(u.role === 'admin' ? 'user' : 'admin', id);
+  res.redirect('/admin/users?ok=updated');
+});
+
+router.post('/users/:id/ban', (req, res) => {
+  if (csrfFail(req, res)) return;
+  const id = parseInt(req.params.id, 10) || 0;
+  if (id === req.user.id) return res.redirect('/admin/users?err=badRequest');
+  db.prepare('UPDATE users SET banned=1-banned WHERE id=?').run(id);
+  res.redirect('/admin/users?ok=updated');
+});
+
+router.post('/users/:id/delete', (req, res) => {
+  if (csrfFail(req, res)) return;
+  const id = parseInt(req.params.id, 10) || 0;
+  if (id === req.user.id) return res.redirect('/admin/users?err=badRequest');
+  db.prepare('DELETE FROM users WHERE id=?').run(id);
+  res.redirect('/admin/users?ok=deleted');
+});
+
+router.get('/comments', (req, res) => {
+  const comments = db.prepare('SELECT cm.*, u.username, g.slug AS game_slug, g.title_en AS game_title_en, g.title_zh AS game_title_zh FROM comments cm JOIN users u ON u.id=cm.user_id JOIN games g ON g.id=cm.game_id ORDER BY cm.id DESC LIMIT 200').all();
+  res.render('admin/comments', { pageTitle: res.locals.t('admin.comments'), comments });
+});
+
+router.post('/comments/:id/toggle', (req, res) => {
+  if (csrfFail(req, res)) return;
+  db.prepare('UPDATE comments SET hidden=1-hidden WHERE id=?').run(parseInt(req.params.id, 10) || 0);
+  res.redirect('/admin/comments?ok=updated');
+});
+
+router.post('/comments/:id/delete', (req, res) => {
+  if (csrfFail(req, res)) return;
+  db.prepare('DELETE FROM comments WHERE id=?').run(parseInt(req.params.id, 10) || 0);
+  res.redirect('/admin/comments?ok=deleted');
+});
+
+const AD_SLOTS = ['header', 'home-mid', 'list-top', 'game-under', 'sidebar', 'footer'];
+
+router.get('/ads', (req, res) => {
+  const ads = db.prepare('SELECT * FROM ads ORDER BY slot, sort, id').all();
+  res.render('admin/ads', { pageTitle: res.locals.t('admin.ads'), ads, slots: AD_SLOTS });
+});
+
+function adData(b) {
+  return {
+    slot: AD_SLOTS.includes(b.slot) ? b.slot : 'header',
+    title: String(b.title || '').slice(0, 100),
+    type: b.type === 'image' ? 'image' : 'html',
+    html: String(b.html || '').slice(0, 5000),
+    image_url: String(b.image_url || '').slice(0, 500),
+    link_url: String(b.link_url || '').slice(0, 500),
+    enabled: b.enabled ? 1 : 0,
+    sort: parseInt(b.sort, 10) || 0
+  };
+}
+
+router.post('/ads', (req, res) => {
+  if (csrfFail(req, res)) return;
+  db.prepare('INSERT INTO ads(slot,title,type,html,image_url,link_url,enabled,sort) VALUES(@slot,@title,@type,@html,@image_url,@link_url,@enabled,@sort)').run(adData(req.body));
+  res.redirect('/admin/ads?ok=created');
+});
+
+router.post('/ads/:id', (req, res) => {
+  if (csrfFail(req, res)) return;
+  db.prepare('UPDATE ads SET slot=@slot,title=@title,type=@type,html=@html,image_url=@image_url,link_url=@link_url,enabled=@enabled,sort=@sort WHERE id=@id').run(Object.assign(adData(req.body), { id: parseInt(req.params.id, 10) || 0 }));
+  res.redirect('/admin/ads?ok=updated');
+});
+
+router.post('/ads/:id/delete', (req, res) => {
+  if (csrfFail(req, res)) return;
+  db.prepare('DELETE FROM ads WHERE id=?').run(parseInt(req.params.id, 10) || 0);
+  res.redirect('/admin/ads?ok=deleted');
+});
+
+router.post('/ads/:id/toggle', (req, res) => {
+  if (csrfFail(req, res)) return;
+  db.prepare('UPDATE ads SET enabled=1-enabled WHERE id=?').run(parseInt(req.params.id, 10) || 0);
+  res.redirect('/admin/ads?ok=updated');
+});
+
+const SETTING_KEYS = ['site_name', 'tagline_en', 'tagline_zh', 'footer_text_en', 'footer_text_zh', 'ads_enabled', 'registration_open'];
+
+router.get('/settings', (req, res) => {
+  const values = {};
+  for (const k of SETTING_KEYS) values[k] = getSetting(k, '');
+  res.render('admin/settings', { pageTitle: res.locals.t('admin.settings'), values });
+});
+
+router.post('/settings', (req, res) => {
+  if (csrfFail(req, res)) return;
+  const b = req.body;
+  for (const k of SETTING_KEYS) {
+    if (k === 'ads_enabled' || k === 'registration_open') setSetting(k, b[k] ? '1' : '0');
+    else setSetting(k, String(b[k] || '').slice(0, 500));
+  }
+  res.redirect('/admin/settings?ok=saved');
+});
+
+module.exports = router;

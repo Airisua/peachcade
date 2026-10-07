@@ -1,0 +1,33 @@
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <div class="logo"><svg class="ic ic-logo"><use href="/img/icons.svg#i-gamepad"></use></svg><span><%= site.name %></span></div>
+      <p class="muted"><%= site.tagline %></p>
+      <% if (site.footerText) { %><p class="muted small"><%= site.footerText %></p><% } %>
+    </div>
+    <div>
+      <h4><%= t('footer.links') %></h4>
+      <a href="/"><%= t('nav.home') %></a>
+      <a href="/games"><%= t('common.allGames') %></a>
+      <a href="/random"><%= t('nav.random') %></a>
+      <a href="/about"><%= t('footer.about') %></a>
+    </div>
+    <div>
+      <h4><%= t('footer.categories') %></h4>
+      <% navCategories.forEach(function (c) { %><a href="/category/<%= c.slug %>"><%= catName(c) %></a><% }); %>
+    </div>
+    <div>
+      <h4><%= t('nav.language') %></h4>
+      <a href="/lang/en?next=<%= encodeURIComponent(path) %>">English</a>
+      <a href="/lang/zh?next=<%= encodeURIComponent(path) %>">中文</a>
+    </div>
+  </div>
+  <%- include('ad', { slot: 'footer' }) %>
+  <div class="container footer-bottom">
+    <span><%= t('footer.legal', { year: year, site: site.name }) %></span>
+    <span class="muted"><%= t('footer.builtWith') %></span>
+  </div>
+</footer>
+<script src="/js/main.js" defer></script>
+</body>
+</html>

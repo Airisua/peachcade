@@ -1,0 +1,36 @@
+{
+  "name": "pixelplay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PixelPlay - self-hosted HTML5 games portal (Express + EJS + SQLite). Inspired by crazygames.com, not affiliated.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "smoke": "node scripts/smoke.js",
+    "check:games": "node scripts/check-games.js",
+    "check:i18n": "node scripts/check-i18n.js",
+    "reset:db": "node scripts/reset-db.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^18.0.6",
+    "ejs": "^7.0.1",
+    "express": "^4.22.3",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.12.1",
+    "multer": "^2.4.0"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.2"
+  },
+  "allowScripts": {
+    "better-sqlite3@13.0.3": true
+  }
+}

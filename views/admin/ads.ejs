@@ -1,0 +1,41 @@
+<%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
+<section class="panel">
+  <h2><%= t('admin.ads') %></h2>
+  <table class="tbl">
+    <tr><th><%= t('admin.tblId') %></th><th><%= t('admin.adSlot') %></th><th><%= t('admin.adTitle') %></th><th><%= t('admin.adType') %></th><th><%= t('admin.adEnabled') %></th><th><%= t('admin.tblActions') %></th></tr>
+    <% ads.forEach(function (a) { %>
+    <tr>
+      <td><%= a.id %></td>
+      <td><code><%= a.slot %></code></td>
+      <td><%= a.title %></td>
+      <td><%= a.type %></td>
+      <td><span class="badge <%= a.enabled ? 'ok' : 'off' %>"><%= a.enabled ? t('admin.on') : t('admin.off') %></span></td>
+      <td class="actions">
+        <form method="post" action="/admin/ads/<%= a.id %>/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.togglePublish') %></button></form>
+        <form method="post" action="/admin/ads/<%= a.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
+      </td>
+    </tr>
+    <% }); %>
+  </table>
+  <p class="muted small"><%= t('ads.placeholder') %></p>
+</section>
+<section class="panel">
+  <h2><%= t('admin.adNew') %></h2>
+  <form method="post" action="/admin/ads" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="form-grid">
+      <label><%= t('admin.adSlot') %><select name="slot"><% slots.forEach(function (s) { %><option value="<%= s %>"><%= s %></option><% }); %></select></label>
+      <label><%= t('admin.adType') %><select name="type"><option value="html">html</option><option value="image">image</option></select></label>
+      <label><%= t('admin.adTitle') %><input name="title"></label>
+      <label><%= t('admin.adSort') %><input name="sort" type="number" value="0"></label>
+      <label class="span2"><%= t('admin.adHtml') %><textarea name="html" rows="3"></textarea></label>
+      <label><%= t('admin.adImage') %><input name="image_url"></label>
+      <label><%= t('admin.adLink') %><input name="link_url"></label>
+    </div>
+    <div class="form-row">
+      <label class="check"><input type="checkbox" name="enabled" checked><%= t('admin.adEnabled') %></label>
+      <button class="btn btn-primary" type="submit"><%= t('admin.adNew') %></button>
+    </div>
+  </form>
+</section>
+<%- include('../partials/admin_bottom') %>

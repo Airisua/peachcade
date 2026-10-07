@@ -1,0 +1,17 @@
+<%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
+<form method="post" action="/admin/settings" class="panel form wide">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="form-grid">
+    <label><%= t('admin.settings_site_name') %><input name="site_name" value="<%= values.site_name %>"></label>
+    <label><%= t('admin.settings_tagline_en') %><input name="tagline_en" value="<%= values.tagline_en %>"></label>
+    <label><%= t('admin.settings_tagline_zh') %><input name="tagline_zh" value="<%= values.tagline_zh %>"></label>
+    <label><%= t('admin.settings_footer_text_en') %><input name="footer_text_en" value="<%= values.footer_text_en %>"></label>
+    <label><%= t('admin.settings_footer_text_zh') %><input name="footer_text_zh" value="<%= values.footer_text_zh %>"></label>
+  </div>
+  <div class="form-row">
+    <label class="check"><input type="checkbox" name="ads_enabled" <%= values.ads_enabled === '1' ? 'checked' : '' %>><%= t('admin.settings_ads_enabled') %></label>
+    <label class="check"><input type="checkbox" name="registration_open" <%= values.registration_open === '1' ? 'checked' : '' %>><%= t('admin.settings_registration_open') %></label>
+  </div>
+  <div class="form-row"><button class="btn btn-primary" type="submit"><%= t('common.save') %></button></div>
+</form>
+<%- include('../partials/admin_bottom') %>

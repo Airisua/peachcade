@@ -1,0 +1,13 @@
+<a class="card" href="/game/<%= g.slug %>">
+  <div class="thumb">
+    <img src="<%= g.thumb %>" alt="<%= gt(g) %>" loading="lazy">
+    <% if (g.cat_en) { %><span class="chip chip-abs"><%= lang === 'zh' ? (g.cat_zh || g.cat_en) : g.cat_en %></span><% } %>
+  </div>
+  <div class="meta">
+    <div class="title"><%= gt(g) %></div>
+    <div class="sub">
+      <span><svg class="ic"><use href="/img/icons.svg#i-play"></use></svg><%= fmt(g.plays) %></span>
+      <span><svg class="ic"><use href="/img/icons.svg#i-heart"></use></svg><%= fmt(g.likes) %></span>
+    </div>
+  </div>
+</a>

@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snake Classic</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:#0f0f1a;color:#e8e8f2;font-family:Arial,"Segoe UI",sans-serif;display:flex;align-items:center;justify-content:center;overflow:hidden;-webkit-user-select:none;user-select:none}
+#game-root{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:10px;position:relative}
+.top{display:flex;gap:14px;align-items:center}
+.score{background:#1b1b2c;border:1px solid #2a2a3e;padding:7px 16px;border-radius:10px;text-align:center;min-width:86px}
+.score small{display:block;color:#9a9ab2;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.score b{font-size:19px}
+canvas{background:#141422;border:1px solid #2a2a3e;border-radius:12px;touch-action:none}
+.overlay{position:absolute;inset:0;background:rgba(10,10,18,.85);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:16px}
+.overlay.show{display:flex}
+.overlay h2{margin:0;font-size:24px}
+button{background:linear-gradient(135deg,#8b5cf6,#ec4899);border:0;color:#fff;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+.hint{color:#9a9ab2;font-size:12.5px}
+</style>
+</head>
+<body>
+<div id="game-root">
+  <div class="top">
+    <div class="score"><small>Score</small><b id="score">0</b></div>
+    <div class="score"><small>Best</small><b id="best">0</b></div>
+  </div>
+  <canvas id="cv" width="480" height="480"></canvas>
+  <div class="hint">Arrow keys / WASD to steer, swipe on mobile</div>
+  <div class="overlay" id="overlay">
+    <h2 id="ovmsg">Ready?</h2>
+    <p style="margin:0;color:#9a9ab2">Eat apples to grow. Do not hit walls or yourself.</p>
+    <button id="ovbtn">Start</button>
+  </div>
+</div>
+<script>
+(function () {
+  var N = 20, SZ = 24, W = N * SZ, H = N * SZ;
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+  var scoreEl = document.getElementById('score');
+  var bestEl = document.getElementById('best');
+  var overlay = document.getElementById('overlay');
+  var ovmsg = document.getElementById('ovmsg');
+  var ovbtn = document.getElementById('ovbtn');
+  var best = 0;
+  try { best = parseInt(localStorage.getItem('pixelplay.best.snake') || '0', 10) || 0; } catch (e) { best = 0; }
+  bestEl.textContent = best;
+  function fit() {
+    var s = Math.min(window.innerWidth / W, (window.innerHeight - 120) / H);
+    s = Math.max(0.4, Math.min(s, 1.2));
+    cv.style.width = (W * s) + 'px';
+    cv.style.height = (H * s) + 'px';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+  var snake, dir, nextDir, food, score, dead, started, timer, speed;
+  function reset() {
+    snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
+    dir = { x: 1, y: 0 };
+    nextDir = dir;
+    score = 0;
+    speed = 130;
+    dead = false;
+    started = false;
+    placeFood();
+    scoreEl.textContent = '0';
+    draw();
+    overlay.classList.add('show');
+    ovmsg.textContent = 'Ready?';
+    ovbtn.textContent = 'Start';
+  }
+  function placeFood() {
+    while (true) {
+      var f = { x: Math.floor(Math.random() * N), y: Math.floor(Math.random() * N) };
+      var hit = snake.some(function (s) { return s.x === f.x && s.y === f.y; });
+      if (!hit) { food = f; return; }
+    }
+  }
+  function start() {
+    if (started && !dead) return;
+    if (dead) { reset(); }
+    started = true;
+    dead = false;
+    overlay.classList.remove('show');
+    clearInterval(timer);
+    timer = setInterval(tick, speed);
+  }
+  function tick() {
+    dir = nextDir;
+    var head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+    if (head.x < 0 || head.y < 0 || head.x >= N || head.y >= N || snake.some(function (s) { return s.x === head.x && s.y === head.y; })) {
+      die();
+      return;
+    }
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y) {
+      score++;
+      scoreEl.textContent = String(score);
+      if (score > best) { best = score; bestEl.textContent = String(best); try { localStorage.setItem('pixelplay.best.snake', String(best)); } catch (e) {} }
+      if (speed > 70) { speed -= 4; clearInterval(timer); timer = setInterval(tick, speed); }
+      placeFood();
+    } else {
+      snake.pop();
+    }
+    draw();
+  }
+  function die() {
+    dead = true;
+    started = false;
+    clearInterval(timer);
+    ovmsg.textContent = 'Game Over';
+    ovbtn.textContent = 'Play again';
+    overlay.classList.add('show');
+  }
+  function draw() {
+    ctx.fillStyle = '#141422';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(food.x * SZ + SZ / 2, food.y * SZ + SZ / 2, SZ / 2 - 3, 0, Math.PI * 2);
+    ctx.fill();
+    for (var i = 0; i < snake.length; i++) {
+      ctx.fillStyle = i === 0 ? '#a3e635' : '#65a30d';
+      ctx.fillRect(snake[i].x * SZ + 2, snake[i].y * SZ + 2, SZ - 4, SZ - 4);
+    }
+  }
+  var KEYMAP = { ArrowUp: 'U', ArrowDown: 'D', ArrowLeft: 'L', ArrowRight: 'R', w: 'U', s: 'D', a: 'L', d: 'R', W: 'U', S: 'D', A: 'L', D: 'R' };
+  function turn(k) {
+    if (!started) { start(); }
+    if (k === 'U' && dir.y === 0) nextDir = { x: 0, y: -1 };
+    if (k === 'D' && dir.y === 0) nextDir = { x: 0, y: 1 };
+    if (k === 'L' && dir.x === 0) nextDir = { x: -1, y: 0 };
+    if (k === 'R' && dir.x === 0) nextDir = { x: 1, y: 0 };
+  }
+  document.addEventListener('keydown', function (e) {
+    if (KEYMAP[e.key]) { e.preventDefault(); turn(KEYMAP[e.key]); }
+  });
+  var sx = 0, sy = 0;
+  cv.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; e.preventDefault(); }, { passive: false });
+  cv.addEventListener('touchmove', function (e) { e.preventDefault(); }, { passive: false });
+  cv.addEventListener('touchend', function (e) {
+    var dx = e.changedTouches[0].clientX - sx;
+    var dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < 22 && Math.abs(dy) < 22) return;
+    if (Math.abs(dx) > Math.abs(dy)) turn(dx > 0 ? 'R' : 'L');
+    else turn(dy > 0 ? 'D' : 'U');
+  }, { passive: true });
+  ovbtn.addEventListener('click', function () { if (overlay.classList.contains('show')) { if (dead) reset(); start(); } });
+  reset();
+})();
+</script>
+</body>
+</html>
+

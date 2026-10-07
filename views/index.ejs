@@ -1,0 +1,44 @@
+<%- include('partials/head', { pageTitle: null }) %>
+<%- include('partials/header') %>
+<%- include('partials/ad', { slot: 'header' }) %>
+<main class="container">
+  <% if (hero) { %>
+  <section class="hero">
+    <div class="hero-text">
+      <span class="chip chip-hot"><%= t('home.featured') %></span>
+      <h1><%= gt(hero) %></h1>
+      <p><%= gd(hero) %></p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="/game/<%= hero.slug %>"><svg class="ic"><use href="/img/icons.svg#i-play"></use></svg><%= t('home.playNow') %></a>
+        <a class="btn btn-ghost btn-lg" href="/random"><svg class="ic"><use href="/img/icons.svg#i-dice"></use></svg><%= t('home.random') %></a>
+      </div>
+      <div class="muted small"><%= fmt(hero.plays) %> <%= t('game.plays') %> · <%= total %> <%= t('home.totalGames') %></div>
+    </div>
+    <a class="hero-art" href="/game/<%= hero.slug %>"><img src="<%= hero.thumb %>" alt="<%= gt(hero) %>"></a>
+  </section>
+  <% } %>
+  <% if (continueList.length) { %>
+  <section class="section">
+    <div class="section-head"><h2><%= t('home.continue') %></h2></div>
+    <div class="grid-cards"><% continueList.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
+  </section>
+  <% } %>
+  <section class="section">
+    <div class="section-head"><h2><%= t('home.featured') %></h2><a class="see-all" href="/games"><%= t('common.viewAll') %></a></div>
+    <div class="grid-cards"><% featured.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
+  </section>
+  <section class="section">
+    <div class="section-head"><h2><%= t('home.popular') %></h2><a class="see-all" href="/games?sort=popular"><%= t('common.viewAll') %></a></div>
+    <div class="grid-cards"><% popular.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
+  </section>
+  <%- include('partials/ad', { slot: 'home-mid' }) %>
+  <section class="section">
+    <div class="section-head"><h2><%= t('home.new') %></h2><a class="see-all" href="/games?sort=new"><%= t('common.viewAll') %></a></div>
+    <div class="grid-cards"><% newest.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
+  </section>
+  <section class="section">
+    <div class="section-head"><h2><%= t('home.topRated') %></h2><a class="see-all" href="/games?sort=likes"><%= t('common.viewAll') %></a></div>
+    <div class="grid-cards"><% topRated.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
+  </section>
+</main>
+<%- include('partials/footer') %>
