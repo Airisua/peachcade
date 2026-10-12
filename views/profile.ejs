@@ -35,10 +35,28 @@
   </section>
   <section class="section">
     <div class="section-head"><h2><%= t('profile.changePassword') %></h2></div>
-    <form method="post" action="/profile/password" class="panel form">
+    <form method="post" action="/profile/password" class="panel form narrow">
       <input type="hidden" name="_csrf" value="<%= csrf %>">
-      <label><%= t('profile.oldPassword') %><input type="password" name="old_password" required></label>
-      <label><%= t('profile.newPassword') %><input type="password" name="new_password" required minlength="6"></label>
+      <div class="form-group">
+        <label for="old_password"><%= t('profile.oldPassword') %></label>
+        <div class="input-wrap password-wrap">
+          <input id="old_password" class="form-input" type="password" name="old_password" required autocomplete="current-password">
+          <button type="button" class="btn-toggle-pw" aria-label="Toggle password visibility" tabindex="-1">
+            <svg class="ic ic-eye"><use href="/img/icons.svg#i-eye"></use></svg>
+            <svg class="ic ic-eye-off" style="display:none"><use href="/img/icons.svg#i-eye-off"></use></svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="new_password"><%= t('profile.newPassword') %></label>
+        <div class="input-wrap password-wrap">
+          <input id="new_password" class="form-input" type="password" name="new_password" required minlength="6" autocomplete="new-password">
+          <button type="button" class="btn-toggle-pw" aria-label="Toggle password visibility" tabindex="-1">
+            <svg class="ic ic-eye"><use href="/img/icons.svg#i-eye"></use></svg>
+            <svg class="ic ic-eye-off" style="display:none"><use href="/img/icons.svg#i-eye-off"></use></svg>
+          </button>
+        </div>
+      </div>
       <div class="form-row"><button class="btn btn-primary" type="submit"><%= t('profile.updatePassword') %></button></div>
     </form>
   </section>

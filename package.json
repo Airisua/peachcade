@@ -2,7 +2,7 @@
   "name": "pixelplay",
   "version": "1.0.0",
   "private": true,
-  "description": "PixelPlay - self-hosted HTML5 games portal (Express + EJS + SQLite). Inspired by crazygames.com, not affiliated.",
+  "description": "PixelPlay - modern self-hosted HTML5 games portal with catalog, accounts, admin dashboard, and ad slots.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

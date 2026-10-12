@@ -1,8 +1,6 @@
 # PixelPlay - a self-hosted HTML5 games portal
 
-PixelPlay is a dynamic, database-driven games website inspired by sites like
-crazygames.com. It is an independent learning project: original code, original
-mini games, no affiliation with crazygames.
+PixelPlay is a dynamic, database-driven games website a premier destination for instant, free HTML5 browser games with user accounts, community features, and management tooling.
 
 ## Features
 
@@ -148,8 +146,7 @@ The admin panel includes a feed importer at /admin/import:
 
 ## 中文摘要
 
-PixelPlay 是一个可自托管的多人在线小游戏站（动态渲染，非静态页面），灵感来自
-crazygames.com，代码与内置游戏均为原创。核心能力：
+PixelPlay 是一个可自托管的多人在线小游戏站（动态渲染，非静态页面），提供极速畅玩的精品网页小游戏，支持完整账号体系、社区互动与管理后台。核心能力：
 
 - 动态游戏库：分类 / 搜索（实时联想）/ 热门、最新、好评排序 / 随机开玩。
 - 内置 5 款可玩小游戏（2048、贪吃蛇、记忆翻牌、井字棋、扫雷），并以 iframe

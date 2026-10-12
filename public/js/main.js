@@ -95,6 +95,23 @@
       $$('input[name="sel"]', form).forEach(function (cb) { if (!cb.disabled) cb.checked = master.checked; });
     });
   });
+  // password visibility toggle
+  $$('.btn-toggle-pw').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var wrap = btn.closest('.input-wrap');
+      if (!wrap) return;
+      var inp = wrap.querySelector('input');
+      if (!inp) return;
+      var isPw = inp.type === 'password';
+      inp.type = isPw ? 'text' : 'password';
+      var eye = btn.querySelector('.ic-eye');
+      var eyeOff = btn.querySelector('.ic-eye-off');
+      if (eye && eyeOff) {
+        eye.style.display = isPw ? 'none' : 'block';
+        eyeOff.style.display = isPw ? 'block' : 'none';
+      }
+    });
+  });
 
   document.addEventListener('submit', function (e) {
     var f = e.target;

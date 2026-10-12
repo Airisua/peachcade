@@ -45,6 +45,80 @@ h1,h2,h3,h4{margin:0 0 .45em;line-height:1.25}
 .linklike.danger{color:#f87171}
 .inline{display:inline-flex;gap:6px;align-items:center}
 
+
+/* base inputs & form elements */
+input, select, textarea, button { font-family: inherit; }
+input[type=text],
+input[type=password],
+input[type=email],
+input[type=number],
+input[type=url],
+input[type=search]:not(.searchbox input),
+input:not([type]),
+select,
+textarea,
+.form-input {
+  display: block;
+  width: 100%;
+  background: #11111d;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type=text]:hover,
+input[type=password]:hover,
+input[type=email]:hover,
+input[type=number]:hover,
+input[type=url]:hover,
+input:not([type]):hover,
+select:hover,
+textarea:hover,
+.form-input:hover {
+  border-color: #3e3e5c;
+}
+input[type=text]:focus,
+input[type=password]:focus,
+input[type=email]:focus,
+input[type=number]:focus,
+input[type=url]:focus,
+input[type=search]:not(.searchbox input):focus,
+input:not([type]):focus,
+select:focus,
+textarea:focus,
+.form-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, .25);
+  background: #151525;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #6e6e8c;
+  opacity: 1;
+}
+select {
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239a9ab2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+}
+select option {
+  background: var(--panel);
+  color: var(--text);
+}
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
 /* header */
 .site-header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(14,14,22,.82);border-bottom:1px solid var(--line)}
 .header-inner{display:flex;align-items:center;gap:16px;padding:12px 18px;flex-wrap:wrap}
@@ -77,7 +151,7 @@ h1,h2,h3,h4{margin:0 0 .45em;line-height:1.25}
 .searchbox{position:relative;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px 12px;min-width:230px;flex:1;max-width:340px}
 .searchbox:focus-within{border-color:var(--brand)}
 .searchbox .ic{color:var(--muted)}
-.searchbox input{background:none;border:0;outline:none;color:var(--text);font-size:14px;width:100%}
+.searchbox input{background:none !important;border:0 !important;outline:none !important;color:var(--text);font-size:14px;width:100%;height:auto !important;padding:0 !important;box-shadow:none !important;display:inline-block !important}
 .suggest{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px;display:none;flex-direction:column;z-index:60}
 .suggest.open{display:flex}
 .suggest a{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:8px;font-size:13.5px}
@@ -152,19 +226,36 @@ h1,h2,h3,h4{margin:0 0 .45em;line-height:1.25}
 .form-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
 
 /* forms / auth */
-.auth-wrap{max-width:430px;margin:44px auto}
-.auth-card{padding:28px}
-.auth-card h2{margin-bottom:14px}
-.form label{display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--muted);font-weight:600;margin-bottom:13px}
-.form input:not([type=checkbox]), .form select, .form textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 12px;font:inherit;outline:none;width:100%}
-.form input:focus, .form select:focus, .form textarea:focus{border-color:var(--brand)}
+.auth-wrap{max-width:440px;margin:52px auto 72px;padding:0 16px}
+.auth-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:36px 32px 30px;box-shadow:0 24px 60px rgba(0,0,0,.48),0 0 0 1px rgba(255,255,255,.03) inset}
+.auth-header{text-align:center;margin-bottom:24px}
+.auth-header h2{font-size:25px;font-weight:800;letter-spacing:-.3px;margin:0 0 6px;color:#fff}
+.auth-header p{margin:0;color:var(--muted);font-size:13.5px}
+.auth-form{display:flex;flex-direction:column}
+.auth-form .btn-primary{margin-top:6px;height:44px;font-size:15px;font-weight:700;border-radius:11px}
+.form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;text-align:left}
+.form-group label,
+.form label{display:flex;flex-direction:column;gap:7px;font-size:13.5px;color:#c7c7dd;font-weight:600;margin-bottom:14px;text-align:left}
+.form-group label{margin-bottom:0}
+.input-wrap{position:relative;width:100%}
+.password-wrap{display:flex;align-items:center}
+.password-wrap input{padding-right:44px}
+.btn-toggle-pw{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:transparent;border:0;padding:7px 9px;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;transition:color .18s,background-color .18s}
+.btn-toggle-pw:hover{color:#fff;background:rgba(255,255,255,.08)}
+.btn-toggle-pw .ic{width:18px;height:18px}
+.auth-footer{text-align:center;margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:13.5px}
+.auth-footer p{margin:0}
+.auth-link{color:#c4b5fd;font-weight:700;margin-left:4px;transition:color .18s}
+.auth-link:hover{color:#fff;text-decoration:underline}
 .form-wide{max-width:none}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
 .span2{grid-column:span 2}
-.check{flex-direction:row !important;align-items:center;color:var(--text) !important;font-weight:500}
-.check input{width:auto !important}
+.check{display:inline-flex !important;flex-direction:row !important;align-items:center !important;gap:8px !important;color:var(--text) !important;font-weight:500 !important;cursor:pointer;margin-bottom:0 !important;user-select:none}
+.check input[type=checkbox]{width:17px !important;height:17px !important;accent-color:var(--brand);cursor:pointer;margin:0}
 .profile-head{display:flex;gap:18px;align-items:center;margin-top:24px}
 .profile-head h1{margin:0}
+.about-card{padding:36px 40px;border-radius:18px}
+.about-lead{font-size:16.5px;color:#e2e2f2;line-height:1.65;margin-bottom:16px}
 
 /* notices / badges / ads */
 .notice{padding:11px 15px;border-radius:11px;margin:12px 0;font-size:14px;border:1px solid}
