@@ -252,5 +252,15 @@
   "seo.category": "{name}小游戏 - 免费在线玩，点开即玩",
   "seo.allGames": "{site} 全部免费在线小游戏 - 打开即玩，无需下载",
   "pager.first": "首页",
-  "pager.last": "末页"
+  "pager.last": "末页",
+  "admin.sortBy": "排序",
+  "admin.sortNew": "最新导入",
+  "admin.sortOldest": "最早导入",
+  "admin.sortHeat": "播放最多",
+  "admin.sortLeast": "播放最少",
+  "admin.sortLikes": "点赞最多",
+  "admin.sortFavorites": "收藏最多",
+  "admin.sortComments": "评论最多",
+  "admin.sortName": "标题 A-Z",
+  "admin.tblFavs": "收藏"
 }

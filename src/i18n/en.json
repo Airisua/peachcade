@@ -252,5 +252,15 @@
   "seo.category": "Free {name} games - play online in your browser",
   "seo.allGames": "All free online games on {site} - play instantly, no download",
   "pager.first": "First",
-  "pager.last": "Last"
+  "pager.last": "Last",
+  "admin.sortBy": "Sort by",
+  "admin.sortNew": "Newest first",
+  "admin.sortOldest": "Oldest first",
+  "admin.sortHeat": "Most played",
+  "admin.sortLeast": "Least played",
+  "admin.sortLikes": "Most liked",
+  "admin.sortFavorites": "Most favorited",
+  "admin.sortComments": "Most commented",
+  "admin.sortName": "Title A-Z",
+  "admin.tblFavs": "Favs"
 }

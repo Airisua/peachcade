@@ -23,8 +23,16 @@ const SIZES = {
 const MAX_SOURCE_BYTES = 8 * 1024 * 1024;
 const FETCH_TIMEOUT_MS = 12000;
 const JPEG_QUALITY = 78;
+// a source that failed is not retried for a while (a dead provider image must not turn every
+// page view into a fresh 12 s fetch attempt)
+const NEGATIVE_TTL_MS = 10 * 60 * 1000;
+// keep the on-disk derivative cache bounded; the oldest entries go first
+const MAX_CACHE_FILES = 8000;
+const PRUNE_EVERY = 100;
 
 const inflight = new Map();
+const failures = new Map();
+let buildsSincePrune = 0;
 
 function sizeFor(name) {
   return SIZES[String(name || '').toLowerCase()] || null;
@@ -61,20 +69,29 @@ async function fetchSource(url) {
 async function build(sourceUrl, size) {
   const file = cacheFile(sourceUrl, size);
   if (fs.existsSync(file)) return { file, created: false };
+  const failedAt = failures.get(file);
+  if (failedAt && Date.now() - failedAt < NEGATIVE_TTL_MS) throw new Error('source failed recently');
   const running = inflight.get(file);
   if (running) return running;
   const job = (async () => {
-    const sharp = require('sharp');
-    const input = await fetchSource(sourceUrl);
-    const out = await sharp(input)
-      .resize(size[0], size[1], { fit: 'cover', position: 'centre', withoutEnlargement: true })
-      .jpeg({ quality: JPEG_QUALITY, progressive: true })
-      .toBuffer();
-    fs.mkdirSync(CACHE_DIR, { recursive: true });
-    const tmp = file + '.' + process.pid + '.tmp';
-    fs.writeFileSync(tmp, out);
-    fs.renameSync(tmp, file);
-    return { file, created: true };
+    try {
+      const sharp = require('sharp');
+      const input = await fetchSource(sourceUrl);
+      const out = await sharp(input)
+        .resize(size[0], size[1], { fit: 'cover', position: 'centre', withoutEnlargement: true })
+        .jpeg({ quality: JPEG_QUALITY, progressive: true })
+        .toBuffer();
+      fs.mkdirSync(CACHE_DIR, { recursive: true });
+      const tmp = file + '.' + process.pid + '.tmp';
+      fs.writeFileSync(tmp, out);
+      fs.renameSync(tmp, file);
+      failures.delete(file);
+      if (++buildsSincePrune >= PRUNE_EVERY) { buildsSincePrune = 0; pruneCache(MAX_CACHE_FILES); }
+      return { file, created: true };
+    } catch (e) {
+      failures.set(file, Date.now());
+      throw e;
+    }
   })();
   inflight.set(file, job);
   try {
@@ -97,4 +114,30 @@ function cacheStats() {
   }
 }
 
-module.exports = { build, sizeFor, cacheFile, cacheStats, SIZES, CACHE_DIR };
+// Removes the least recently used derivatives until the cache holds at most max files.
+function pruneCache(max) {
+  const limit = Number(max) > 0 ? Number(max) : MAX_CACHE_FILES;
+  let names;
+  try {
+    names = fs.readdirSync(CACHE_DIR);
+  } catch (e) {
+    return { removed: 0, files: 0 };
+  }
+  if (names.length <= limit) return { removed: 0, files: names.length };
+  const entries = [];
+  for (const name of names) {
+    try {
+      const st = fs.statSync(path.join(CACHE_DIR, name));
+      entries.push({ name, used: Math.max(st.atimeMs || 0, st.mtimeMs || 0) });
+    } catch (e) { /* ignore */ }
+  }
+  entries.sort((a, b) => a.used - b.used);
+  let removed = 0;
+  for (const e of entries) {
+    if (names.length - removed <= limit) break;
+    try { fs.unlinkSync(path.join(CACHE_DIR, e.name)); removed++; } catch (err) { /* ignore */ }
+  }
+  return { removed, files: names.length - removed };
+}
+
+module.exports = { build, sizeFor, cacheFile, cacheStats, pruneCache, SIZES, CACHE_DIR, MAX_CACHE_FILES };

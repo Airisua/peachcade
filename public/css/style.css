@@ -200,6 +200,7 @@ textarea {
 .pg-gap{color:var(--muted);padding:0 2px;user-select:none}
 .pg-edge{font-size:13px;padding:0 12px}
 .pg-info{margin-left:8px}
+.select-sm{height:34px;padding:0 8px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:13px}
 @media (max-width:560px){.pg{padding:0 9px;min-width:32px}.pg-edge .pg-label{display:none}}
 
 /* game page */

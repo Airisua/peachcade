@@ -33,13 +33,16 @@ router.get('/', (req, res) => {
 
 router.get('/games', (req, res) => {
   const q = String(req.query.q || '').slice(0, 64);
-  const data = listGames({ q, sort: 'new', page: parseInt(req.query.page, 10) || 1, per: 24, includeUnpublished: true });
+  // "how hot is this game" views: most/least played, most liked, most favorited, most commented
+  const ADMIN_SORTS = ['new', 'oldest', 'heat', 'least', 'likes', 'favorites', 'comments', 'name'];
+  const sort = ADMIN_SORTS.indexOf(String(req.query.sort || '')) >= 0 ? String(req.query.sort) : 'new';
+  const data = listGames({ q, sort: sort, page: parseInt(req.query.page, 10) || 1, per: 24, includeUnpublished: true, withStats: true });
   let note = '';
   if (req.query.n) note = res.locals.t('admin.bulkCount', { n: parseInt(req.query.n, 10) || 0 });
   res.render('admin/games', {
     pageTitle: res.locals.t('admin.games'),
-    games: data.games, page: data.page, pages: data.pages, q, note,
-    base: ADMIN_BASE + '/games?q=' + encodeURIComponent(q) + '&'
+    games: data.games, page: data.page, pages: data.pages, q, note, sort,
+    base: ADMIN_BASE + '/games?q=' + encodeURIComponent(q) + '&sort=' + sort + '&'
   });
 });
 

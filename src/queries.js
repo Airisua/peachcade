@@ -9,8 +9,17 @@ const SORTS = {
   popular: 'g.plays DESC, g.id ASC',
   new: 'g.created_at DESC, g.id DESC',
   likes: 'g.likes DESC, g.id ASC',
-  name: 'g.title_en COLLATE NOCASE ASC'
+  name: 'g.title_en COLLATE NOCASE ASC',
+  // admin "how hot is this game" views
+  heat: 'g.plays DESC, g.likes DESC, g.id ASC',
+  least: 'g.plays ASC, g.likes ASC, g.id ASC',
+  favorites: 'favs DESC, g.plays DESC, g.id ASC',
+  comments: 'cmts DESC, g.plays DESC, g.id ASC',
+  oldest: 'g.created_at ASC, g.id ASC'
 };
+
+// extra counters, only selected when a caller asks for them (admin listings)
+const STAT_COLUMNS = ', (SELECT COUNT(*) FROM favorites f WHERE f.game_id=g.id) AS favs, (SELECT COUNT(*) FROM comments cm WHERE cm.game_id=g.id AND cm.hidden=0) AS cmts';
 
 const GAME_SELECT = 'SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh FROM games g LEFT JOIN categories c ON c.slug=g.category ';
 
@@ -61,7 +70,7 @@ function listGames(opt) {
   const total = db.prepare('SELECT COUNT(*) n FROM games g ' + w).get(...args).n;
   const pages = Math.max(1, Math.ceil(total / per));
   const page = Math.min(Math.max(1, parseInt(o.page, 10) || 1), pages);
-  const rows = db.prepare(GAME_SELECT + w + ' ORDER BY ' + order + ' LIMIT ? OFFSET ?').all(...args, per, (page - 1) * per);
+  const rows = db.prepare(GAME_SELECT.replace(' FROM games g', (o.withStats ? STAT_COLUMNS : '') + ' FROM games g') + w + ' ORDER BY ' + order + ' LIMIT ? OFFSET ?').all(...args, per, (page - 1) * per);
   return { games: rows, total, page, pages };
 }
 

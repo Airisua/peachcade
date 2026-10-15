@@ -1,6 +1,19 @@
 <%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
 <div class="toolbar">
-  <form class="searchbox small" action="/wyj/games" method="get"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-search"></use></svg><input name="q" value="<%= q %>" placeholder="<%= t('nav.searchPlaceholder') %>"></form>
+  <form class="searchbox small" action="/wyj/games" method="get">
+    <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-search"></use></svg>
+    <input name="q" value="<%= q %>" placeholder="<%= t('nav.searchPlaceholder') %>">
+    <select name="sort" class="select-sm" data-autosubmit title="<%= t('admin.sortBy') %>">
+      <option value="new" <%= sort === 'new' ? 'selected' : '' %>><%= t('admin.sortNew') %></option>
+      <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>><%= t('admin.sortOldest') %></option>
+      <option value="heat" <%= sort === 'heat' ? 'selected' : '' %>><%= t('admin.sortHeat') %></option>
+      <option value="least" <%= sort === 'least' ? 'selected' : '' %>><%= t('admin.sortLeast') %></option>
+      <option value="likes" <%= sort === 'likes' ? 'selected' : '' %>><%= t('admin.sortLikes') %></option>
+      <option value="favorites" <%= sort === 'favorites' ? 'selected' : '' %>><%= t('admin.sortFavorites') %></option>
+      <option value="comments" <%= sort === 'comments' ? 'selected' : '' %>><%= t('admin.sortComments') %></option>
+      <option value="name" <%= sort === 'name' ? 'selected' : '' %>><%= t('admin.sortName') %></option>
+    </select>
+  </form>
   <a class="btn btn-primary" href="/wyj/games/new"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-plus"></use></svg><%= t('admin.newGame') %></a>
 </div>
 <div class="toolbar bulkbar">
@@ -17,7 +30,21 @@
   <input type="hidden" name="_csrf" value="<%= csrf %>">
 </form>
 <table class="tbl">
-  <tr><th><input type="checkbox" data-check-all form="bulk-form" title="<%= t('admin.bulkSelectAll') %>"></th><th><%= t('admin.tblId') %></th><th></th><th><%= t('admin.tblTitle') %></th><th><%= t('admin.tblSlug') %></th><th><%= t('admin.tblCategory') %></th><th><%= t('admin.tblSource') %></th><th><%= t('admin.tblPlays') %></th><th>F</th><th>P</th><th><%= t('admin.tblActions') %></th></tr>
+  <tr>
+    <th><input type="checkbox" data-check-all form="bulk-form" title="<%= t('admin.bulkSelectAll') %>"></th>
+    <th><%= t('admin.tblId') %></th>
+    <th></th>
+    <th><%= t('admin.tblTitle') %></th>
+    <th><%= t('admin.tblSlug') %></th>
+    <th><%= t('admin.tblCategory') %></th>
+    <th><%= t('admin.tblSource') %></th>
+    <th><a href="<%= base %>sort=heat" title="<%= t('admin.sortHeat') %>"><%= t('admin.tblPlays') %><%= sort === 'heat' ? ' ▾' : (sort === 'least' ? ' ▴' : '') %></a></th>
+    <th><a href="<%= base %>sort=likes" title="<%= t('admin.sortLikes') %>"><%= t('admin.tblLikes') %><%= sort === 'likes' ? ' ▾' : '' %></a></th>
+    <th><a href="<%= base %>sort=favorites" title="<%= t('admin.sortFavorites') %>"><%= t('admin.tblFavs') %><%= sort === 'favorites' ? ' ▾' : '' %></a></th>
+    <th><a href="<%= base %>sort=comments" title="<%= t('admin.sortComments') %>"><%= t('admin.tblComments') %><%= sort === 'comments' ? ' ▾' : '' %></a></th>
+    <th>F</th><th>P</th>
+    <th><%= t('admin.tblActions') %></th>
+  </tr>
   <% games.forEach(function (g) { %>
   <tr>
     <td><input type="checkbox" name="sel" value="<%= g.id %>" form="bulk-form"></td>
@@ -28,6 +55,9 @@
     <td><%= g.category %></td>
     <td><%= g.source || '-' %></td>
     <td><%= fmt(g.plays) %></td>
+    <td><%= fmt(g.likes) %></td>
+    <td><%= fmt(g.favs || 0) %></td>
+    <td><%= fmt(g.cmts || 0) %></td>
     <td><%= g.featured ? '★' : '' %></td>
     <td><%= g.published ? '✓' : '—' %></td>
     <td class="actions">

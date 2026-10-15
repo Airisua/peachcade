@@ -88,6 +88,11 @@
     });
   });
 
+  // selects that submit their form on change (admin listing sort switch)
+  $$('[data-autosubmit]').forEach(function (el) {
+    el.addEventListener('change', function () { if (el.form) el.form.submit(); });
+  });
+
   // Bulk selection. On the games list the row checkboxes live *outside* the bulk <form> and
   // are tied to it with the HTML5 form="..." attribute, so they must be resolved through the
   // form owner (querying inside the form element finds nothing there).

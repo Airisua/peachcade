@@ -202,6 +202,13 @@ function client() {
   ok(r.status === 404, 'unknown thumbnail size is a 404', r.status);
   r = await user.req('HEAD', '/thumb/grave-blast-gm-87711.card.jpg');
   ok(r.status === 200 || r.status === 302, 'provider thumbnail is resized (200) or falls back (302)', r.status);
+  // the derivative cache must stay bounded and remember recent failures
+  const thumbCache = require('../src/thumbs');
+  ok(typeof thumbCache.pruneCache === 'function' && typeof thumbCache.cacheStats === 'function', 'thumbnail cache exposes stats + prune');
+  const cacheInfo = thumbCache.cacheStats();
+  ok(cacheInfo.files >= 0 && Number.isFinite(cacheInfo.bytes), 'thumbnail cache stats are usable', JSON.stringify(cacheInfo));
+  const pruned = thumbCache.pruneCache();
+  ok(pruned && typeof pruned.removed === 'number' && pruned.files <= Math.max(thumbCache.MAX_CACHE_FILES, cacheInfo.files), 'thumbnail cache prune keeps the cache bounded', JSON.stringify(pruned));
   r = await user.get('/');
   ok(/src="\/thumb\/[a-z0-9-]+\.card\.jpg"/.test(r.text), 'cards use the resize proxy');
   ok(/src="\/thumb\/[a-z0-9-]+\.hero\.jpg"/.test(r.text) || /src="\/img\/games\/[a-z0-9-]+\.svg"/.test(r.text), 'hero image is served locally (proxy or built-in asset)');
@@ -249,6 +256,56 @@ function client() {
   // bulk buttons must resolve the form owner instead of querying inside the form element
   r = await admin.get('/wyj/games');
   ok(r.status === 200 && r.text.indexOf('data-check-all') >= 0 && r.text.indexOf('name="sel"') >= 0, 'admin games list has select-all + row checkboxes', r.status);
+  // "how hot is this game" views: the admin list can be ordered by plays / likes / favorites /
+  // comments, both ways. Check the rendered order against the stored numbers.
+  const hotId = db.prepare("INSERT INTO games(slug,title_en,category,thumb,embed_url,source,plays,likes,published) VALUES('heat-fixture-hot','Heat Fixture Hot','puzzle','/img/games/default.svg','https://example.com/heat/hot','smoke',999999,0,1)").run().lastInsertRowid;
+  const coldId = db.prepare("INSERT INTO games(slug,title_en,category,thumb,embed_url,source,plays,likes,published) VALUES('heat-fixture-cold','Heat Fixture Cold','puzzle','/img/games/default.svg','https://example.com/heat/cold','smoke',0,777,1)").run().lastInsertRowid;
+  // favorites are unique per user, so build the count with throwaway users (cascaded away below)
+  const smokeUser = db.prepare('SELECT id FROM users WHERE username=?').get(uname);
+  const favUsers = [];
+  if (smokeUser) {
+    const insUser = db.prepare("INSERT INTO users(username,email,password_hash,role) VALUES(?,?,?,'user')");
+    const fav = db.prepare('INSERT OR IGNORE INTO favorites(user_id,game_id) VALUES(?,?)');
+    fav.run(smokeUser.id, coldId);
+    for (let i = 0; i < 4; i++) {
+      const uid = insUser.run('heatfav' + i + '_' + Date.now().toString().slice(-6), 'heatfav' + i + '_' + Date.now() + '@example.com', 'x').lastInsertRowid;
+      favUsers.push(uid);
+      fav.run(uid, coldId);
+    }
+    const cm = db.prepare('INSERT INTO comments(user_id,game_id,content) VALUES(?,?,?)');
+    for (let i = 0; i < 3; i++) cm.run(smokeUser.id, coldId, 'heat smoke ' + i);
+  }
+  const rowIds = (html) => [...html.matchAll(/name="sel" value="(\d+)"/g)].map((m) => Number(m[1]));
+  const statsOf = (id) => db.prepare('SELECT g.plays, g.likes, (SELECT COUNT(*) FROM favorites f WHERE f.game_id=g.id) favs, (SELECT COUNT(*) FROM comments c WHERE c.game_id=g.id AND c.hidden=0) cmts FROM games g WHERE g.id=?').get(id);
+  try {
+    r = await admin.get('/wyj/games?sort=heat');
+    let ids = rowIds(r.text).map(statsOf);
+    ok(ids.length > 1 && ids.every((s, i) => i === 0 || ids[i - 1].plays >= s.plays), 'admin sort by most played', JSON.stringify(ids.slice(0, 3).map((s) => s.plays)));
+    ok(/value="heat" selected/.test(r.text), 'admin sort control reflects the active sort');
+    r = await admin.get('/wyj/games?sort=least');
+    ids = rowIds(r.text).map(statsOf);
+    ok(ids.length > 1 && ids.every((s, i) => i === 0 || ids[i - 1].plays <= s.plays), 'admin sort by least played', JSON.stringify(ids.slice(0, 3).map((s) => s.plays)));
+    r = await admin.get('/wyj/games?sort=likes');
+    ids = rowIds(r.text).map(statsOf);
+    ok(ids.length > 1 && ids.every((s, i) => i === 0 || ids[i - 1].likes >= s.likes), 'admin sort by most liked', JSON.stringify(ids.slice(0, 3).map((s) => s.likes)));
+    r = await admin.get('/wyj/games?sort=favorites');
+    ids = rowIds(r.text).map(statsOf);
+    ok(ids.length > 1 && ids.every((s, i) => i === 0 || ids[i - 1].favs >= s.favs), 'admin sort by most favorited', JSON.stringify(ids.slice(0, 3).map((s) => s.favs)));
+    r = await admin.get('/wyj/games?sort=comments');
+    ids = rowIds(r.text).map(statsOf);
+    ok(ids.length > 1 && ids.every((s, i) => i === 0 || ids[i - 1].cmts >= s.cmts), 'admin sort by most commented', JSON.stringify(ids.slice(0, 3).map((s) => s.cmts)));
+    r = await admin.get('/wyj/games?sort=favorites&q=heat-fixture');
+    ok(r.text.indexOf('>5<') >= 0 && r.text.indexOf('>3<') >= 0, 'admin list shows favorites + comments counts', r.status);
+    r = await admin.get('/wyj/games?sort=new');
+    ok(rowIds(r.text)[0] === coldId || rowIds(r.text).indexOf(coldId) >= 0, 'admin list still sorts by newest', r.status);
+  } finally {
+    for (const uid of favUsers) db.prepare('DELETE FROM users WHERE id=?').run(uid);
+    for (const id of [hotId, coldId]) {
+      db.prepare('DELETE FROM favorites WHERE game_id=?').run(id);
+      db.prepare('DELETE FROM comments WHERE game_id=?').run(id);
+      db.prepare('DELETE FROM games WHERE id=?').run(id);
+    }
+  }
   if (JSDOM) {
     const dom = new JSDOM(r.text, { runScripts: 'outside-only', url: BASE + '/wyj/games', virtualConsole: new VirtualConsole() });
     dom.window.eval(fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'main.js'), 'utf8'));
