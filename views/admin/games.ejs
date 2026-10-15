@@ -3,23 +3,24 @@
   <form class="searchbox small" action="/wyj/games" method="get"><svg class="ic"><use href="/img/icons.svg#i-search"></use></svg><input name="q" value="<%= q %>" placeholder="<%= t('nav.searchPlaceholder') %>"></form>
   <a class="btn btn-primary" href="/wyj/games/new"><svg class="ic"><use href="/img/icons.svg#i-plus"></use></svg><%= t('admin.newGame') %></a>
 </div>
-<form method="post" action="/wyj/games/bulk">
-<input type="hidden" name="_csrf" value="<%= csrf %>">
 <div class="toolbar bulkbar">
   <span class="muted small"><%= t('admin.bulkHint') %><b id="bulk-count">0</b></span>
   <div class="bulk-actions">
-    <button class="btn btn-sm btn-primary" type="submit" name="action" value="publish"><%= t('admin.bulkPublish') %></button>
-    <button class="btn btn-sm btn-ghost" type="submit" name="action" value="unpublish"><%= t('admin.bulkUnpublish') %></button>
-    <button class="btn btn-sm btn-ghost" type="submit" name="action" value="feature"><%= t('admin.bulkFeature') %></button>
-    <button class="btn btn-sm btn-ghost" type="submit" name="action" value="unfeature"><%= t('admin.bulkUnfeature') %></button>
-    <button class="btn btn-sm btn-danger" type="submit" name="action" value="delete" data-confirm="1" formnovalidate><%= t('admin.bulkDelete') %></button>
+    <button class="btn btn-sm btn-primary" type="submit" form="bulk-form" name="action" value="publish"><%= t('admin.bulkPublish') %></button>
+    <button class="btn btn-sm btn-ghost" type="submit" form="bulk-form" name="action" value="unpublish"><%= t('admin.bulkUnpublish') %></button>
+    <button class="btn btn-sm btn-ghost" type="submit" form="bulk-form" name="action" value="feature"><%= t('admin.bulkFeature') %></button>
+    <button class="btn btn-sm btn-ghost" type="submit" form="bulk-form" name="action" value="unfeature"><%= t('admin.bulkUnfeature') %></button>
+    <button class="btn btn-sm btn-danger" type="submit" form="bulk-form" name="action" value="delete" data-confirm="1" formnovalidate><%= t('admin.bulkDelete') %></button>
   </div>
 </div>
+<form method="post" action="/wyj/games/bulk" id="bulk-form">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+</form>
 <table class="tbl">
-  <tr><th><input type="checkbox" data-check-all title="<%= t('admin.bulkSelectAll') %>"></th><th><%= t('admin.tblId') %></th><th></th><th><%= t('admin.tblTitle') %></th><th><%= t('admin.tblSlug') %></th><th><%= t('admin.tblCategory') %></th><th><%= t('admin.tblSource') %></th><th><%= t('admin.tblPlays') %></th><th>F</th><th>P</th><th><%= t('admin.tblActions') %></th></tr>
+  <tr><th><input type="checkbox" data-check-all form="bulk-form" title="<%= t('admin.bulkSelectAll') %>"></th><th><%= t('admin.tblId') %></th><th></th><th><%= t('admin.tblTitle') %></th><th><%= t('admin.tblSlug') %></th><th><%= t('admin.tblCategory') %></th><th><%= t('admin.tblSource') %></th><th><%= t('admin.tblPlays') %></th><th>F</th><th>P</th><th><%= t('admin.tblActions') %></th></tr>
   <% games.forEach(function (g) { %>
   <tr>
-    <td><input type="checkbox" name="sel" value="<%= g.id %>"></td>
+    <td><input type="checkbox" name="sel" value="<%= g.id %>" form="bulk-form"></td>
     <td><%= g.id %></td>
     <td><img class="tbl-thumb" src="<%= g.thumb %>" alt=""></td>
     <td><%= g.title_en %><% if (g.title_zh) { %><br><small class="muted"><%= g.title_zh %></small><% } %></td>
@@ -38,7 +39,6 @@
   </tr>
   <% }); %>
 </table>
-</form>
 <% if (typeof note !== 'undefined' && note) { %><div class="notice ok"><%= note %></div><% } %>
 <%- include('../partials/pagination', { page: page, pages: pages, base: base }) %>
 <%- include('../partials/admin_bottom') %>

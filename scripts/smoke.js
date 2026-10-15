@@ -144,14 +144,21 @@ function client() {
   await admin.post('/wyj/games', { _csrf: admin.csrf(), title_en: 'Smoke Bulk A', slug: slugA, category: 'puzzle', embed_url: '/games/2048/', published: 'on' });
   await admin.post('/wyj/games', { _csrf: admin.csrf(), title_en: 'Smoke Bulk B', slug: slugB, category: 'puzzle', embed_url: '/games/2048/', published: 'on' });
   r = await admin.get('/wyj/games?q=smoke-');
+  const tagRe = /<\/?form[^>]*>/g;
+  let depth = 0; let nested = false; let tm;
+  while ((tm = tagRe.exec(r.text))) { if (tm[0].startsWith('</')) depth--; else { depth++; if (depth > 1) nested = true; } }
+  ok(!nested, 'games page has no nested <form> tags');
   const bulkIds = [];
   const idBySlug = new Map();
-  for (const m of r.text.matchAll(/name="sel" value="(\d+)"><\/td>[\s\S]{0,900}?<code>([^<]+)<\/code>/g)) {
+  for (const m of r.text.matchAll(/name="sel" value="(\d+)"[^>]*>\s*<\/td>[\s\S]{0,900}?<code>([^<]+)<\/code>/g)) {
     bulkIds.push(m[1]);
     idBySlug.set(m[2], m[1]);
   }
   ok(bulkIds.length >= 2 && r.text.includes('data-check-all') && idBySlug.has(slugA) && idBySlug.has(slugB), 'games list exposes multi-select checkboxes', JSON.stringify(bulkIds));
   const pair = [idBySlug.get(slugA), idBySlug.get(slugB)];
+  const bulkForm = (r.text.match(/<form[^>]*id="bulk-form"[\s\S]*?<\/form>/) || [''])[0];
+  const bulkToken = (bulkForm.match(/name="_csrf" value="([^"]+)"/) || [])[1] || '';
+  ok(!!bulkToken && bulkForm.indexOf('name="sel"') === -1, 'bulk form carries csrf only (checkboxes reference it)');
   if (pair[0] && pair[1]) {
     resp = await admin.post('/wyj/games/bulk', { _csrf: admin.csrf(), action: 'unpublish', sel: pair });
     ok(resp.status === 302 && resp.location.indexOf('n=2') >= 0, 'bulk hide updates 2 games', resp.status + ' ' + resp.location);

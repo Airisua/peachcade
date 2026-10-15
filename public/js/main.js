@@ -90,25 +90,32 @@
 
   $$('[data-check-all]').forEach(function (master) {
     master.addEventListener('change', function () {
-      var form = master.closest('form');
-      if (!form) return;
-      $$('input[name="sel"]', form).forEach(function (cb) { if (!cb.disabled) cb.checked = master.checked; });
+      var form = master.form || master.closest('form');
+      var scope = form || document;
+      $$('input[name="sel"]', scope).forEach(function (cb) {
+        if (form && cb.form !== form) return;
+        if (!cb.disabled) cb.checked = master.checked;
+      });
       updateBulkCount(form);
     });
   });
 
   function updateBulkCount(form) {
     var el = $('#bulk-count');
-    if (!form || !el || !form.contains(el)) return;
-    el.textContent = String($$('input[name="sel"]:checked', form).length);
+    if (!el) return;
+    var scope = form || document;
+    var cbs = $$('input[name="sel"]:checked', scope);
+    if (form) cbs = cbs.filter(function (cb) { return cb.form === form; });
+    el.textContent = String(cbs.length);
   }
   $$('input[name="sel"]').forEach(function (cb) {
-    cb.addEventListener('change', function () { updateBulkCount(cb.closest('form')); });
+    cb.addEventListener('change', function () { updateBulkCount(cb.form || cb.closest('form')); });
   });
   $$('.bulk-actions button').forEach(function (btn) {
     btn.addEventListener('click', function (e) {
-      var form = btn.closest('form');
-      if (form && $$('input[name="sel"]:checked', form).length === 0) {
+      var form = btn.form || btn.closest('form') || $('#' + btn.getAttribute('form'));
+      var count = form ? $$('input[name="sel"]:checked', form).filter(function (cb) { return cb.form === form; }).length : 0;
+      if (count === 0) {
         e.preventDefault();
         toast(I18N.bulkNone || 'Select at least one item first.');
       }
