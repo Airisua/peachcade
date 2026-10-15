@@ -76,6 +76,25 @@ function client() {
     r = await user.get('/category/' + slug);
     ok(r.status === 200, 'category page ' + slug, r.status);
   }
+  // structured data (JSON-LD) - search engines only accept valid JSON, so parse it here
+  function ldBlocks(html) {
+    return [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => {
+      try { return JSON.parse(m[1]); } catch (e) { return null; }
+    });
+  }
+  r = await user.get('/');
+  const homeLd = ldBlocks(r.text);
+  ok(homeLd.length > 0 && homeLd.every(Boolean) && homeLd.some((b) => b['@type'] === 'WebSite' && b.potentialAction), 'home has WebSite + SearchAction JSON-LD', JSON.stringify(homeLd.map((b) => b && b['@type'])));
+  r = await user.get('/game/2048');
+  const gameLd = ldBlocks(r.text);
+  ok(gameLd.length > 0 && gameLd.every(Boolean) && gameLd.some((b) => b['@type'] === 'VideoGame' && b.name === '2048' && b.offers), 'game page has valid VideoGame JSON-LD');
+  ok(gameLd.some((b) => b['@type'] === 'BreadcrumbList' && b.itemListElement.length >= 2), 'game page has a BreadcrumbList');
+  r = await user.get('/category/puzzle');
+  const catLd = ldBlocks(r.text);
+  ok(catLd.every(Boolean) && catLd.some((b) => b['@type'] === 'CollectionPage' && b.mainEntity && b.mainEntity.numberOfItems >= 1), 'category page has a CollectionPage ItemList');
+  ok(/<meta name="description" content="Free Puzzle games/.test(r.text), 'category page has its own meta description', (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1]);
+  r = await user.get('/search?q=snake');
+  ok(/<meta name="robots" content="noindex">/.test(r.text), 'search results are noindex');
   r = await user.get('/sitemap.xml');
   ok(r.status === 200 && r.text.includes('<urlset') && r.text.includes('/game/2048'), 'sitemap.xml', r.status);
   r = await user.get('/robots.txt');

@@ -5,6 +5,7 @@ const { db } = require('../db');
 const { listGames, featuredRotation } = require('../queries');
 const { requireLogin } = require('../auth');
 const { rateLimit } = require('../ratelimit');
+const schemaLd = require('../schema');
 
 const commentLimiter = rateLimit({ windowMs: 60000, max: 10, scope: 'comment' });
 
@@ -24,17 +25,30 @@ router.get('/', (req, res) => {
     continueList = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, MAX(p.created_at) AS last_play FROM plays_log p JOIN games g ON g.id=p.game_id LEFT JOIN categories c ON c.slug=g.category WHERE p.user_id=? GROUP BY g.id ORDER BY last_play DESC LIMIT 4').all(req.user.id);
   }
   const total = db.prepare('SELECT COUNT(*) n FROM games WHERE published=1').get().n;
-  res.render('index', { pageTitle: null, hero, featured, popular, newest, topRated, continueList, total });
+  res.render('index', {
+    pageTitle: null, hero, featured, popular, newest, topRated, continueList, total,
+    schema: [schemaLd.website(res.locals.site, res.locals.siteUrl)]
+  });
 });
 
 router.get('/games', (req, res) => {
   const sort = safeSort(req.query.sort);
   const data = listGames({ sort, page: page(req.query.page), per: 24 });
+  const heading = res.locals.t('common.allGames');
   res.render('list', {
-    pageTitle: res.locals.t('common.allGames'),
-    heading: res.locals.t('common.allGames'),
+    pageTitle: heading,
+    heading,
     games: data.games, page: data.page, pages: data.pages,
-    basePath: '/games?', sort, totalGames: data.total
+    basePath: '/games?', sort, totalGames: data.total,
+    metaDesc: res.locals.t('seo.allGames', { site: res.locals.site.name }),
+    schema: [
+      schemaLd.collectionPage({
+        name: heading, siteName: res.locals.site.name, siteUrl: res.locals.siteUrl, path: '/games',
+        description: res.locals.t('seo.allGames', { site: res.locals.site.name }),
+        games: data.games, total: data.total, titleFor: res.locals.gt
+      }),
+      schemaLd.breadcrumbs([{ name: res.locals.t('nav.home'), url: '/' }, { name: heading, url: '/games' }], res.locals.siteUrl)
+    ]
   });
 });
 
@@ -43,11 +57,22 @@ router.get('/category/:slug', (req, res, next) => {
   if (!cat) return next();
   const sort = safeSort(req.query.sort);
   const data = listGames({ sort, category: cat.slug, page: page(req.query.page), per: 24 });
+  const catLabel = res.locals.catName(cat);
+  const catDesc = res.locals.t('seo.category', { name: catLabel });
   res.render('list', {
-    pageTitle: res.locals.catName(cat),
-    heading: res.locals.catName(cat),
+    pageTitle: catLabel,
+    heading: catLabel,
     games: data.games, page: data.page, pages: data.pages,
-    basePath: '/category/' + cat.slug + '?', sort, totalGames: data.total
+    basePath: '/category/' + cat.slug + '?', sort, totalGames: data.total,
+    metaDesc: catDesc,
+    schema: [
+      schemaLd.collectionPage({
+        name: catLabel, siteName: res.locals.site.name, siteUrl: res.locals.siteUrl,
+        path: '/category/' + cat.slug, description: catDesc,
+        games: data.games, total: data.total, titleFor: res.locals.gt
+      }),
+      schemaLd.breadcrumbs([{ name: res.locals.t('nav.home'), url: '/' }, { name: catLabel, url: '/category/' + cat.slug }], res.locals.siteUrl)
+    ]
   });
 });
 
@@ -59,7 +84,8 @@ router.get('/search', (req, res) => {
     pageTitle: res.locals.t('list.searchResults', { q }),
     heading: res.locals.t('list.searchResults', { q }),
     games: data.games, page: data.page, pages: data.pages,
-    basePath: '/search?q=' + encodeURIComponent(q) + '&', sort, totalGames: data.total, q
+    basePath: '/search?q=' + encodeURIComponent(q) + '&', sort, totalGames: data.total, q,
+    noindex: true
   });
 });
 
@@ -79,7 +105,22 @@ router.get('/game/:slug', (req, res, next) => {
   const comments = db.prepare('SELECT cm.*, u.username, u.role FROM comments cm JOIN users u ON u.id=cm.user_id WHERE cm.game_id=? AND cm.hidden=0 ORDER BY cm.created_at DESC LIMIT 50').all(game.id);
   const liked = req.user ? !!db.prepare('SELECT 1 FROM likes WHERE user_id=? AND game_id=?').get(req.user.id, game.id) : false;
   const favorited = req.user ? !!db.prepare('SELECT 1 FROM favorites WHERE user_id=? AND game_id=?').get(req.user.id, game.id) : false;
-  res.render('game', { pageTitle: res.locals.gt(game), game, related, comments, liked, favorited });
+  const title = res.locals.gt(game);
+  const catLabel = res.locals.catName({ name_en: game.cat_en, name_zh: game.cat_zh });
+  const crumbs = [{ name: res.locals.t('nav.home'), url: '/' }];
+  if (game.cat_en) crumbs.push({ name: catLabel, url: '/category/' + game.category });
+  crumbs.push({ name: title, url: '/game/' + game.slug });
+  res.render('game', {
+    pageTitle: title, game, related, comments, liked, favorited,
+    metaDesc: res.locals.gd(game).slice(0, 300),
+    schema: [
+      schemaLd.videoGame(game, {
+        siteUrl: res.locals.siteUrl, title, description: res.locals.gd(game).slice(0, 500),
+        genre: catLabel, lang: res.locals.lang
+      }),
+      schemaLd.breadcrumbs(crumbs, res.locals.siteUrl)
+    ]
+  });
 });
 
 router.post('/game/:id/comment', requireLogin, commentLimiter, (req, res) => {

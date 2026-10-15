@@ -248,5 +248,7 @@
   "admin.importScanInfo": "Scanned {pages} feed page(s) · found {found} new game(s)",
   "admin.importAutoSkip": "Already-imported games are skipped automatically",
   "admin.importContinue": "Scan for more",
-  "admin.importNoNew": "Nothing new found in the scanned pages (everything there is already imported)."
+  "admin.importNoNew": "Nothing new found in the scanned pages (everything there is already imported).",
+  "seo.category": "Free {name} games - play online in your browser",
+  "seo.allGames": "All free online games on {site} - play instantly, no download"
 }

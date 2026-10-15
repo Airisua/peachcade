@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><%= (typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle + ' · ' + site.name : site.name + ' · ' + site.tagline %></title>
-<meta name="description" content="<%= site.tagline %>">
+<meta name="description" content="<%= (typeof metaDesc !== 'undefined' && metaDesc) ? metaDesc : ((typeof ogDesc !== 'undefined' && ogDesc) ? ogDesc : site.tagline) %>">
 <link rel="icon" href="/favicon.svg">
 <link rel="stylesheet" href="/css/style.css?v=<%= assetV %>">
 <% if (typeof adminCss !== 'undefined' && adminCss) { %><link rel="stylesheet" href="/css/admin.css?v=<%= assetV %>"><% } %>
@@ -19,6 +19,9 @@
 <% if (_ogImg) { %><meta property="og:image" content="<%= _ogImg %>"><% } %>
 <meta name="twitter:card" content="<%= _ogImg ? 'summary_large_image' : 'summary' %>">
 <link rel="canonical" href="<%= siteUrl + path %>">
+<% var _ld = (typeof schema !== 'undefined' && schema) ? (Array.isArray(schema) ? schema : [schema]) : []; %>
+<% _ld.forEach(function (block) { %><script type="application/ld+json"><%- JSON.stringify(block).replace(/</g, '\\u003c') %></script>
+<% }); %>
 </head>
 <body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
 <script>window.CSRF = <%- JSON.stringify(csrf) %>; window.I18N = <%- JSON.stringify({ copied: t('js.copied'), likeLogin: t('js.likeLogin'), confirmDelete: t('common.confirmDelete'), bulkNone: t('js.bulkNone') }) %>;</script>
