@@ -11,6 +11,7 @@
     "check:games": "node scripts/check-games.js",
     "check:i18n": "node scripts/check-i18n.js",
     "check:providers": "node scripts/check-providers.js",
+    "import:all": "node scripts/import-all.js",
     "reclassify": "node scripts/reclassify.js",
     "reset:db": "node scripts/reset-db.js"
   },

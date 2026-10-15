@@ -286,8 +286,11 @@ router.get('/import', (req, res) => {
   });
 });
 
-const IMPORT_SCAN_LIMIT = 5;
-const FEED_PAGE_DELAY_MS = 250;
+// The provider throttles bursts (Cloudflare 1015): keep interactive scans short and slow
+// down between pages, otherwise the admin keeps hitting the rate limit. Bulk imports use
+// scripts/import-all.js instead.
+const IMPORT_SCAN_LIMIT = 4;
+const FEED_PAGE_DELAY_MS = 2000;
 
 function gameTitleFor(res, it) {
   try { return res.locals.gt(it); } catch (e) { return it.title_en || ''; }
