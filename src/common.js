@@ -24,6 +24,13 @@ function common(req, res, next) {
   res.locals.gd = (g) => gd(g, lang);
   res.locals.gh = (g) => gh(g, lang);
   res.locals.catName = (c) => (!c ? '' : (lang === 'zh' ? c.name_zh : c.name_en));
+  // icon sprite id for a category (falls back to the generic gamepad for new/unknown slugs)
+  const CAT_ICONS = ['puzzle', 'arcade', 'action', 'casual', 'skill', 'board', 'racing', 'shooting',
+    'sports', 'platform', 'adventure', 'simulation', 'clicker', 'girls'];
+  res.locals.catIcon = (c) => {
+    const slug = typeof c === 'string' ? c : (c && c.slug) || '';
+    return '/img/icons.svg#i-cat-' + (CAT_ICONS.indexOf(slug) >= 0 ? slug : 'arcade');
+  };
   res.locals.fmt = (n) => {
     n = Number(n) || 0;
     if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
