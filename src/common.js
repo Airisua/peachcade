@@ -6,6 +6,24 @@ const { ASSET_VERSION } = require('./assets');
 const OK_CODES = ['saved', 'created', 'updated', 'deleted', 'password', 'comment', 'login', 'registered'];
 const ERR_CODES = ['commentEmpty', 'commentLong', 'wrongPassword', 'slugTaken', 'fileType', 'fileTooBig', 'badRequest', 'notFound', 'forbidden', 'registrationClosed', 'importFailed'];
 
+// One game cover per category for the "browse by category" cards. The picks are refreshed
+// every 10 minutes: the homepage keeps rotating through covers without re-rolling on every
+// request (which would defeat image caching).
+const CATEGORY_SAMPLE_TTL_MS = 10 * 60 * 1000;
+let categorySampleCache = { at: 0, map: {} };
+function categorySamples() {
+  if (Date.now() - categorySampleCache.at < CATEGORY_SAMPLE_TTL_MS) return categorySampleCache.map;
+  const map = {};
+  try {
+    const rows = db.prepare('SELECT c.slug AS slug, (SELECT g.thumb FROM games g WHERE g.category=c.slug AND g.published=1 ORDER BY RANDOM() LIMIT 1) AS thumb FROM categories c').all();
+    for (const r of rows) if (r.thumb) map[r.slug] = r.thumb;
+  } catch (e) {
+    return categorySampleCache.map;
+  }
+  categorySampleCache = { at: Date.now(), map };
+  return map;
+}
+
 function common(req, res, next) {
   const lang = req.lang;
   res.locals.path = req.path;
@@ -18,6 +36,8 @@ function common(req, res, next) {
     footerText: lang === 'zh' ? getSetting('footer_text_zh', '') : getSetting('footer_text_en', '')
   };
   const cats = db.prepare('SELECT c.*, (SELECT COUNT(*) FROM games g WHERE g.category=c.slug AND g.published=1) AS n FROM categories c ORDER BY c.sort, c.slug').all();
+  const samples = categorySamples();
+  for (const c of cats) c.sample_thumb = (c.n > 0 && samples[c.slug]) || '';
   res.locals.categories = cats;
   res.locals.navCategories = cats.filter((c) => c.n > 0);
   res.locals.adsEnabled = getSetting('ads_enabled', '1') === '1';
@@ -31,7 +51,7 @@ function common(req, res, next) {
     'sports', 'platform', 'adventure', 'simulation', 'clicker', 'girls'];
   res.locals.catIcon = (c) => {
     const slug = typeof c === 'string' ? c : (c && c.slug) || '';
-    return '/img/icons.svg#i-cat-' + (CAT_ICONS.indexOf(slug) >= 0 ? slug : 'arcade');
+    return '/img/icons.svg?v=' + ASSET_VERSION + '#i-cat-' + (CAT_ICONS.indexOf(slug) >= 0 ? slug : 'arcade');
   };
   res.locals.fmt = (n) => {
     n = Number(n) || 0;

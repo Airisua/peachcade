@@ -305,8 +305,12 @@ textarea {
 .cat-card{display:flex;align-items:center;gap:11px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);transition:.18s}
 .cat-card:hover{border-color:#3d3d5c;transform:translateY(-2px);color:inherit}
 .cat-card b{font-size:15px}
+.cat-card .cat-visual{position:relative;display:flex;flex:none;width:54px;height:42px}
+.cat-card .cat-thumb{width:54px;height:42px;object-fit:cover;border-radius:11px;border:1px solid var(--line);background:var(--panel2)}
 .cat-card .cat-icon{width:40px;height:40px;padding:9px;border-radius:12px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);color:var(--brand)}
+.cat-card .cat-glyph{position:absolute;right:-6px;bottom:-6px;width:20px;height:20px;padding:3px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);color:var(--brand)}
 .cat-card:hover .cat-icon{color:var(--brand2);border-color:rgba(236,72,153,.28);background:rgba(236,72,153,.12)}
+.cat-card:hover .cat-glyph{color:var(--brand2);border-color:rgba(236,72,153,.35)}
 .cat-card .cat-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
 .play-badge{position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2));display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(4px);transition:.18s;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.4)}
 .card:hover .play-badge{opacity:1;transform:translateY(0)}

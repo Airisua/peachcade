@@ -23,7 +23,14 @@
     <div class="cat-grid">
       <% navCategories.forEach(function (c) { %>
       <a class="cat-card" href="/category/<%= c.slug %>">
-        <svg class="ic cat-icon"><use href="<%= catIcon(c) %>"></use></svg>
+        <span class="cat-visual">
+          <% if (c.sample_thumb) { %>
+          <img class="cat-thumb" src="<%= c.sample_thumb %>" alt="" loading="lazy" decoding="async">
+          <% } else { %>
+          <svg class="ic cat-icon"><use href="<%= catIcon(c) %>"></use></svg>
+          <% } %>
+          <svg class="ic cat-glyph"><use href="<%= catIcon(c) %>"></use></svg>
+        </span>
         <span class="cat-meta">
           <b><%= catName(c) %></b>
           <small class="muted"><%= c.n %> <%= t('home.totalGames') %></small>

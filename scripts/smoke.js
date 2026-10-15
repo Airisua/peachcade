@@ -87,6 +87,12 @@ function client() {
   ok(/\/css\/style\.css\?v=[0-9a-f]{6,}/.test(r.text), 'stylesheet url is versioned');
   ok(/\/js\/main\.js\?v=[0-9a-f]{6,}/.test(r.text), 'script url is versioned');
   ok(/\/img\/icons\.svg\?v=[0-9a-f]{6,}#i-/.test(r.text), 'icon sprite url is versioned');
+  // regression guard: a helper that builds the sprite url itself must version it too,
+  // otherwise a CDN-cached previous sprite silently renders empty icons
+  const spriteRefs = [...r.text.matchAll(/\/img\/icons\.svg[^"'#)\s]*/g)].map((m) => m[0]);
+  const unversioned = spriteRefs.filter((u) => !/\?v=[0-9a-f]{6,}$/.test(u));
+  ok(spriteRefs.length > 0 && unversioned.length === 0, 'every icon sprite reference is versioned', unversioned.slice(0, 3).join(' '));
+  ok(r.text.includes('cat-thumb') && r.text.includes('cat-glyph'), 'category cards show a game cover + category glyph');
   // homepage featured section: admin picks rotate randomly, and without any admin pick the
   // section falls back to a random mix of the most popular / best rated games
   const { db } = require('../src/db');
