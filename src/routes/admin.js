@@ -1,14 +1,45 @@
 'use strict';
 const ADMIN_BASE = process.env.ADMIN_BASE || '/wyj';
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const router = express.Router();
-const { db, getSetting, setSetting } = require('../db');
+const { db, getSetting, setSetting, DATA_DIR } = require('../db');
 const { requireAdmin } = require('../auth');
 const { listGames } = require('../queries');
 const { isValid } = require('../csrf');
 const upload = require('../upload');
 const providers = require('../providers');
+
+// server-side bulk import (scripts/import-all.js) writes a cursor + log next to the database;
+// the admin import page surfaces it so a long run is visible without opening a shell
+const BULK_STATE_FILE = path.join(DATA_DIR, 'import-all.state.json');
+const BULK_LOG_FILE = path.join(DATA_DIR, 'import-all.log');
+
+function bulkImportStatus() {
+  try {
+    const state = JSON.parse(fs.readFileSync(BULK_STATE_FILE, 'utf8'));
+    const updated = state.updatedAt ? Date.parse(state.updatedAt) : NaN;
+    const ageMs = Number.isFinite(updated) ? Date.now() - updated : null;
+    let logTail = [];
+    try {
+      logTail = fs.readFileSync(BULK_LOG_FILE, 'utf8').trim().split('\n').slice(-3);
+    } catch (e) { /* no log yet */ }
+    return {
+      nextPage: state.nextPage || null,
+      imported: state.imported || 0,
+      scanned: state.scanned || 0,
+      lastTitle: state.lastNewTitle || '',
+      updatedAt: state.updatedAt || '',
+      ageMinutes: ageMs === null ? null : Math.round(ageMs / 60000),
+      running: ageMs !== null && ageMs < 3 * 60 * 1000,
+      logTail: logTail
+    };
+  } catch (e) {
+    return null;
+  }
+}
 
 router.use(requireAdmin);
 
@@ -285,7 +316,8 @@ router.get('/import', (req, res) => {
     pageTitle: res.locals.t('admin.import'),
     providerList: providers.list(),
     done: req.query.done != null ? parseInt(req.query.done, 10) || 0 : null,
-    skipped: parseInt(req.query.skip, 10) || 0
+    skipped: parseInt(req.query.skip, 10) || 0,
+    bulk: bulkImportStatus()
   });
 });
 

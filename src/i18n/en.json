@@ -262,5 +262,11 @@
   "admin.sortFavorites": "Most favorited",
   "admin.sortComments": "Most commented",
   "admin.sortName": "Title A-Z",
-  "admin.tblFavs": "Favs"
+  "admin.tblFavs": "Favs",
+  "admin.bulkTitle": "Server-side bulk import",
+  "admin.bulkRunning": "running",
+  "admin.bulkIdle": "not running",
+  "admin.bulkNextPage": "next page",
+  "admin.bulkImported": "new games in this run",
+  "admin.bulkUpdated": "updated {t} ago"
 }

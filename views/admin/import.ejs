@@ -1,4 +1,20 @@
 <%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
+<% if (typeof bulk !== 'undefined' && bulk) { %>
+<div class="panel">
+  <h2><%= t('admin.bulkTitle') %>
+    <span class="badge <%= bulk.running ? 'ok' : 'off' %>"><%= bulk.running ? t('admin.bulkRunning') : t('admin.bulkIdle') %></span>
+  </h2>
+  <p class="muted small">
+    <%= t('admin.bulkNextPage') %> <b><%= bulk.nextPage %></b> ·
+    <%= t('admin.bulkImported') %> <b><%= bulk.imported %></b> ·
+    <%= t('admin.bulkUpdated', { t: bulk.ageMinutes === null ? '-' : bulk.ageMinutes + ' min' }) %>
+    <% if (bulk.lastTitle) { %> · <span class="muted"><%= bulk.lastTitle %></span><% } %>
+  </p>
+  <% if (bulk.logTail.length) { %><pre class="log-tail"><%= bulk.logTail.join('\n') %></pre><% } %>
+  <p class="muted small"><%= t('admin.bulkHint') %></p>
+  <pre class="log-tail">sudo docker exec -w /app pixelplay node scripts/import-all.js --start <%= bulk.nextPage %> --delay 5000 --publish</pre>
+</div>
+<% } %>
 <div class="panel">
   <h2><%= t('admin.import') %></h2>
   <% if (done !== null) { %>

@@ -335,6 +335,19 @@ function client() {
   }
   resp = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: 'http://127.0.0.1:9/nope', num: 5, page: 1 });
   ok(resp.status === 302 && resp.location.indexOf('/wyj/import') === 0, 'import preview handles unreachable feed', resp.status + ' ' + resp.location);
+  // the import page surfaces the server-side bulk import cursor so a long run is visible
+  const bulkStateFile = path.join(__dirname, '..', 'data', 'import-all.state.json');
+  const previousBulkState = fs.existsSync(bulkStateFile) ? fs.readFileSync(bulkStateFile, 'utf8') : null;
+  try {
+    fs.mkdirSync(path.dirname(bulkStateFile), { recursive: true });
+    fs.writeFileSync(bulkStateFile, JSON.stringify({ nextPage: 4242, imported: 777, scanned: 9, lastNewTitle: 'Smoke Bulk Title', updatedAt: new Date().toISOString() }));
+    r = await admin.get('/wyj/import');
+    ok(r.status === 200 && r.text.includes('4242') && r.text.includes('777') && r.text.includes('Smoke Bulk Title'), 'admin import page shows the bulk import status', r.status);
+    ok(r.text.includes('--start 4242'), 'admin import page shows the resume command');
+  } finally {
+    if (previousBulkState !== null) fs.writeFileSync(bulkStateFile, previousBulkState);
+    else { try { fs.unlinkSync(bulkStateFile); } catch (e) {} }
+  }
 
   // import preview: auto-scan + auto-dedupe (only not-yet-imported games are shown)
   // housekeeping: drop fixtures left behind by an earlier (interrupted) run so their ids are free again

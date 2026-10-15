@@ -223,4 +223,4 @@ function seed() {
 
 seed();
 
-module.exports = { db, getSetting, setSetting };
+module.exports = { db, getSetting, setSetting, DATA_DIR };

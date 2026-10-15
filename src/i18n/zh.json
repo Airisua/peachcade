@@ -262,5 +262,11 @@
   "admin.sortFavorites": "收藏最多",
   "admin.sortComments": "评论最多",
   "admin.sortName": "标题 A-Z",
-  "admin.tblFavs": "收藏"
+  "admin.tblFavs": "收藏",
+  "admin.bulkTitle": "批量导入（服务器端）",
+  "admin.bulkRunning": "运行中",
+  "admin.bulkIdle": "已停止",
+  "admin.bulkNextPage": "下一页",
+  "admin.bulkImported": "本次新增",
+  "admin.bulkUpdated": "最后更新 {t} 前"
 }
