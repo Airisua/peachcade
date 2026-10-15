@@ -12,6 +12,38 @@ const SORTS = {
   name: 'g.title_en COLLATE NOCASE ASC'
 };
 
+const GAME_SELECT = 'SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh FROM games g LEFT JOIN categories c ON c.slug=g.category ';
+
+function shuffle(list) {
+  const a = list.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+// Homepage "featured" rotation.
+// - admin picked featured games (published only) are shown in a random order, so the
+//   homepage changes on every visit without any admin action;
+// - when nothing is featured yet, fall back to a random mix of the most popular and
+//   best rated published games.
+function featuredRotation(limit) {
+  const want = Math.min(24, Math.max(1, parseInt(limit, 10) || 8));
+  const picked = db.prepare(GAME_SELECT + 'WHERE g.published=1 AND g.featured=1 ORDER BY g.plays DESC, g.id ASC LIMIT 40').all();
+  if (picked.length) return shuffle(picked).slice(0, want);
+  const pool = db.prepare(GAME_SELECT + 'WHERE g.published=1 ORDER BY g.plays DESC, g.id ASC LIMIT 24').all()
+    .concat(db.prepare(GAME_SELECT + 'WHERE g.published=1 ORDER BY g.likes DESC, g.id ASC LIMIT 24').all());
+  const seen = new Set();
+  const uniq = [];
+  for (const g of pool) {
+    if (seen.has(g.id)) continue;
+    seen.add(g.id);
+    uniq.push(g);
+  }
+  return shuffle(uniq).slice(0, want);
+}
+
 function listGames(opt) {
   const o = opt || {};
   const per = Math.min(60, Math.max(1, parseInt(o.per, 10) || 24));
@@ -29,8 +61,8 @@ function listGames(opt) {
   const total = db.prepare('SELECT COUNT(*) n FROM games g ' + w).get(...args).n;
   const pages = Math.max(1, Math.ceil(total / per));
   const page = Math.min(Math.max(1, parseInt(o.page, 10) || 1), pages);
-  const rows = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh FROM games g LEFT JOIN categories c ON c.slug=g.category ' + w + ' ORDER BY ' + order + ' LIMIT ? OFFSET ?').all(...args, per, (page - 1) * per);
+  const rows = db.prepare(GAME_SELECT + w + ' ORDER BY ' + order + ' LIMIT ? OFFSET ?').all(...args, per, (page - 1) * per);
   return { games: rows, total, page, pages };
 }
 
-module.exports = { gt, gd, gh, listGames, SORTS };
+module.exports = { gt, gd, gh, listGames, featuredRotation, shuffle, SORTS };

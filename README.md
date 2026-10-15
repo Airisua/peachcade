@@ -40,10 +40,11 @@ Default accounts (created on first start, change them!):
 
 Useful scripts:
 
-    npm run smoke        # end-to-end HTTP test of the running site (57 checks)
+    npm run smoke        # end-to-end HTTP test of the running site (97 checks)
     npm run check:games  # validate the 5 built-in games (syntax + jsdom boot)
     npm run check:i18n   # verify all translation keys exist in EN and ZH
     npm run check:providers  # unit checks for the game feed parsers
+    npm run reclassify   # dry run: re-sort imported games into the current categories
     npm run reset:db     # delete the SQLite database (re-seeded on next start)
 
 ## Docker deployment (one command)
@@ -84,8 +85,10 @@ database and set new values.
   play", pick a category, set a thumbnail (upload PNG/JPG/WebP/GIF <= 2 MB or
   paste a URL), and set the Embed URL. For a built-in game use the local path
   (/games/<slug>/); for an external game use its iframe URL. Check
-  "Published" to make it visible; "Featured" games appear on the homepage hero
-  and featured row.
+  "Published" to make it visible. The homepage featured row and hero rotate
+  randomly: through the games you marked "Featured" (when at least one is
+  published), otherwise through a random mix of the most popular and best
+  rated games, so the homepage changes on every visit.
 - Ads: /wyj/ads -> add an ad: choose slot, type html (paste an AdSense or
   any ad-network snippet) or image (image URL + link). Toggle enabled/disabled
   per ad; switch all ads off in /wyj/settings (ads_enabled).
@@ -109,6 +112,20 @@ The admin panel includes a feed importer at /wyj/import:
 - Whitelist your domain on the platform: ads and revenue tracking inside
   embedded games are handled by the provider SDK, while your own ad slots keep
   running around the player.
+
+## Categories
+
+- Games are sorted into 14 categories: Puzzle, Arcade, Action, Casual, Skill,
+  Board, Racing, Shooting, Sports, Platformer, Adventure, Simulation, Clicker
+  and Girls. Categories without games are hidden from the navigation
+  automatically.
+- Imported games keep the provider's own category when it is a known genre
+  (Racing, Shooting, Sports, Adventure, Clicker, Girls, ...) and otherwise fall
+  back to genre keywords in the feed tags, so a driving or dress-up game lands
+  on the right shelf without manual work.
+- `npm run reclassify` re-sorts games that were imported before a category
+  existed: it reads the feed again (`--feed-file <dump>` or `--pages N`),
+  prints the planned moves, and writes them with `--apply`.
 
 ## Project structure
 
@@ -157,6 +174,11 @@ PixelPlay 是一个可自托管的多人在线小游戏站（动态渲染，非�
   评论审核、用户管理（角色 / 封禁）、广告管理、站点设置。
 - 广告位：6 个可配置位置，支持 AdSense 等 HTML 代码或图片横幅，未配置时显示占位。
 - 中英文切换：默认英文，页头 / 页脚一键切换中文。
+- 游戏分类：14 个大类（益智 / 街机 / 动作 / 休闲 / 技巧 / 棋牌 / 赛车 / 射击 /
+  体育 / 闯关 / 冒险 / 模拟 / 放置 / 女生），没有游戏的分类自动隐藏；导入游戏时
+  优先采用分发平台自己的分类，其次按标签关键词归类，新分类会持续自动填充。
+- 首页精选：后台勾选「精选」并发布的游戏会随机轮换展示；一个都没设置时，
+  自动从热门榜与好评榜中随机挑选，首页每次刷新都有变化。
 - Docker 一键部署：docker compose up -d --build，含 /healthz 健康检查。
 - 游戏导入：后台「导入游戏」(/wyj/import) 支持从 GameMonetize（免注册可先预览）
   或任意自定义 RSS/JSON 游戏源批量导入，自动去重、默认存草稿；正式接入前请先在

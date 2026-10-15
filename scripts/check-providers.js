@@ -28,7 +28,15 @@ const cats = [
   { slug: 'action', name_en: 'Action' },
   { slug: 'casual', name_en: 'Casual' },
   { slug: 'skill', name_en: 'Skill' },
-  { slug: 'board', name_en: 'Board' }
+  { slug: 'board', name_en: 'Board' },
+  { slug: 'racing', name_en: 'Racing' },
+  { slug: 'shooting', name_en: 'Shooting' },
+  { slug: 'sports', name_en: 'Sports' },
+  { slug: 'platform', name_en: 'Platformer' },
+  { slug: 'adventure', name_en: 'Adventure' },
+  { slug: 'simulation', name_en: 'Simulation' },
+  { slug: 'clicker', name_en: 'Clicker' },
+  { slug: 'girls', name_en: 'Girls' }
 ];
 
 (async function () {
@@ -56,8 +64,21 @@ const cats = [
   }
 
   ok(providers.slugFor('gamemonetize', { title: 'Grave Blast', sourceId: '87711' }) === 'grave-blast-gm-87711', 'slug: deterministic', providers.slugFor('gamemonetize', { title: 'Grave Blast', sourceId: '87711' }));
-  ok(providers.mapCategory('Shooting', cats) === 'action', 'category: shooting -> action');
+  ok(providers.mapCategory('Shooting', cats) === 'shooting', 'category: shooting -> shooting');
   ok(providers.mapCategory('Puzzle', cats) === 'puzzle', 'category: exact name match');
+  ok(providers.mapCategory('Racing', cats) === 'racing', 'category: racing -> racing');
+  ok(providers.mapCategory('Sports', cats) === 'sports', 'category: sports -> sports');
+  ok(providers.mapCategory('Adventure', cats) === 'adventure', 'category: adventure -> adventure');
+  ok(providers.mapCategory('Clicker', cats) === 'clicker', 'category: clicker -> clicker');
+  ok(providers.mapCategory('Puzzle', cats, 'Jumping, Platform, Levels') === 'platform', 'category: tags refine a broad provider pick');
+  ok(providers.mapCategory('Arcade', cats, '1 Player, Car, Driving, Racing, Taxi') === 'racing', 'category: arcade + driving tags -> racing');
+  ok(providers.mapCategory('Hypercasual', cats, 'beauty, Dress Up, Fashion, Girls') === 'girls', 'category: hypercasual dress up -> girls');
+  ok(providers.mapCategory('Arcade', cats, 'Bubble Shooter, Ball, Highscore') === 'arcade', 'category: bubble shooter is not shooting');
+  ok(providers.mapCategory('Shooting', cats, 'Fish, Fishing, Shooter') === 'casual', 'category: fishing shooter -> not shooting');
+  ok(providers.mapCategory('', cats, 'Sniper, First Person Shooter, Shoot') === 'shooting', 'category: tags only -> shooting');
+  ok(providers.mapCategory('', cats, 'Obby, Obstacle, Jumping') === 'platform', 'category: tags only -> platform');
+  ok(providers.mapCategory('', cats, 'Idle, Clicker, Tycoon') === 'clicker', 'category: tags only -> clicker');
+  ok(providers.mapCategory('', cats, 'Soccer, Football, Sport') === 'sports', 'category: tags only -> sports');
   ok(providers.mapCategory('Something Weird', cats) === 'casual', 'category: fallback casual');
   ok(providers.tagsFor('gamemonetize', 'Action, Arcade, Zombie').indexOf('gamemonetize') === 0, 'tags: provider tag first');
 

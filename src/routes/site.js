@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../db');
-const { listGames } = require('../queries');
+const { listGames, featuredRotation } = require('../queries');
 const { requireLogin } = require('../auth');
 const { rateLimit } = require('../ratelimit');
 
@@ -15,7 +15,9 @@ router.get('/', (req, res) => {
   const popular = listGames({ sort: 'popular', per: 8 }).games;
   const newest = listGames({ sort: 'new', per: 8 }).games;
   const topRated = listGames({ sort: 'likes', per: 8 }).games;
-  const featured = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.published=1 AND g.featured=1 ORDER BY g.plays DESC LIMIT 4').all();
+  // random rotation: admin-picked featured games when any are published, otherwise a
+  // random mix of the most popular / best rated games
+  const featured = featuredRotation(8);
   const hero = featured[0] || popular[0] || null;
   let continueList = [];
   if (req.user) {

@@ -113,7 +113,15 @@ const CATEGORIES = [
   ['action', 'Action', '动作', 3],
   ['casual', 'Casual', '休闲', 4],
   ['skill', 'Skill', '技巧', 5],
-  ['board', 'Board', '棋牌', 6]
+  ['board', 'Board', '棋牌', 6],
+  ['racing', 'Racing', '赛车', 7],
+  ['shooting', 'Shooting', '射击', 8],
+  ['sports', 'Sports', '体育', 9],
+  ['platform', 'Platformer', '闯关', 10],
+  ['adventure', 'Adventure', '冒险', 11],
+  ['simulation', 'Simulation', '模拟', 12],
+  ['clicker', 'Clicker', '放置', 13],
+  ['girls', 'Girls', '女生', 14]
 ];
 
 const SEED_GAMES = [

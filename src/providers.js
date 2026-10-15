@@ -197,17 +197,63 @@ function tagsFor(providerName, rawTags) {
   return out.join(',');
 }
 
-function mapCategory(raw, cats) {
-  const c = String(raw || '').toLowerCase().trim();
-  if (!c) return 'casual';
-  for (const row of cats || []) {
-    if (c === String(row.name_en || '').toLowerCase() || c === String(row.slug || '')) return row.slug;
+// Genre keywords, most specific first. Used for both the provider category string and
+// (as a weaker signal) the provider tag list, so new categories keep filling up on import.
+const CATEGORY_RULES = [
+  ['board', /(\bboard\b|\bcards?\b|chess|checkers|mahjong|solitaire|poker|domino|bingo)/],
+  ['puzzle', /(puzzle|logic|\bbrain\b|bubble|matching|match.?3|\bmatch\b|\bsort|\bmerge|number|\bword\b|quiz|jigsaw|hidden|sudoku)/],
+  ['racing', /(racing|drift|kart|\bmoto|motorbike|monstertruck|\btruck|traffic|parking|\bdriving|driver|taxi|supercar|\brally|offroad|car.?tuning|\bcars?\b)/],
+  ['sports', /(sport|soccer|football|basketball|billiard|snooker|\bpool\b|golf|tennis|baseball|boxing|hockey|skate|bowling|rugby|cricket)/],
+  ['platform', /(obby|platform|parkour|obstacle|\bjump|\brunning|\brunner|climb)/],
+  ['shooting', /(sniper|first.?person.?shooter|\bfps\b|\bgun\b|weapon|military|\barmy\b|\bwar\b|combat|\bbattle|csgo|shoot.?em.?up|\bshoot)/],
+  ['clicker', /(clicker|\bidle\b|incremental|tycoon)/],
+  ['simulation', /(simulat|\bsim\b|management|\bbuild|craft|sandbox|minecraft|\bfarm|cooking|\bcook\b|hospital|doctor|dentist|cleaning|\bhouse\b|\bcity\b)/],
+  ['girls', /(\bgirls?\b|dress.?up|fashion|beauty|makeover|coloring|colouring)/],
+  ['action', /(action|fight|brawl|\bbeat\b|zombie|superhero|impostor|attack)/],
+  ['adventure', /(adventure|quest|explor|dungeon|survival|horror|maze|escape)/],
+  ['arcade', /(arcade|retro|classic|highscore|endless)/],
+  ['skill', /(skill|agility|reflex|precision|\baim\b)/]
+];
+
+// Categories a stronger tag signal is allowed to override (broad / catch-all buckets only).
+const REFINABLE = ['arcade', 'casual', 'skill', 'action', 'adventure', 'puzzle'];
+
+function ruleFor(text) {
+  for (const [slug, re] of CATEGORY_RULES) {
+    if (re.test(text)) return slug;
   }
-  if (/(shoot|action|fight|battle|war|adventure|zombie|survival)/.test(c)) return 'action';
-  if (/(puzzle|logic|brain|match|number|word|quiz|escape|hidden)/.test(c)) return 'puzzle';
-  if (/(arcade|retro|classic|platform|runner|clicker|idle)/.test(c)) return 'arcade';
-  if (/(skill|agility|reflex|sport|racing|drift|run|jump|bike|car)/.test(c)) return 'skill';
-  if (/(board|card|chess|tile|mahjong|solitaire|match-3|bubble)/.test(c)) return 'board';
+  return '';
+}
+
+function mapCategory(raw, cats, tags) {
+  const rawCat = String(raw || '').toLowerCase().trim();
+  const rawTags = String(tags || '').toLowerCase().trim();
+  const ctx = rawCat + ' ' + rawTags;
+  // "Bubble Shooter" / fishing games are puzzles & casual games, not shooters
+  const cleanup = (s) => {
+    let t = s.replace(/bubble[\s-]*shoot\w*/g, ' ');
+    if (/bubble|\bfish/.test(ctx)) t = t.replace(/\bshoot\w*|\bsniper\b|\bfps\b|\bgun\b|\bweapons?\b/g, ' ');
+    return t.replace(/[\s_-]+/g, ' ').trim();
+  };
+  const c = cleanup(rawCat);
+  const t = cleanup(rawTags);
+  if (!c && !t) return 'casual';
+  // provider category already matches one of our categories
+  for (const row of cats || []) {
+    const known = c === String(row.slug || '') || c === String(row.name_en || '').toLowerCase();
+    if (!known) continue;
+    if (REFINABLE.indexOf(row.slug) >= 0 && t) {
+      const refined = ruleFor(t);
+      if (refined && refined !== row.slug) return refined;
+    }
+    return row.slug;
+  }
+  const byCategory = ruleFor(c);
+  if (byCategory) return byCategory;
+  const byTags = ruleFor(t);
+  if (byTags) return byTags;
+  // provider "hypercasual" / "boys" / "kids" style buckets without a genre keyword
+  if (/(casual|hypercasual|boys|kids|family|funny|one.?touch|multiplayer|io)/.test(c + ' ' + t)) return 'casual';
   return 'casual';
 }
 

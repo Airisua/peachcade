@@ -68,12 +68,57 @@ function client() {
   ok(r.status === 200 && r.text.includes('Snake Classic'), 'search page', r.status);
   r = await user.get('/category/puzzle');
   ok(r.status === 200 && r.text.includes('Minesweeper'), 'category page', r.status);
+  for (const slug of ['racing', 'shooting', 'sports', 'platform', 'adventure', 'simulation', 'clicker', 'girls']) {
+    r = await user.get('/category/' + slug);
+    ok(r.status === 200, 'category page ' + slug, r.status);
+  }
   r = await user.get('/sitemap.xml');
   ok(r.status === 200 && r.text.includes('<urlset') && r.text.includes('/game/2048'), 'sitemap.xml', r.status);
   r = await user.get('/robots.txt');
   ok(r.status === 200 && r.text.includes('Sitemap:'), 'robots.txt', r.status);
   r = await user.get('/');
   ok(r.text.includes('cat-card'), 'home shows category strip');
+  // homepage featured section: admin picks rotate randomly, and without any admin pick the
+  // section falls back to a random mix of the most popular / best rated games
+  const { db } = require('../src/db');
+  const { featuredRotation } = require('../src/queries');
+  function featuredSlugs(html) {
+    const start = html.indexOf('<h2>Featured</h2>');
+    if (start < 0) return [];
+    const end = html.indexOf('</section>', start);
+    return [...html.slice(start, end === -1 ? html.length : end).matchAll(/\/game\/([a-z0-9-]+)"/g)].map((m) => m[1]);
+  }
+  const originalFeatured = db.prepare('SELECT id FROM games WHERE featured=1').all().map((x) => x.id);
+  const extraFeatured = db.prepare('SELECT id FROM games WHERE published=1 AND featured=0 ORDER BY id LIMIT 3').all().map((x) => x.id);
+  for (const id of extraFeatured) db.prepare('UPDATE games SET featured=1 WHERE id=?').run(id);
+  const featuredSet = db.prepare('SELECT slug FROM games WHERE published=1 AND featured=1').all().map((x) => x.slug);
+  let featuredOnly = true;
+  const featuredOrders = new Set();
+  for (let i = 0; i < 5; i++) {
+    r = await user.get('/');
+    const slugs = featuredSlugs(r.text);
+    if (!slugs.length || slugs.some((s) => featuredSet.indexOf(s) < 0)) featuredOnly = false;
+    featuredOrders.add(slugs.join(','));
+  }
+  ok(featuredOnly, 'featured row only lists published featured games', [...featuredOrders].join(' | '));
+  ok(featuredSet.length < 4 || featuredOrders.size >= 2, 'admin featured picks rotate between visits', [...featuredOrders].join(' | '));
+  db.prepare('UPDATE games SET featured=0').run();
+  try {
+    const pool = db.prepare('SELECT id FROM games WHERE published=1 ORDER BY plays DESC, id ASC LIMIT 24').all()
+      .concat(db.prepare('SELECT id FROM games WHERE published=1 ORDER BY likes DESC, id ASC LIMIT 24').all())
+      .map((x) => x.id);
+    const poolIds = new Set(pool);
+    const picks = featuredRotation(8);
+    ok(picks.length > 0 && picks.every((g) => poolIds.has(g.id)), 'fallback featured picks come from popular + top rated', JSON.stringify(picks.map((g) => g.id)));
+    ok(new Set(picks.map((g) => g.id)).size === picks.length, 'fallback featured picks are unique');
+    const fallbackOrders = new Set();
+    for (let i = 0; i < 4; i++) fallbackOrders.add(featuredRotation(8).map((g) => g.id).join(','));
+    ok(picks.length < 3 || fallbackOrders.size >= 2, 'fallback featured rotation is randomized', [...fallbackOrders].join(' | '));
+    r = await user.get('/');
+    ok(featuredSlugs(r.text).length > 0, 'homepage keeps a featured row when nothing is featured', r.status);
+  } finally {
+    for (const id of originalFeatured) db.prepare('UPDATE games SET featured=1 WHERE id=?').run(id);
+  }
   r = await user.get('/game/2048');
   ok(r.text.includes('og:title') && r.text.includes('rel="canonical"'), 'game page has OG tags + canonical');
   r = await user.get('/game/2048');
@@ -126,6 +171,8 @@ function client() {
   ok(resp.status === 302 && resp.location.indexOf('/wyj/import') === 0, 'import preview handles unreachable feed', resp.status + ' ' + resp.location);
 
   // import preview: auto-scan + auto-dedupe (only not-yet-imported games are shown)
+  // housekeeping: drop fixtures left behind by an earlier (interrupted) run so their ids are free again
+  db.prepare("DELETE FROM games WHERE slug LIKE 'fixture-game-%'").run();
   const fixture = http.createServer((fq, fres) => {
     const u = new URL(fq.url, 'http://127.0.0.1');
     const n = Math.min(48, parseInt(u.searchParams.get('num'), 10) || 24);
@@ -165,10 +212,7 @@ function client() {
   const importedAgain = shownGames.indexOf(1) >= 0 || shownGames.indexOf(2) >= 0;
   ok(!importedAgain, 'imported games no longer appear in the preview');
   // cleanup imported fixtures
-  const cleanupIds = [];
-  const listPage = await admin.get('/wyj/games?q=fixture-game-1-ext');
-  for (const m of listPage.text.matchAll(/name="sel" value="(\d+)"[^>]*>\s*<\/td>[\s\S]{0,900}?<code>(fixture-game-1-ext[^<]+)<\/code>/g)) cleanupIds.push(m[1]);
-  if (cleanupIds.length) await admin.post('/wyj/games/bulk', { _csrf: admin.csrf(), action: 'delete', sel: cleanupIds });
+  db.prepare("DELETE FROM games WHERE slug LIKE 'fixture-game-%'").run();
   fixture.close();
 
   // rate-limited feed (HTTP 429) shows a friendly notice with retry instead of a bare redirect.

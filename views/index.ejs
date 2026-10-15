@@ -36,10 +36,12 @@
     <div class="grid-cards"><% continueList.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
   </section>
   <% } %>
+  <% if (featured.length) { %>
   <section class="section">
     <div class="section-head"><h2><%= t('home.featured') %></h2><a class="see-all" href="/games"><%= t('common.viewAll') %></a></div>
     <div class="grid-cards"><% featured.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
   </section>
+  <% } %>
   <section class="section">
     <div class="section-head"><h2><%= t('home.popular') %></h2><a class="see-all" href="/games?sort=popular"><%= t('common.viewAll') %></a></div>
     <div class="grid-cards"><% popular.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
