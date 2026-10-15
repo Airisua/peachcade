@@ -15,8 +15,9 @@ function categorySamples() {
   if (Date.now() - categorySampleCache.at < CATEGORY_SAMPLE_TTL_MS) return categorySampleCache.map;
   const map = {};
   try {
-    const rows = db.prepare('SELECT c.slug AS slug, (SELECT g.thumb FROM games g WHERE g.category=c.slug AND g.published=1 ORDER BY RANDOM() LIMIT 1) AS thumb FROM categories c').all();
-    for (const r of rows) if (r.thumb) map[r.slug] = r.thumb;
+    // one random published game per category (joined, so slug and thumb always belong together)
+    const rows = db.prepare('SELECT c.slug AS category, g.slug AS slug, g.thumb AS thumb FROM categories c LEFT JOIN games g ON g.id = (SELECT x.id FROM games x WHERE x.category=c.slug AND x.published=1 ORDER BY RANDOM() LIMIT 1)').all();
+    for (const r of rows) if (r.thumb && r.slug) map[r.category] = { slug: r.slug, thumb: r.thumb };
   } catch (e) {
     return categorySampleCache.map;
   }
@@ -37,7 +38,7 @@ function common(req, res, next) {
   };
   const cats = db.prepare('SELECT c.*, (SELECT COUNT(*) FROM games g WHERE g.category=c.slug AND g.published=1) AS n FROM categories c ORDER BY c.sort, c.slug').all();
   const samples = categorySamples();
-  for (const c of cats) c.sample_thumb = (c.n > 0 && samples[c.slug]) || '';
+  for (const c of cats) c.sample_thumb = (c.n > 0 && samples[c.slug]) ? samples[c.slug] : null;
   res.locals.categories = cats;
   res.locals.navCategories = cats.filter((c) => c.n > 0);
   res.locals.adsEnabled = getSetting('ads_enabled', '1') === '1';
@@ -46,6 +47,15 @@ function common(req, res, next) {
   res.locals.gd = (g) => gd(g, lang);
   res.locals.gh = (g) => gh(g, lang);
   res.locals.catName = (c) => (!c ? '' : (lang === 'zh' ? c.name_zh : c.name_en));
+  // thumbnails: provider images are proxied and resized by /thumb/<slug>.<size>.jpg
+  // (see src/thumbs.js); local assets (built-in games, uploads) are served as-is
+  res.locals.thumb = (g, size) => {
+    if (!g) return '';
+    const url = typeof g === 'string' ? String(g) : String(g.thumb || '');
+    const slug = typeof g === 'string' ? '' : g.slug;
+    if (slug && /^https?:\/\//i.test(url)) return '/thumb/' + slug + '.' + (size || 'card') + '.jpg';
+    return url || '/img/games/default.svg';
+  };
   // icon sprite id for a category (falls back to the generic gamepad for new/unknown slugs)
   const CAT_ICONS = ['puzzle', 'arcade', 'action', 'casual', 'skill', 'board', 'racing', 'shooting',
     'sports', 'platform', 'adventure', 'simulation', 'clicker', 'girls'];

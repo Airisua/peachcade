@@ -6,6 +6,7 @@ const { listGames, featuredRotation } = require('../queries');
 const { requireLogin } = require('../auth');
 const { rateLimit } = require('../ratelimit');
 const schemaLd = require('../schema');
+const thumbs = require('../thumbs');
 
 const commentLimiter = rateLimit({ windowMs: 60000, max: 10, scope: 'comment' });
 
@@ -92,6 +93,25 @@ router.get('/search', (req, res) => {
 router.get('/random', (req, res) => {
   const g = db.prepare('SELECT slug FROM games WHERE published=1 ORDER BY RANDOM() LIMIT 1').get();
   res.redirect(g ? '/game/' + g.slug : '/games');
+});
+
+// resized, self-hosted thumbnail (see src/thumbs.js) - falls back to the original image
+router.get('/thumb/:key', async (req, res) => {
+  const m = String(req.params.key || '').match(/^([a-z0-9-]{1,80})\.([a-z]+)\.jpg$/i);
+  const size = m ? thumbs.sizeFor(m[2]) : null;
+  if (!m || !size) return res.status(404).end();
+  const game = db.prepare('SELECT slug, thumb FROM games WHERE slug=?').get(m[1]);
+  if (!game) return res.status(404).end();
+  const source = String(game.thumb || '');
+  if (!/^https?:\/\//i.test(source)) return res.redirect(302, source || '/img/games/default.svg');
+  try {
+    const out = await thumbs.build(source, size);
+    res.set('cache-control', 'public, max-age=31536000, immutable');
+    res.type('image/jpeg');
+    return res.sendFile(out.file);
+  } catch (e) {
+    return res.redirect(302, source);
+  }
 });
 
 router.get('/game/:slug', (req, res, next) => {

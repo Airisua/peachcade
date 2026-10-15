@@ -14,7 +14,7 @@
       </div>
       <div class="muted small"><%= fmt(hero.plays) %> <%= t('game.plays') %> · <%= total %> <%= t('home.totalGames') %></div>
     </div>
-    <a class="hero-art" href="/game/<%= hero.slug %>"><img src="<%= hero.thumb %>" alt="<%= gt(hero) %>"></a>
+    <a class="hero-art" href="/game/<%= hero.slug %>"><img src="<%= thumb(hero, 'hero') %>" alt="<%= gt(hero) %>" decoding="async"></a>
   </section>
   <% } %>
   <% if (navCategories.length) { %>
@@ -25,7 +25,7 @@
       <a class="cat-card" href="/category/<%= c.slug %>">
         <span class="cat-visual">
           <% if (c.sample_thumb) { %>
-          <img class="cat-thumb" src="<%= c.sample_thumb %>" alt="" loading="lazy" decoding="async">
+          <img class="cat-thumb" src="<%= thumb(c.sample_thumb, 'cat') %>" alt="" loading="lazy" decoding="async">
           <% } else { %>
           <svg class="ic cat-icon"><use href="<%= catIcon(c) %>"></use></svg>
           <% } %>

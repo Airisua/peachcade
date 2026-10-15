@@ -163,6 +163,20 @@ function client() {
     r = await user.get('/img/games/' + slug + '.svg');
     ok(r.status === 200 && r.text.includes('<svg'), 'thumb ' + slug, r.status);
   }
+  // thumbnails: built-in games keep their local asset, provider images go through the
+  // resize proxy (or fall back to the original url when the provider is unreachable)
+  r = await user.get('/thumb/2048.card.jpg');
+  ok(r.status === 302 && r.location.indexOf('/img/games/2048.svg') >= 0, 'local thumbnail redirects to the asset', r.status + ' ' + r.location);
+  r = await user.get('/thumb/does-not-exist.card.jpg');
+  ok(r.status === 404, 'unknown thumbnail slug is a 404', r.status);
+  r = await user.get('/thumb/2048.bogus.jpg');
+  ok(r.status === 404, 'unknown thumbnail size is a 404', r.status);
+  r = await user.req('HEAD', '/thumb/grave-blast-gm-87711.card.jpg');
+  ok(r.status === 200 || r.status === 302, 'provider thumbnail is resized (200) or falls back (302)', r.status);
+  r = await user.get('/');
+  ok(/src="\/thumb\/[a-z0-9-]+\.card\.jpg"/.test(r.text), 'cards use the resize proxy');
+  ok(/src="\/thumb\/[a-z0-9-]+\.hero\.jpg"/.test(r.text) || /src="\/img\/games\/[a-z0-9-]+\.svg"/.test(r.text), 'hero image is served locally (proxy or built-in asset)');
+  ok(/src="\/thumb\/[a-z0-9-]+\.cat\.jpg"/.test(r.text), 'category chips use the resize proxy');
   r = await user.get('/api/games?q=snake');
   let j = null;
   try { j = JSON.parse(r.text); } catch (e) {}
