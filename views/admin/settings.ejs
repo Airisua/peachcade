@@ -14,4 +14,25 @@
   </div>
   <div class="form-row"><button class="btn btn-primary" type="submit"><%= t('common.save') %></button></div>
 </form>
+<div class="panel">
+  <h2><%= t('admin.settings_ads_txt') %></h2>
+  <p class="muted small"><%= t('admin.settings_ads_txt_hint') %></p>
+  <form method="post" action="/wyj/settings" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="site_name" value="<%= values.site_name %>">
+    <input type="hidden" name="tagline_en" value="<%= values.tagline_en %>">
+    <input type="hidden" name="tagline_zh" value="<%= values.tagline_zh %>">
+    <input type="hidden" name="footer_text_en" value="<%= values.footer_text_en %>">
+    <input type="hidden" name="footer_text_zh" value="<%= values.footer_text_zh %>">
+    <% if (values.ads_enabled === '1') { %><input type="hidden" name="ads_enabled" value="on"><% } %>
+    <% if (values.registration_open === '1') { %><input type="hidden" name="registration_open" value="on"><% } %>
+    <div class="form-group">
+      <textarea id="ads_txt" name="ads_txt" rows="7" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px"><%= values.ads_txt %></textarea>
+    </div>
+    <div class="form-row">
+      <button class="btn btn-primary" type="submit"><%= t('common.save') %></button>
+      <a class="btn btn-ghost" href="/ads.txt" target="_blank" rel="noopener">/ads.txt</a>
+    </div>
+  </form>
+</div>
 <%- include('../partials/admin_bottom') %>

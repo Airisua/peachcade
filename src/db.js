@@ -174,6 +174,7 @@ function seed() {
     tagline_zh: '即点即玩 · 免费在线小游戏',
     footer_text_en: '',
     footer_text_zh: '',
+    ads_txt: '# GameMonetize publisher ads.txt - replace with the snippet from your publisher dashboard',
     ads_enabled: '1',
     registration_open: '1'
   };

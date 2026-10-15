@@ -229,5 +229,7 @@
   "auth.usernamePlaceholder": "Username or email",
   "auth.passwordPlaceholder": "Enter your password",
   "auth.emailPlaceholder": "name@example.com",
-  "auth.passwordReq": "At least 6 characters"
+  "auth.passwordReq": "At least 6 characters",
+  "admin.settings_ads_txt": "ads.txt content (ad-network verification)",
+  "admin.settings_ads_txt_hint": "Served as plain text at /ads.txt. Paste the ads.txt snippet from your ad network publisher dashboard here."
 }

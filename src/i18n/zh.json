@@ -229,5 +229,7 @@
   "auth.usernamePlaceholder": "请输入用户名或邮箱",
   "auth.passwordPlaceholder": "请输入密码",
   "auth.emailPlaceholder": "name@example.com",
-  "auth.passwordReq": "至少 6 位字符"
+  "auth.passwordReq": "至少 6 位字符",
+  "admin.settings_ads_txt": "ads.txt 内容（广告平台验证）",
+  "admin.settings_ads_txt_hint": "将以纯文本形式发布在 /ads.txt。把广告平台出版商后台提供的 ads.txt 代码粘贴到这里即可。"
 }

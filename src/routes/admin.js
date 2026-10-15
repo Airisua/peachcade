@@ -215,7 +215,7 @@ router.post('/ads/:id/toggle', (req, res) => {
   res.redirect(ADMIN_BASE + '/ads?ok=updated');
 });
 
-const SETTING_KEYS = ['site_name', 'tagline_en', 'tagline_zh', 'footer_text_en', 'footer_text_zh', 'ads_enabled', 'registration_open'];
+const SETTING_KEYS = ['site_name', 'tagline_en', 'tagline_zh', 'footer_text_en', 'footer_text_zh', 'ads_enabled', 'registration_open', 'ads_txt'];
 
 router.get('/settings', (req, res) => {
   const values = {};
@@ -227,8 +227,9 @@ router.post('/settings', (req, res) => {
   if (csrfFail(req, res)) return;
   const b = req.body;
   for (const k of SETTING_KEYS) {
+    if (k === 'ads_txt' && !('ads_txt' in b)) continue; // dedicated form on the same page
     if (k === 'ads_enabled' || k === 'registration_open') setSetting(k, b[k] ? '1' : '0');
-    else setSetting(k, String(b[k] || '').slice(0, 500));
+    else setSetting(k, String(b[k] || '').slice(0, k === 'ads_txt' ? 20000 : 500));
   }
   res.redirect(ADMIN_BASE + '/settings?ok=saved');
 });

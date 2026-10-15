@@ -149,6 +149,12 @@ function client() {
   resp = await admin.post('/wyj/settings', Object.assign({}, baseSettings, { ads_enabled: 'on' }));
   r = await user.get('/');
   ok(r.text.includes('ad-slot-header'), 'ads re-enabled with placeholders', r.status);
+  r = await user.get('/ads.txt');
+  ok(r.status === 200 && r.text.trim().length > 0, 'ads.txt served as text', r.status);
+  resp = await admin.post('/wyj/settings', Object.assign({}, baseSettings, { ads_enabled: 'on', ads_txt: '#GameMonetize.com' }));
+  ok(resp.status === 302, 'ads.txt saved via settings', resp.status);
+  r = await user.get('/ads.txt');
+  ok(r.status === 200 && r.text.trim() === '#GameMonetize.com', 'ads.txt reflects admin content', JSON.stringify(r.text.slice(0, 60)));
   r = await user.get('/healthz');
   ok(r.status === 200 && r.text.indexOf('"ok":true') >= 0, 'healthz endpoint', r.status);
   r = await user.get('/nope-nope');

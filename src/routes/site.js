@@ -116,6 +116,15 @@ router.get('/healthz', (req, res) => {
   res.json({ ok: true, uptime: process.uptime() });
 });
 
+// publisher ads.txt (ad-network authorized sellers) - editable from admin settings
+router.get('/ads.txt', (req, res) => {
+  const { getSetting } = require('../db');
+  const body = String(getSetting('ads_txt', '') || '').trim();
+  res.type('text/plain');
+  if (!body) return res.send('# no ads.txt configured\n');
+  res.send(body + '\n');
+});
+
 router.get('/robots.txt', (req, res) => {
   res.type('text/plain').send('User-agent: *\nAllow: /\nSitemap: ' + res.locals.siteUrl + '/sitemap.xml\n');
 });
