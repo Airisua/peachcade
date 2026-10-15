@@ -6,7 +6,21 @@
 
 const FETCH_TIMEOUT_MS = 20000;
 
+// hosts that recently answered 429 are throttled locally so the admin UI
+// fails fast with a clear notice instead of hammering the provider
+const hostCooldown = new Map();
+const COOLDOWN_MS = 90 * 1000;
+
 async function fetchText(url) {
+  let host = '';
+  try { host = new URL(url).host; } catch (e) { host = ''; }
+  const until = host ? hostCooldown.get(host) : 0;
+  if (until && Date.now() < until) {
+    const err = new Error('HTTP 429 (cooldown)');
+    err.status = 429;
+    throw err;
+  }
+
   async function once() {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -19,6 +33,7 @@ async function fetchText(url) {
       if (!res.ok) {
         const err = new Error('HTTP ' + res.status);
         err.status = res.status;
+        if (res.status === 429 && host) hostCooldown.set(host, Date.now() + COOLDOWN_MS);
         throw err;
       }
       return await res.text();
@@ -29,9 +44,9 @@ async function fetchText(url) {
   try {
     return await once();
   } catch (e) {
-    // a single delayed retry smooths over short throttling bursts
-    if (e && (e.status === 429 || e.status === 408 || (e.status >= 500 && e.status <= 599))) {
-      await new Promise((r) => setTimeout(r, 4000));
+    // one delayed retry smooths over short hiccups (not sustained 429 throttles)
+    if (e && (e.status === 408 || (e.status >= 500 && e.status <= 599))) {
+      await new Promise((r) => setTimeout(r, 2500));
       return await once();
     }
     throw e;
