@@ -1,7 +1,35 @@
 <% if (pages > 1) { %>
-<nav class="pagination">
-  <% if (page > 1) { %><a class="btn btn-ghost btn-sm" href="<%= base %>page=<%= page - 1 %>"><%= t('common.prev') %></a><% } %>
-  <span class="muted small"><%= page %> / <%= pages %></span>
-  <% if (page < pages) { %><a class="btn btn-ghost btn-sm" href="<%= base %>page=<%= page + 1 %>"><%= t('common.next') %></a><% } %>
+<%
+  var win = 2;
+  var from = Math.max(1, page - win);
+  var to = Math.min(pages, page + win);
+%>
+<nav class="pagination" aria-label="pagination">
+  <% if (page > 1) { %>
+  <a class="pg pg-edge" href="<%= base %>page=1" title="<%= t('pager.first') %>">«&nbsp;<span class="pg-label"><%= t('pager.first') %></span></a>
+  <a class="pg" href="<%= base %>page=<%= page - 1 %>" rel="prev" aria-label="<%= t('common.prev') %>">‹</a>
+  <% } else { %>
+  <span class="pg pg-off">«&nbsp;<span class="pg-label"><%= t('pager.first') %></span></span>
+  <span class="pg pg-off">‹</span>
+  <% } %>
+  <% if (from > 1) { %>
+  <a class="pg" href="<%= base %>page=1">1</a>
+  <% if (from > 2) { %><span class="pg-gap">…</span><% } %>
+  <% } %>
+  <% for (var i = from; i <= to; i++) { %>
+  <% if (i === page) { %><span class="pg pg-on" aria-current="page"><%= i %></span><% } else { %><a class="pg" href="<%= base %>page=<%= i %>"><%= i %></a><% } %>
+  <% } %>
+  <% if (to < pages) { %>
+  <% if (to < pages - 1) { %><span class="pg-gap">…</span><% } %>
+  <a class="pg" href="<%= base %>page=<%= pages %>"><%= pages %></a>
+  <% } %>
+  <% if (page < pages) { %>
+  <a class="pg" href="<%= base %>page=<%= page + 1 %>" rel="next" aria-label="<%= t('common.next') %>">›</a>
+  <a class="pg pg-edge" href="<%= base %>page=<%= pages %>" title="<%= t('pager.last') %>"><span class="pg-label"><%= t('pager.last') %></span>&nbsp;»</a>
+  <% } else { %>
+  <span class="pg pg-off">›</span>
+  <span class="pg pg-off"><span class="pg-label"><%= t('pager.last') %></span>&nbsp;»</span>
+  <% } %>
+  <span class="muted small pg-info"><%= page %> / <%= pages %></span>
 </nav>
 <% } %>

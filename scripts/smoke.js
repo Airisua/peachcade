@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 let JSDOM = null, VirtualConsole = null;
 try { const jd = require('jsdom'); JSDOM = jd.JSDOM; VirtualConsole = jd.VirtualConsole; } catch (e) { JSDOM = null; }
+const { db } = require('../src/db');
+const { featuredRotation } = require('../src/queries');
 const BASE = process.env.SMOKE_BASE || ('http://localhost:' + (process.env.PORT || 3000));
 let pass = 0, fail = 0;
 const failures = [];
@@ -68,6 +70,31 @@ function client() {
   ok(r.status === 302, 'lang switch back to en', r.status);
   r = await user.get('/games');
   ok(r.status === 200 && r.text.includes('/game/snake'), 'games listing page', r.status);
+  // pager: sliding window of page numbers plus first/last shortcuts (one partial shared by
+  // the all-games and category listings). Needs more than one page of games, so a few
+  // temporary published fixtures are added for the check and removed afterwards.
+  const pagerIds = [];
+  const pagerIns = db.prepare("INSERT INTO games(slug,title_en,category,thumb,embed_url,source,published) VALUES(?,?,?,?,?,?,1)");
+  for (let i = 1; i <= 26; i++) {
+    pagerIds.push(pagerIns.run('pager-fixture-' + i, 'Pager Fixture ' + i, 'puzzle', '/img/games/default.svg', 'https://example.com/pager/' + i, 'smoke').lastInsertRowid);
+  }
+  try {
+    r = await user.get('/games');
+    ok(r.text.includes('class="pagination"') && r.text.includes('class="pg pg-on" aria-current="page"'), 'pager renders a numbered window', r.status);
+    ok(/href="\/games\?[^"]*page=2"/.test(r.text), 'pager links to the next page');
+    ok(/class="pg pg-edge"/.test(r.text), 'pager has first/last shortcuts');
+    r = await user.get('/games?page=2');
+    ok(r.status === 200 && r.text.includes('aria-current="page">2<'), 'pager marks the current page', r.status);
+    ok(/href="\/games\?[^"]*page=1"/.test(r.text), 'pager links back to page one');
+    r = await user.get('/category/puzzle');
+    ok(r.text.includes('class="pagination"'), 'category listing uses the same pager', r.status);
+    r = await user.get('/lang/zh?next=/games');
+    r = await user.get('/games');
+    ok(/首页/.test(r.text) && /末页/.test(r.text), 'pager shows localised first/last labels');
+    r = await user.get('/lang/en?next=/games');
+  } finally {
+    for (const id of pagerIds) db.prepare('DELETE FROM games WHERE id=?').run(id);
+  }
   r = await user.get('/search?q=snake');
   ok(r.status === 200 && r.text.includes('Snake Classic'), 'search page', r.status);
   r = await user.get('/category/puzzle');
@@ -97,6 +124,10 @@ function client() {
   ok(/<meta name="robots" content="noindex">/.test(r.text), 'search results are noindex');
   r = await user.get('/sitemap.xml');
   ok(r.status === 200 && r.text.includes('<urlset') && r.text.includes('/game/2048'), 'sitemap.xml', r.status);
+  const sitemapUrls = (r.text.match(/<url>/g) || []).length;
+  const publishedGames = db.prepare('SELECT COUNT(*) n FROM games WHERE published=1').get().n;
+  const categoryRows = db.prepare('SELECT COUNT(*) n FROM categories').get().n;
+  ok(sitemapUrls === Math.min(publishedGames, 45000) + categoryRows + 3, 'sitemap lists every published game', sitemapUrls + ' of ' + (publishedGames + categoryRows + 3));
   r = await user.get('/robots.txt');
   ok(r.status === 200 && r.text.includes('Sitemap:'), 'robots.txt', r.status);
   r = await user.get('/');
@@ -114,8 +145,6 @@ function client() {
   ok(r.text.includes('cat-thumb') && r.text.includes('cat-glyph'), 'category cards show a game cover + category glyph');
   // homepage featured section: admin picks rotate randomly, and without any admin pick the
   // section falls back to a random mix of the most popular / best rated games
-  const { db } = require('../src/db');
-  const { featuredRotation } = require('../src/queries');
   function featuredSlugs(html) {
     const start = html.indexOf('<h2>Featured</h2>');
     if (start < 0) return [];

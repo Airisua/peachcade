@@ -250,5 +250,7 @@
   "admin.importContinue": "继续扫描",
   "admin.importNoNew": "扫描的页面中没有发现新游戏（都已在库中）。",
   "seo.category": "{name}小游戏 - 免费在线玩，点开即玩",
-  "seo.allGames": "{site} 全部免费在线小游戏 - 打开即玩，无需下载"
+  "seo.allGames": "{site} 全部免费在线小游戏 - 打开即玩，无需下载",
+  "pager.first": "首页",
+  "pager.last": "末页"
 }

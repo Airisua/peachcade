@@ -193,7 +193,9 @@ router.get('/robots.txt', (req, res) => {
 });
 
 router.get('/sitemap.xml', (req, res) => {
-  const games = db.prepare('SELECT slug, created_at FROM games WHERE published=1 ORDER BY id DESC LIMIT 2000').all();
+  // Well under the 50k urls / 50 MB limit Google allows per sitemap file, but high enough
+  // that a large imported catalogue never silently drops games out of the sitemap.
+  const games = db.prepare('SELECT slug, created_at FROM games WHERE published=1 ORDER BY id DESC LIMIT 45000').all();
   const cats = db.prepare('SELECT slug FROM categories ORDER BY sort').all();
   const urls = [
     { loc: '/', pri: '1.0' },

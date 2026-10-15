@@ -250,5 +250,7 @@
   "admin.importContinue": "Scan for more",
   "admin.importNoNew": "Nothing new found in the scanned pages (everything there is already imported).",
   "seo.category": "Free {name} games - play online in your browser",
-  "seo.allGames": "All free online games on {site} - play instantly, no download"
+  "seo.allGames": "All free online games on {site} - play instantly, no download",
+  "pager.first": "First",
+  "pager.last": "Last"
 }
