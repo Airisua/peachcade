@@ -1,5 +1,9 @@
 'use strict';
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
+let JSDOM = null, VirtualConsole = null;
+try { const jd = require('jsdom'); JSDOM = jd.JSDOM; VirtualConsole = jd.VirtualConsole; } catch (e) { JSDOM = null; }
 const BASE = process.env.SMOKE_BASE || ('http://localhost:' + (process.env.PORT || 3000));
 let pass = 0, fail = 0;
 const failures = [];
@@ -166,6 +170,38 @@ function client() {
   for (const p of ['/wyj', '/wyj/games', '/wyj/import', '/wyj/users', '/wyj/comments', '/wyj/ads', '/wyj/settings']) {
     r = await admin.get(p);
     ok(r.status === 200, 'admin page ' + p, r.status);
+  }
+  // admin bulk selection: the row checkboxes are tied to the bulk form with the HTML5
+  // form="..." attribute (they live outside the <form> element), so "select all" and the
+  // bulk buttons must resolve the form owner instead of querying inside the form element
+  r = await admin.get('/wyj/games');
+  ok(r.status === 200 && r.text.indexOf('data-check-all') >= 0 && r.text.indexOf('name="sel"') >= 0, 'admin games list has select-all + row checkboxes', r.status);
+  if (JSDOM) {
+    const dom = new JSDOM(r.text, { runScripts: 'outside-only', url: BASE + '/wyj/games', virtualConsole: new VirtualConsole() });
+    dom.window.eval(fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'main.js'), 'utf8'));
+    const doc = dom.window.document;
+    const rows = Array.prototype.slice.call(doc.querySelectorAll('input[name="sel"]'));
+    const master = doc.querySelector('[data-check-all]');
+    const bulkBtn = doc.querySelector('.bulk-actions button[value="publish"]');
+    const bump = () => new dom.window.Event('change', { bubbles: true });
+    const click = () => new dom.window.MouseEvent('click', { bubbles: true, cancelable: true });
+    master.checked = true;
+    master.dispatchEvent(bump());
+    ok(rows.length > 0 && rows.every((cb) => cb.checked), 'admin select-all ticks every row checkbox', rows.filter((cb) => cb.checked).length + '/' + rows.length);
+    ok(doc.querySelector('#bulk-count').textContent === String(rows.length), 'bulk counter follows select-all', doc.querySelector('#bulk-count').textContent);
+    rows[0].checked = false;
+    rows[0].dispatchEvent(bump());
+    ok(master.checked === false && master.indeterminate === true, 'master shows a partial selection after one row is cleared');
+    master.checked = false;
+    master.dispatchEvent(bump());
+    ok(rows.every((cb) => !cb.checked) && doc.querySelector('#bulk-count').textContent === '0', 'select-all can clear the selection', doc.querySelector('#bulk-count').textContent);
+    ok(!bulkBtn.dispatchEvent(click()), 'bulk action is blocked while nothing is selected');
+    master.checked = true;
+    master.dispatchEvent(bump());
+    ok(bulkBtn.dispatchEvent(click()), 'bulk action submits once rows are selected');
+    dom.window.close();
+  } else {
+    ok(true, 'admin select-all DOM check skipped (jsdom not installed)');
   }
   resp = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: 'http://127.0.0.1:9/nope', num: 5, page: 1 });
   ok(resp.status === 302 && resp.location.indexOf('/wyj/import') === 0, 'import preview handles unreachable feed', resp.status + ' ' + resp.location);

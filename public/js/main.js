@@ -88,33 +88,51 @@
     });
   });
 
+  // Bulk selection. On the games list the row checkboxes live *outside* the bulk <form> and
+  // are tied to it with the HTML5 form="..." attribute, so they must be resolved through the
+  // form owner (querying inside the form element finds nothing there).
+  function ownerForm(el) {
+    var id = el.getAttribute && el.getAttribute('form');
+    if (id) {
+      var linked = document.getElementById(id);
+      if (linked) return linked;
+    }
+    return el.form || el.closest('form');
+  }
+  function selectionBoxes(form) {
+    return $$('input[name="sel"]').filter(function (cb) { return !form || ownerForm(cb) === form; });
+  }
+  function updateBulkCount(form) {
+    var boxes = selectionBoxes(form);
+    var el = $('#bulk-count');
+    if (el) el.textContent = String(boxes.filter(function (cb) { return cb.checked; }).length);
+    $$('[data-check-all]').forEach(function (master) {
+      if (form && ownerForm(master) !== form) return;
+      var rows = selectionBoxes(ownerForm(master)).filter(function (cb) { return !cb.disabled; });
+      if (!rows.length) return;
+      var checked = rows.filter(function (cb) { return cb.checked; }).length;
+      master.checked = checked === rows.length;
+      master.indeterminate = checked > 0 && checked < rows.length;
+    });
+  }
   $$('[data-check-all]').forEach(function (master) {
     master.addEventListener('change', function () {
-      var form = master.form || master.closest('form');
-      var scope = form || document;
-      $$('input[name="sel"]', scope).forEach(function (cb) {
-        if (form && cb.form !== form) return;
+      var form = ownerForm(master);
+      selectionBoxes(form).forEach(function (cb) {
         if (!cb.disabled) cb.checked = master.checked;
       });
       updateBulkCount(form);
     });
   });
-
-  function updateBulkCount(form) {
-    var el = $('#bulk-count');
-    if (!el) return;
-    var scope = form || document;
-    var cbs = $$('input[name="sel"]:checked', scope);
-    if (form) cbs = cbs.filter(function (cb) { return cb.form === form; });
-    el.textContent = String(cbs.length);
-  }
   $$('input[name="sel"]').forEach(function (cb) {
-    cb.addEventListener('change', function () { updateBulkCount(cb.form || cb.closest('form')); });
+    cb.addEventListener('change', function () { updateBulkCount(ownerForm(cb)); });
   });
+  // counter / master state on load (the import preview starts with every importable row checked)
+  $$('[data-check-all]').forEach(function (master) { updateBulkCount(ownerForm(master)); });
   $$('.bulk-actions button').forEach(function (btn) {
     btn.addEventListener('click', function (e) {
-      var form = btn.form || btn.closest('form') || $('#' + btn.getAttribute('form'));
-      var count = form ? $$('input[name="sel"]:checked', form).filter(function (cb) { return cb.form === form; }).length : 0;
+      var form = ownerForm(btn);
+      var count = form ? selectionBoxes(form).filter(function (cb) { return cb.checked; }).length : 0;
       if (count === 0) {
         e.preventDefault();
         toast(I18N.bulkNone || 'Select at least one item first.');
