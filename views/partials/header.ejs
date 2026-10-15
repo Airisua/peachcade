@@ -1,14 +1,14 @@
 <header class="site-header">
   <div class="container header-inner">
     <a class="logo" href="/">
-      <svg class="ic ic-logo" aria-hidden="true"><use href="/img/icons.svg#i-gamepad"></use></svg>
+      <svg class="ic ic-logo" aria-hidden="true"><use href="/img/icons.svg?v=<%= assetV %>#i-gamepad"></use></svg>
       <span><%= site.name %></span>
     </a>
     <nav class="main-nav">
       <a href="/" class="<%= path === '/' ? 'active' : '' %>"><%= t('nav.home') %></a>
       <a href="/games" class="<%= path.indexOf('/games') === 0 || path.indexOf('/category') === 0 ? 'active' : '' %>"><%= t('nav.games') %></a>
       <details class="dropdown">
-        <summary><%= t('nav.categories') %><svg class="ic"><use href="/img/icons.svg#i-chevron"></use></svg></summary>
+        <summary><%= t('nav.categories') %><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-chevron"></use></svg></summary>
         <div class="dropdown-panel">
           <% navCategories.forEach(function (c) { %>
           <a href="/category/<%= c.slug %>"><span><%= catName(c) %></span><b><%= c.n %></b></a>
@@ -18,22 +18,22 @@
       </details>
     </nav>
     <form class="searchbox" action="/search" method="get" autocomplete="off">
-      <svg class="ic"><use href="/img/icons.svg#i-search"></use></svg>
+      <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-search"></use></svg>
       <input id="nav-search" name="q" placeholder="<%= t('nav.searchPlaceholder') %>" value="<%= typeof q !== 'undefined' ? q : '' %>">
       <div class="suggest" id="search-suggest"></div>
     </form>
     <div class="header-actions">
       <a class="lang-switch" href="/lang/<%= otherLang %>?next=<%= encodeURIComponent(path) %>" title="<%= t('nav.language') %>">
-        <svg class="ic"><use href="/img/icons.svg#i-globe"></use></svg><%= otherLang === 'zh' ? '中文' : 'EN' %>
+        <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-globe"></use></svg><%= otherLang === 'zh' ? '中文' : 'EN' %>
       </a>
       <% if (user) { %>
       <details class="dropdown usermenu">
         <summary class="avatar" title="<%= user.username %>"><%= user.username.charAt(0).toUpperCase() %></summary>
         <div class="dropdown-panel">
           <div class="menu-head"><b><%= user.username %></b><small><%= user.email %></small></div>
-          <a href="/profile"><svg class="ic"><use href="/img/icons.svg#i-user"></use></svg><%= t('nav.profile') %></a>
-          <% if (user.role === 'admin') { %><a href="/wyj"><svg class="ic"><use href="/img/icons.svg#i-shield"></use></svg><%= t('nav.admin') %></a><% } %>
-          <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrf %>"><button type="submit" class="linklike"><svg class="ic"><use href="/img/icons.svg#i-logout"></use></svg><%= t('nav.logout') %></button></form>
+          <a href="/profile"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-user"></use></svg><%= t('nav.profile') %></a>
+          <% if (user.role === 'admin') { %><a href="/wyj"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-shield"></use></svg><%= t('nav.admin') %></a><% } %>
+          <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrf %>"><button type="submit" class="linklike"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-logout"></use></svg><%= t('nav.logout') %></button></form>
         </div>
       </details>
       <% } else { %>

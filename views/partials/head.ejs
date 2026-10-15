@@ -6,8 +6,8 @@
 <title><%= (typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle + ' · ' + site.name : site.name + ' · ' + site.tagline %></title>
 <meta name="description" content="<%= site.tagline %>">
 <link rel="icon" href="/favicon.svg">
-<link rel="stylesheet" href="/css/style.css">
-<% if (typeof adminCss !== 'undefined' && adminCss) { %><link rel="stylesheet" href="/css/admin.css"><% } %>
+<link rel="stylesheet" href="/css/style.css?v=<%= assetV %>">
+<% if (typeof adminCss !== 'undefined' && adminCss) { %><link rel="stylesheet" href="/css/admin.css?v=<%= assetV %>"><% } %>
 <meta name="robots" content="<%= (typeof noindex !== 'undefined' && noindex) ? 'noindex' : 'index' %>">
 <% var _ogTitle = (typeof ogTitle !== 'undefined' && ogTitle) ? ogTitle : ((typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle : site.name); %>
 <% var _ogImg = (typeof ogImage !== 'undefined' && ogImage) ? (String(ogImage).indexOf('http') === 0 ? ogImage : siteUrl + ogImage) : ''; %>

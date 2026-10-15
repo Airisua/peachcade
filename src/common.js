@@ -1,6 +1,7 @@
 'use strict';
 const { db, getSetting } = require('./db');
 const { gt, gd, gh } = require('./queries');
+const { ASSET_VERSION } = require('./assets');
 
 const OK_CODES = ['saved', 'created', 'updated', 'deleted', 'password', 'comment', 'login', 'registered'];
 const ERR_CODES = ['commentEmpty', 'commentLong', 'wrongPassword', 'slugTaken', 'fileType', 'fileTooBig', 'badRequest', 'notFound', 'forbidden', 'registrationClosed', 'importFailed'];
@@ -8,6 +9,7 @@ const ERR_CODES = ['commentEmpty', 'commentLong', 'wrongPassword', 'slugTaken', 
 function common(req, res, next) {
   const lang = req.lang;
   res.locals.path = req.path;
+  res.locals.assetV = ASSET_VERSION;
   res.locals.year = new Date().getFullYear();
   res.locals.siteUrl = String(process.env.SITE_URL || (req.protocol + '://' + (req.get('host') || 'localhost'))).replace(/\/+$/, '');
   res.locals.site = {

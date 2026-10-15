@@ -1,7 +1,7 @@
 <footer class="site-footer">
   <div class="container footer-grid">
     <div>
-      <div class="logo"><svg class="ic ic-logo"><use href="/img/icons.svg#i-gamepad"></use></svg><span><%= site.name %></span></div>
+      <div class="logo"><svg class="ic ic-logo"><use href="/img/icons.svg?v=<%= assetV %>#i-gamepad"></use></svg><span><%= site.name %></span></div>
       <p class="muted"><%= site.tagline %></p>
       <% if (site.footerText) { %><p class="muted small"><%= site.footerText %></p><% } %>
     </div>
@@ -28,6 +28,6 @@
     <span class="muted"><%= t('footer.builtWith') %></span>
   </div>
 </footer>
-<script src="/js/main.js" defer></script>
+<script src="/js/main.js?v=<%= assetV %>" defer></script>
 </body>
 </html>

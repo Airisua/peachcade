@@ -1,7 +1,7 @@
 <%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
 <div class="toolbar">
-  <form class="searchbox small" action="/wyj/games" method="get"><svg class="ic"><use href="/img/icons.svg#i-search"></use></svg><input name="q" value="<%= q %>" placeholder="<%= t('nav.searchPlaceholder') %>"></form>
-  <a class="btn btn-primary" href="/wyj/games/new"><svg class="ic"><use href="/img/icons.svg#i-plus"></use></svg><%= t('admin.newGame') %></a>
+  <form class="searchbox small" action="/wyj/games" method="get"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-search"></use></svg><input name="q" value="<%= q %>" placeholder="<%= t('nav.searchPlaceholder') %>"></form>
+  <a class="btn btn-primary" href="/wyj/games/new"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-plus"></use></svg><%= t('admin.newGame') %></a>
 </div>
 <div class="toolbar bulkbar">
   <span class="muted small"><%= t('admin.bulkHint') %><b id="bulk-count">0</b></span>

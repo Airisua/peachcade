@@ -82,6 +82,11 @@ function client() {
   ok(r.status === 200 && r.text.includes('Sitemap:'), 'robots.txt', r.status);
   r = await user.get('/');
   ok(r.text.includes('cat-card'), 'home shows category strip');
+  // every static asset URL carries ?v=<hash> so a CDN / browser cache can never serve the
+  // previous build after a release
+  ok(/\/css\/style\.css\?v=[0-9a-f]{6,}/.test(r.text), 'stylesheet url is versioned');
+  ok(/\/js\/main\.js\?v=[0-9a-f]{6,}/.test(r.text), 'script url is versioned');
+  ok(/\/img\/icons\.svg\?v=[0-9a-f]{6,}#i-/.test(r.text), 'icon sprite url is versioned');
   // homepage featured section: admin picks rotate randomly, and without any admin pick the
   // section falls back to a random mix of the most popular / best rated games
   const { db } = require('../src/db');

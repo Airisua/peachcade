@@ -11,6 +11,7 @@ const { i18nMiddleware } = require('./src/i18n');
 const { loadUser } = require('./src/auth');
 const { csrfMiddleware, csrfGuard } = require('./src/csrf');
 const common = require('./src/common');
+const { ASSET_VERSION } = require('./src/assets');
 
 const siteRouter = require('./src/routes/site');
 const authRouter = require('./src/routes/auth');
@@ -27,6 +28,8 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
+// cache-busting token for /css + /js + the icon sprite (see src/assets.js)
+app.locals.assetV = ASSET_VERSION;
 
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(morgan('tiny'));

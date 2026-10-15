@@ -2,13 +2,13 @@
   <div class="thumb">
     <img src="<%= g.thumb %>" alt="<%= gt(g) %>" loading="lazy">
     <% if (g.cat_en) { %><span class="chip chip-abs"><%= lang === 'zh' ? (g.cat_zh || g.cat_en) : g.cat_en %></span><% } %>
-    <span class="play-badge"><svg class="ic"><use href="/img/icons.svg#i-play"></use></svg></span>
+    <span class="play-badge"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-play"></use></svg></span>
   </div>
   <div class="meta">
     <div class="title"><%= gt(g) %></div>
     <div class="sub">
-      <span><svg class="ic"><use href="/img/icons.svg#i-play"></use></svg><%= fmt(g.plays) %></span>
-      <span><svg class="ic"><use href="/img/icons.svg#i-heart"></use></svg><%= fmt(g.likes) %></span>
+      <span><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-play"></use></svg><%= fmt(g.plays) %></span>
+      <span><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-heart"></use></svg><%= fmt(g.likes) %></span>
     </div>
   </div>
 </a>
