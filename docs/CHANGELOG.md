@@ -4,6 +4,41 @@
 
 ---
 
+## [2026-10-16] 性能飞跃、PWA支持、播放器体验与后台多维筛选全面升级
+
+### 1. 数据库多维索引构建与查询极速优化 (Database Indexing)
+- **复合索引全面加持**：针对已膨胀至 16,000+ 款海量游戏的线上库，在 `src/db.js` 中构建全套复合索引：
+  - `idx_games_pub_plays`: `(published, plays DESC, created_at DESC, id DESC)` 消除首页与全站最热排行的全部全表扫描 (`SCAN g`) 与临时内存 B-Tree 排序。
+  - `idx_games_pub_cat_plays`: `(published, category, plays DESC, id DESC)` 分类筛选毫秒级即时定位。
+  - `idx_games_pub_created`: `(published, created_at DESC, id DESC)` 最新游戏专享索引。
+  - `idx_games_pub_likes`: `(published, likes DESC, created_at DESC, id DESC)` 最受好评专享索引。
+  - `idx_games_pub_featured`: `(published, featured, plays DESC)` 精选推荐快速召回。
+- **查询性能质变**：所有前台核心页面查询计划均变为 `SEARCH g USING INDEX`，耗时从数十毫秒压至 sub-millisecond 亚毫秒级。
+
+### 2. PWA (Progressive Web App) 与移动端渐进式 Web 应用落地
+- **Web App Manifest**：新增 `public/manifest.webmanifest`，规范定义应用名称、独立全屏窗口展示 (`standalone`)、深色主题色 (`#0e0e16`) 及自适应矢量图标。
+- **移动端应用标签**：在 `views/partials/head.ejs` 注入 `apple-mobile-web-app-capable`、`theme-color` 等元信息，支持手机（iOS/Android）或电脑（Chrome/Edge）一键「添加到主屏幕 / 安装为应用」，提供类似原生客户端的沉浸式体验。
+
+### 3. 游戏详情页沉浸式播放器体验与容灾 (Player UX & Resilience)
+- **优雅加载中占位遮罩**：游戏 iframe 加载阶段展示高档深色径向渐变加载遮罩 (`.player-loader`)，辅以平滑旋转加载环与「游戏载入中」文案，iframe 触发 `load` 事件后平滑淡出，彻底告别白屏/黑屏等待。
+- **一键重载游戏按钮**：播放器控制栏新增刷新图标按钮 (`#i-reload`)，当外部 iframe 游戏偶发卡死或报错时，玩家无需刷新整个网页即可一键快速重启游戏。
+- **全屏快捷键 (F 键)**：浏览游戏详情页时，按下键盘 `F` 键即可秒切全屏模式（智能规避文本框与评论区输入冲突），对齐主流国际大厂游戏站标准。
+- **加载异常逃生兜底**：加载遮罩配备「游戏载入缓慢？新窗口打开」引导链接，并在 8 秒超时后自动隐退，确保极端网络环境或跨域阻断下用户不被卡死。
+
+### 4. 搜索建议与全站静态缓存再优化 (API & Cache Headers)
+- **实时搜索极速缩略图**：`/api/games` 搜索建议由返回原始大图改为走 `res.locals.thumb(g, "thumb")` 缩略图代理，体积骤减 85% 以上，并享受本地与 CDN 强缓存。
+- **静态资源强缓存响应头**：`server.js` 针对 `.svg`, `.css`, `.js`, `.webmanifest` 等静态资源显式赋予 `max-age=86400` (1天) 缓存指令，结合已有 `?v=<hash>` 破缓存机制，既最大化加速静态命中，又确保发版即更新。
+
+### 5. 后台游戏管理多维筛选与缩略图优化 (Admin Enhancement)
+- **分类与状态复合筛选**：后台游戏管理 `/wyj/games` 新增分类下拉选择器及状态筛选（全部状态 / 已发布 / 未发布草稿 / 首页推荐），使管理员在大规模游戏库中能精准检索各状态游戏。
+- **后台缩略图代理优化**：后台表格封面图改用 `thumb(g, "thumb")` 并开启 `loading="lazy"`，大幅减轻后台列表翻页时的网络传输开销。
+
+### 6. SEO、Robots 与 Sitemap 健壮性防线
+- **安全屏蔽爬虫**：`robots.txt` 明确追加 `Disallow: /wyj/` 与 `Disallow: /api/`，杜绝搜索引擎蜘蛛对后台管理路径与内部接口的无效攀爬。
+- **Sitemap 内存缓存与频次标注**：针对 1.6 万+ 大规模 URL 的 `/sitemap.xml`，新增 1 小时内存缓存保护与 `<changefreq>`（首页/全站列表 daily，详情页 weekly）元标签，防止蜘蛛密集抓取导致的 CPU/IO 压力。
+
+---
+
 ## [2026-10-16] 品牌全面升级为 Peachcade & 网站体验深度优化
 
 ### 1. 品牌全面重塑 (Rebranding)

@@ -132,7 +132,9 @@ function client() {
   const categoryRows = db.prepare('SELECT COUNT(*) n FROM categories').get().n;
   ok(sitemapUrls === Math.min(publishedGames, 45000) + categoryRows + 3, 'sitemap lists every published game', sitemapUrls + ' of ' + (publishedGames + categoryRows + 3));
   r = await user.get('/robots.txt');
-  ok(r.status === 200 && r.text.includes('Sitemap:'), 'robots.txt', r.status);
+  ok(r.status === 200 && r.text.includes('Sitemap:') && r.text.includes('Disallow: /wyj/'), 'robots.txt guards admin and references sitemap', r.status);
+  r = await user.get('/manifest.webmanifest');
+  ok(r.status === 200 && r.text.includes('Peachcade'), 'manifest.webmanifest served as PWA app config', r.status);
   r = await user.get('/');
   ok(r.text.includes('cat-card'), 'home shows category strip');
   // every static asset URL carries ?v=<hash> so a CDN / browser cache can never serve the

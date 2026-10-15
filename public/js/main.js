@@ -88,6 +88,41 @@
     });
   });
 
+  // Player loader & reload & keyboard shortcuts
+  var frame = $("#game-frame");
+  var loader = $("#player-loader");
+  if (frame && loader) {
+    frame.addEventListener("load", function () {
+      loader.classList.add("loaded");
+    });
+    setTimeout(function () { if (loader) loader.classList.add("loaded"); }, 8000);
+  }
+
+  $$('[data-reload]').forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var target = $(btn.getAttribute("data-reload"));
+      if (!target) return;
+      if (loader) loader.classList.remove("loaded");
+      var src = target.src;
+      target.src = "";
+      setTimeout(function () { target.src = src; }, 50);
+    });
+  });
+
+  var pBox = $("#player-box");
+  if (pBox) {
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "f" || e.key === "F") {
+        var tag = (document.activeElement && document.activeElement.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA" || (document.activeElement && document.activeElement.isContentEditable)) return;
+        e.preventDefault();
+        if (document.fullscreenElement) document.exitFullscreen();
+        else if (pBox.requestFullscreen) pBox.requestFullscreen();
+      }
+    });
+  }
+
+
   // selects that submit their form on change (admin listing sort switch)
   $$('[data-autosubmit]').forEach(function (el) {
     el.addEventListener('change', function () { if (el.form) el.form.submit(); });

@@ -268,5 +268,14 @@
   "admin.bulkIdle": "not running",
   "admin.bulkNextPage": "next page",
   "admin.bulkImported": "new games in this run",
-  "admin.bulkUpdated": "updated {t} ago"
+  "admin.bulkUpdated": "updated {t} ago",
+  "common.allCategories": "All categories",
+  "admin.filterStatus": "Status",
+  "admin.statusAll": "All status",
+  "admin.statusPublished": "Published",
+  "admin.statusUnpublished": "Drafts / Hidden",
+  "admin.statusFeatured": "Featured",
+  "game.loading": "Loading game...",
+  "game.reload": "Reload game",
+  "game.trouble": "Game taking too long?"
 }

@@ -3,6 +3,18 @@
   <form class="searchbox small" action="/wyj/games" method="get">
     <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-search"></use></svg>
     <input name="q" value="<%= q %>" placeholder="<%= t('nav.searchPlaceholder') %>">
+    <select name="category" class="select-sm" data-autosubmit title="<%= t('list.category') %>">
+      <option value=""><%= t('common.allCategories') %></option>
+      <% categories.forEach(function (c) { %>
+      <option value="<%= c.slug %>" <%= (typeof category !== 'undefined' && category === c.slug) ? 'selected' : '' %>><%= catName(c) %></option>
+      <% }); %>
+    </select>
+    <select name="status" class="select-sm" data-autosubmit title="<%= t('admin.filterStatus') %>">
+      <option value="all" <%= (typeof status === 'undefined' || status === 'all') ? 'selected' : '' %>><%= t('admin.statusAll') %></option>
+      <option value="published" <%= (typeof status !== 'undefined' && status === 'published') ? 'selected' : '' %>><%= t('admin.statusPublished') %></option>
+      <option value="unpublished" <%= (typeof status !== 'undefined' && status === 'unpublished') ? 'selected' : '' %>><%= t('admin.statusUnpublished') %></option>
+      <option value="featured" <%= (typeof status !== 'undefined' && status === 'featured') ? 'selected' : '' %>><%= t('admin.statusFeatured') %></option>
+    </select>
     <select name="sort" class="select-sm" data-autosubmit title="<%= t('admin.sortBy') %>">
       <option value="new" <%= sort === 'new' ? 'selected' : '' %>><%= t('admin.sortNew') %></option>
       <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>><%= t('admin.sortOldest') %></option>
@@ -50,7 +62,7 @@
   <tr>
     <td><input type="checkbox" name="sel" value="<%= g.id %>" form="bulk-form"></td>
     <td><%= g.id %></td>
-    <td><img class="tbl-thumb" src="<%= g.thumb %>" alt=""></td>
+    <td><img class="tbl-thumb" src="<%= thumb(g, 'thumb') %>" alt="" loading="lazy"></td>
     <td><%= g.title_en %><% if (g.title_zh) { %><br><small class="muted"><%= g.title_zh %></small><% } %></td>
     <td><code><%= g.slug %></code></td>
     <td><%= g.category %></td>

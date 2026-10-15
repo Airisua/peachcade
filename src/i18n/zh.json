@@ -268,5 +268,14 @@
   "admin.bulkIdle": "已停止",
   "admin.bulkNextPage": "下一页",
   "admin.bulkImported": "本次新增",
-  "admin.bulkUpdated": "最后更新 {t} 前"
+  "admin.bulkUpdated": "最后更新 {t} 前",
+  "common.allCategories": "全部分类",
+  "admin.filterStatus": "状态",
+  "admin.statusAll": "全部状态",
+  "admin.statusPublished": "已发布",
+  "admin.statusUnpublished": "未发布/草稿",
+  "admin.statusFeatured": "推荐",
+  "game.loading": "游戏载入中...",
+  "game.reload": "重新载入游戏",
+  "game.trouble": "游戏载入缓慢？"
 }

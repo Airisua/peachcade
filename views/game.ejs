@@ -17,12 +17,18 @@
   </div>
   <div class="player-wrap">
     <div class="player-box" id="player-box">
+      <div class="player-loader" id="player-loader">
+        <div class="player-spinner"></div>
+        <span class="player-loader-text"><%= t('game.loading') %></span>
+        <a class="player-loader-fallback small muted" href="<%= game.embed_url %>" target="_blank" rel="noopener"><%= t('game.trouble') %> <%= t('game.newTab') %></a>
+      </div>
       <iframe id="game-frame" src="<%= game.embed_url %>" title="<%= gt(game) %>" allowfullscreen sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups allow-orientation-lock"></iframe>
     </div>
     <div class="player-bar">
       <button class="btn btn-icon <%= liked ? 'on' : '' %>" id="like-btn" data-like="<%= game.id %>" title="<%= t('game.like') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-heart"></use></svg><span class="n"><%= fmt(game.likes) %></span></button>
       <button class="btn btn-icon <%= favorited ? 'on' : '' %>" id="fav-btn" data-fav="<%= game.id %>" title="<%= t('game.favorite') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-star"></use></svg></button>
-      <button class="btn btn-icon" data-fs="#player-box" title="<%= t('game.fullscreen') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-maximize"></use></svg></button>
+      <button class="btn btn-icon" id="reload-btn" data-reload="#game-frame" title="<%= t('game.reload') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-reload"></use></svg></button>
+      <button class="btn btn-icon" data-fs="#player-box" title="<%= t('game.fullscreen') %> (F)"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-maximize"></use></svg></button>
       <a class="btn btn-icon" href="<%= game.embed_url %>" target="_blank" rel="noopener" title="<%= t('game.newTab') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-external"></use></svg></a>
       <button class="btn btn-icon" data-share title="<%= t('game.share') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-share"></use></svg></button>
     </div>

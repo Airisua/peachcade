@@ -189,22 +189,30 @@ router.get('/ads.txt', (req, res) => {
 });
 
 router.get('/robots.txt', (req, res) => {
-  res.type('text/plain').send('User-agent: *\nAllow: /\nSitemap: ' + res.locals.siteUrl + '/sitemap.xml\n');
+  const adminBase = process.env.ADMIN_BASE || '/wyj';
+  res.type('text/plain').send('User-agent: *\nAllow: /\nDisallow: ' + adminBase + '/\nDisallow: /api/\nSitemap: ' + res.locals.siteUrl + '/sitemap.xml\n');
 });
 
+let sitemapCache = { body: '', at: 0 };
 router.get('/sitemap.xml', (req, res) => {
-  // Well under the 50k urls / 50 MB limit Google allows per sitemap file, but high enough
-  // that a large imported catalogue never silently drops games out of the sitemap.
+  const now = Date.now();
+  if (sitemapCache.body && (now - sitemapCache.at < 3600000)) {
+    res.type('application/xml');
+    return res.send(sitemapCache.body);
+  }
   const games = db.prepare('SELECT slug, created_at FROM games WHERE published=1 ORDER BY id DESC LIMIT 45000').all();
   const cats = db.prepare('SELECT slug FROM categories ORDER BY sort').all();
   const urls = [
-    { loc: '/', pri: '1.0' },
-    { loc: '/games', pri: '0.9' },
-    { loc: '/about', pri: '0.3' }
-  ].concat(cats.map((c) => ({ loc: '/category/' + c.slug, pri: '0.6' })))
-    .concat(games.map((g) => ({ loc: '/game/' + g.slug, pri: '0.8', last: String(g.created_at || '').slice(0, 10) })));
-  const body = urls.map((u) => '  <url><loc>' + res.locals.siteUrl + u.loc + '</loc>' + (u.last ? '<lastmod>' + u.last + '</lastmod>' : '') + '<priority>' + u.pri + '</priority></url>').join('\n');
-  res.type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + body + '\n</urlset>\n');
+    { loc: '/', pri: '1.0', cf: 'daily' },
+    { loc: '/games', pri: '0.9', cf: 'daily' },
+    { loc: '/about', pri: '0.3', cf: 'monthly' }
+  ].concat(cats.map((c) => ({ loc: '/category/' + c.slug, pri: '0.7', cf: 'daily' })))
+    .concat(games.map((g) => ({ loc: '/game/' + g.slug, pri: '0.8', cf: 'weekly', last: String(g.created_at || '').slice(0, 10) })));
+  const body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    urls.map((u) => '  <url><loc>' + res.locals.siteUrl + u.loc + '</loc>' + (u.last ? '<lastmod>' + u.last + '</lastmod>' : '') + (u.cf ? '<changefreq>' + u.cf + '</changefreq>' : '') + '<priority>' + u.pri + '</priority></url>').join('\n') +
+    '\n</urlset>\n';
+  sitemapCache = { body, at: now };
+  res.type('application/xml').send(body);
 });
 
 module.exports = router;

@@ -83,7 +83,10 @@ function listGames(opt) {
   const per = Math.min(60, Math.max(1, parseInt(o.per, 10) || 24));
   const where = [];
   const args = [];
-  if (!o.includeUnpublished) where.push('g.published=1');
+  if (o.status === "unpublished") where.push("g.published=0");
+  else if (o.status === "published") where.push("g.published=1");
+  else if (o.status === "featured") where.push("g.featured=1");
+  else if (!o.includeUnpublished) where.push("g.published=1");
   if (o.category) { where.push('g.category=?'); args.push(o.category); }
   if (o.q) {
     where.push('(g.title_en LIKE ? OR g.title_zh LIKE ? OR g.tags LIKE ? OR g.slug LIKE ?)');

@@ -1,0 +1,23 @@
+{
+  "name": "Peachcade — Free Online Browser Games",
+  "short_name": "Peachcade",
+  "description": "Play thousands of free online browser games instantly on Peachcade.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0e0e16",
+  "theme_color": "#0e0e16",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

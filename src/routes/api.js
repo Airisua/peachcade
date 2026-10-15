@@ -14,7 +14,7 @@ router.get('/games', (req, res) => {
   });
   res.json({
     games: data.games.map((g) => ({
-      id: g.id, slug: g.slug, title: res.locals.gt(g), thumb: g.thumb,
+      id: g.id, slug: g.slug, title: res.locals.gt(g), thumb: res.locals.thumb(g, 'thumb'),
       plays: g.plays, likes: g.likes, category: g.category,
       cat: res.locals.lang === 'zh' ? g.cat_zh : g.cat_en
     }))

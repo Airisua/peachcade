@@ -49,7 +49,14 @@ app.use(ADMIN_BASE, adminRouter);
 
 // static files are served after routes so that page routes such as /games
 // are never shadowed by same-named directories inside public/
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h' }));
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1h',
+  setHeaders: (res, filePath) => {
+    if (/\.(svg|css|js|webmanifest|png|jpg|ico)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+    }
+  }
+}));
 
 app.use((req, res) => {
   let suggestions = [];

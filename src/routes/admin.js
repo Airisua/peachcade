@@ -64,16 +64,28 @@ router.get('/', (req, res) => {
 
 router.get('/games', (req, res) => {
   const q = String(req.query.q || '').slice(0, 64);
+  const category = String(req.query.category || '').slice(0, 32);
+  const status = ['all', 'published', 'unpublished', 'featured'].includes(req.query.status) ? req.query.status : 'all';
   // "how hot is this game" views: most/least played, most liked, most favorited, most commented
   const ADMIN_SORTS = ['new', 'oldest', 'heat', 'least', 'likes', 'favorites', 'comments', 'name'];
   const sort = ADMIN_SORTS.indexOf(String(req.query.sort || '')) >= 0 ? String(req.query.sort) : 'new';
-  const data = listGames({ q, sort: sort, page: parseInt(req.query.page, 10) || 1, per: 24, includeUnpublished: true, withStats: true });
+  const data = listGames({
+    q,
+    category: category || undefined,
+    status: status !== 'all' ? status : undefined,
+    sort,
+    page: parseInt(req.query.page, 10) || 1,
+    per: 24,
+    includeUnpublished: true,
+    withStats: true
+  });
   let note = '';
   if (req.query.n) note = res.locals.t('admin.bulkCount', { n: parseInt(req.query.n, 10) || 0 });
+  const filterParams = (category ? '&category=' + encodeURIComponent(category) : '') + (status !== 'all' ? '&status=' + status : '');
   res.render('admin/games', {
     pageTitle: res.locals.t('admin.games'),
-    games: data.games, page: data.page, pages: data.pages, q, note, sort,
-    base: ADMIN_BASE + '/games?q=' + encodeURIComponent(q) + '&sort=' + sort + '&'
+    games: data.games, page: data.page, pages: data.pages, q, note, sort, category, status,
+    base: ADMIN_BASE + '/games?q=' + encodeURIComponent(q) + '&sort=' + sort + filterParams + '&'
   });
 });
 
