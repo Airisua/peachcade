@@ -30,7 +30,8 @@ const START = Math.max(1, parseInt(arg('start', 1), 10) || 1);
 const PAGES = Math.max(0, parseInt(arg('pages', 0), 10) || 0);
 const DELAY = Math.max(0, parseInt(arg('delay', 5000), 10));
 const NUM = Math.min(48, Math.max(1, parseInt(arg('num', 48), 10) || 48));
-const MAX_EMPTY = Math.max(1, parseInt(arg('max-empty', 5), 10) || 5);
+const MAX_EMPTY = Math.max(1, parseInt(arg('max-empty', 4), 10) || 4);
+const EMPTY_RETRIES = Math.max(1, parseInt(arg('empty-retries', 4), 10) || 4);
 const PUBLISH = !arg('drafts', false);
 const MAX_ATTEMPTS = 6;
 
@@ -54,10 +55,18 @@ function saveState(state) {
 
 async function loadPage(page) {
   let wait = 30000;
+  let empties = 0;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       const res = await providers.fetchGames({ provider: 'gamemonetize', num: NUM, page: page });
-      return res.items || [];
+      const items = res.items || [];
+      if (items.length) return items;
+      // the feed answers with an empty body every now and then (throttling); the first few
+      // empty answers must not be mistaken for the end of the catalogue
+      empties++;
+      if (empties >= EMPTY_RETRIES) return items;
+      log('page ' + page + ': empty answer ' + empties + '/' + EMPTY_RETRIES + ' - retrying in 20s');
+      await sleep(20000);
     } catch (e) {
       const status = (e && e.status) || 0;
       log('page ' + page + ' attempt ' + attempt + '/' + MAX_ATTEMPTS + ' failed: ' + e.message + ' - waiting ' + Math.round(wait / 1000) + 's');
@@ -121,12 +130,14 @@ async function main() {
     });
     tx();
     imported += added;
-    if (added > 0) emptyStreak = 0; else emptyStreak++;
     log('page ' + page + ': ' + items.length + ' item(s), ' + added + ' new (total new ' + imported + ')');
     saveState({ nextPage: page + 1, imported, scanned, lastNewTitle, updatedAt: new Date().toISOString() });
     page++;
+    // Only stop when the feed itself stops answering: pages that merely contain nothing new
+    // are normal while walking a catalogue that is already partly imported.
+    if (items.length > 0) emptyStreak = 0; else emptyStreak++;
     if (emptyStreak >= MAX_EMPTY) {
-      log('stopping: ' + emptyStreak + ' page(s) in a row without a new game');
+      log('stopping: ' + emptyStreak + ' page(s) in a row returned nothing at all');
       break;
     }
     if (DELAY) await sleep(DELAY);
