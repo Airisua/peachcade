@@ -149,6 +149,20 @@ function client() {
   ok(r.status === 200 && r.text.indexOf('value="3"') >= 0 && r.text.indexOf('value="1"') >= 0, 'preview navigates to feed page 2', r.status);
   ok(r.text.includes('Fixture Game 7') && !r.text.includes('Fixture Game 1<'), 'feed page 2 shows the next batch', r.status);
   fixture.close();
+
+  // rate-limited feed (HTTP 429) shows a friendly notice with retry instead of a bare redirect
+  const limiter = http.createServer((fq, fres) => {
+    fres.statusCode = 429;
+    fres.setHeader('content-type', 'text/plain');
+    fres.end('slow down');
+  });
+  await new Promise((res2) => limiter.listen(0, '127.0.0.1', res2));
+  const limiterUrl = 'http://127.0.0.1:' + limiter.address().port + '/feed?num={num}&page={page}';
+  r = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: limiterUrl, num: 6, page: 4 });
+  ok(r.status === 200 && r.text.indexOf('Retry') >= 0 && r.text.indexOf('429') >= 0, 'rate-limited feed shows retry notice', r.status);
+  r = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: limiterUrl, num: 6, page: 4 });
+  ok(r.status === 200, 'retry path renders again', r.status);
+  limiter.close();
   const slug = 'smoke-game-' + Date.now().toString().slice(-6);
   resp = await admin.post('/wyj/games', { _csrf: admin.csrf(), title_en: 'Smoke Game', slug: slug, category: 'puzzle', embed_url: '/games/2048/', published: 'on' });
   ok(resp.status === 302, 'admin creates game', resp.status);

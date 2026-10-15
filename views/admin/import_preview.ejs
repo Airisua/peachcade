@@ -2,7 +2,18 @@
 <div class="panel">
   <h2><%= t('admin.importPreviewTitle') %></h2>
   <p class="muted small"><code><%= feedUrl %></code> · <code><%= provider %></code></p>
-  <% if (!items.length) { %>
+  <% if (typeof feedBusy !== 'undefined' && feedBusy) { %>
+  <div class="notice warn"><%= feedBusy %></div>
+  <form method="post" action="/wyj/import/preview" class="inline">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="provider" value="<%= provider %>">
+    <input type="hidden" name="url" value="<%= rawUrl %>">
+    <input type="hidden" name="num" value="<%= num %>">
+    <input type="hidden" name="page" value="<%= page %>">
+    <button class="btn btn-primary" type="submit"><%= t('admin.importRetry') %></button>
+    <a class="btn btn-ghost" href="/wyj/import"><%= t('admin.importBack') %></a>
+  </form>
+  <% } else if (!items.length) { %>
   <p class="muted"><%= t('admin.importEmpty') %></p>
   <% } else { %>
   <div class="toolbar">

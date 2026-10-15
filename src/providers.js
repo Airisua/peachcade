@@ -7,18 +7,34 @@
 const FETCH_TIMEOUT_MS = 20000;
 
 async function fetchText(url) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  async function once() {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    try {
+      const res = await fetch(url, {
+        signal: controller.signal,
+        redirect: 'follow',
+        headers: { 'user-agent': 'PixelPlay-GameImporter/1.0 (+self-hosted portal)', accept: '*/*' }
+      });
+      if (!res.ok) {
+        const err = new Error('HTTP ' + res.status);
+        err.status = res.status;
+        throw err;
+      }
+      return await res.text();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
   try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      redirect: 'follow',
-      headers: { 'user-agent': 'PixelPlay-GameImporter/1.0 (+self-hosted portal)', accept: '*/*' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return await res.text();
-  } finally {
-    clearTimeout(timer);
+    return await once();
+  } catch (e) {
+    // a single delayed retry smooths over short throttling bursts
+    if (e && (e.status === 429 || e.status === 408 || (e.status >= 500 && e.status <= 599))) {
+      await new Promise((r) => setTimeout(r, 4000));
+      return await once();
+    }
+    throw e;
   }
 }
 

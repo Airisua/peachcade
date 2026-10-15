@@ -265,11 +265,15 @@ router.post('/settings', (req, res) => {
 // ---- game feed importer (GameMonetize / custom RSS / custom JSON) ----
 
 const importCache = new Map();
+const feedPageCache = new Map();
 
 function pruneImportCache() {
   const now = Date.now();
   for (const [k, v] of importCache) {
     if (now - v.ts > 15 * 60 * 1000) importCache.delete(k);
+  }
+  for (const [k, v] of feedPageCache) {
+    if (now - v.ts > 10 * 60 * 1000) feedPageCache.delete(k);
   }
 }
 
@@ -284,17 +288,21 @@ router.get('/import', (req, res) => {
 
 router.post('/import/preview', async (req, res) => {
   if (csrfFail(req, res)) return;
+  const provider = String(req.body.provider || 'gamemonetize');
+  const page = Math.max(1, parseInt(req.body.page, 10) || 1);
+  const num = Math.min(48, Math.max(1, parseInt(req.body.num, 10) || 24));
+  const rawUrl = String(req.body.url || '').trim();
+  let feedBusy = '';
   try {
-    const provider = String(req.body.provider || 'gamemonetize');
-    const page = Math.max(1, parseInt(req.body.page, 10) || 1);
-    const result = await providers.fetchGames({
-      provider,
-      url: String(req.body.url || ''),
-      num: req.body.num,
-      page: page
-    });
+    pruneImportCache();
+    const cacheKey = [provider, rawUrl, num, page].join('|');
+    let result = feedPageCache.get(cacheKey);
+    if (!result) {
+      result = await providers.fetchGames({ provider, url: rawUrl, num: num, page: page });
+      feedPageCache.set(cacheKey, { url: result.url, items: result.items, ts: Date.now() });
+    }
     const cats = db.prepare('SELECT * FROM categories ORDER BY sort').all();
-    const items = result.items.map((it) => {
+    const items = (result.items || []).map((it) => {
       const slug = providers.slugFor(provider, it);
       return {
         sourceId: it.sourceId,
@@ -312,7 +320,6 @@ router.post('/import/preview', async (req, res) => {
       };
     });
     const token = crypto.randomBytes(12).toString('hex');
-    pruneImportCache();
     importCache.set(token, { items: items, ts: Date.now(), provider: provider, publish: !!req.body.publish });
     res.render('admin/import_preview', {
       pageTitle: res.locals.t('admin.importPreviewTitle'),
@@ -321,11 +328,28 @@ router.post('/import/preview', async (req, res) => {
       provider: provider,
       publish: !!req.body.publish,
       feedUrl: result.url,
-      rawUrl: String(req.body.url || ''),
+      rawUrl: rawUrl,
       page: page,
-      num: parseInt(req.body.num, 10) || 24
+      num: num,
+      feedBusy: feedBusy
     });
   } catch (e) {
+    if (e && e.status === 429) {
+      feedBusy = res.locals.t('admin.importRateLimited');
+      res.render('admin/import_preview', {
+        pageTitle: res.locals.t('admin.importPreviewTitle'),
+        token: '',
+        items: [],
+        provider: provider,
+        publish: !!req.body.publish,
+        feedUrl: rawUrl,
+        rawUrl: rawUrl,
+        page: page,
+        num: num,
+        feedBusy: feedBusy
+      });
+      return;
+    }
     res.redirect(ADMIN_BASE + '/import?err=importFailed');
   }
 });

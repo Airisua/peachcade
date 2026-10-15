@@ -242,5 +242,7 @@
   "admin.bulkCount": "Updated {n} game(s).",
   "js.bulkNone": "Select at least one game first.",
   "admin.importShowing": "Showing the selected batch from the feed",
-  "admin.importPageLabel": "Feed page"
+  "admin.importPageLabel": "Feed page",
+  "admin.importRateLimited": "The game feed is rate-limiting this server (HTTP 429). This usually clears within a few minutes. Wait a bit, then hit Retry. Tip: import one page at a time instead of flipping through many pages quickly.",
+  "admin.importRetry": "Retry this page"
 }
