@@ -159,6 +159,16 @@ The admin panel includes a feed importer at /wyj/import:
   only trusted admins should have access.
 - Uploads are limited to raster images <= 2 MB.
 
+## Caching & releases
+
+- Every static asset URL (style.css, admin.css, main.js and the SVG icon sprite)
+  carries a `?v=<hash>` token computed from the asset contents (`src/assets.js`).
+  Browsers and a CDN in front of the site (Cloudflare caches `.js` / `.css` by
+  extension) therefore fetch a new build immediately after a deploy instead of
+  serving the previous one for up to an hour. HTML is never cached, so it always
+  points at the current hash.
+- Override the token with `ASSET_VERSION=...` if you want to bust caches by hand.
+
 ---
 
 ## 中文摘要
@@ -180,6 +190,8 @@ PixelPlay 是一个可自托管的多人在线小游戏站（动态渲染，非�
 - 首页精选：后台勾选「精选」并发布的游戏会随机轮换展示；一个都没设置时，
   自动从热门榜与好评榜中随机挑选，首页每次刷新都有变化。
 - Docker 一键部署：docker compose up -d --build，含 /healthz 健康检查。
+- 静态资源版本化：CSS / JS / 图标 sprite 都带 `?v=<内容哈希>`，Cloudflare 等 CDN
+  与浏览器缓存不会再把上一版本的脚本喂给访客（发版后立即生效）。
 - 游戏导入：后台「导入游戏」(/wyj/import) 支持从 GameMonetize（免注册可先预览）
   或任意自定义 RSS/JSON 游戏源批量导入，自动去重、默认存草稿；正式接入前请先在
   平台注册出版商并登记你的站点域名。
