@@ -13,6 +13,7 @@ function website(site, siteUrl) {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: site.name,
+    alternateName: ['PeachCat Games', 'peachcat.fun', 'Peachcade Games'],
     url: siteUrl + '/',
     description: site.tagline || '',
     potentialAction: {

@@ -1,14 +1,39 @@
 'use strict';
 const { db } = require('./db');
 
-function gt(game, lang) { return !game ? '' : (lang === 'zh' && game.title_zh ? game.title_zh : game.title_en); }
-function gd(game, lang) { return !game ? '' : (lang === 'zh' && game.desc_zh ? game.desc_zh : game.desc_en); }
-function gh(game, lang) { return !game ? '' : (lang === 'zh' && game.howto_zh ? game.howto_zh : game.howto_en); }
+function decodeEntities(s) {
+  if (s == null) return '';
+  let str = String(s);
+  if (str.indexOf('&') === -1) return str;
+  const named = {
+    '&lt;': '<', '&gt;': '>', '&quot;': '"', '&apos;': "'", '&#039;': "'",
+    '&nbsp;': ' ', '&mdash;': '—', '&ndash;': '–', '&bull;': '•', '&times;': '×',
+    '&hellip;': '…', '&trade;': '™', '&copy;': '©', '&reg;': '®',
+    '&rsquo;': "'", '&lsquo;': "'", '&rdquo;': '"', '&ldquo;': '"',
+    '&middot;': '·', '&amp;': '&'
+  };
+  for (let pass = 0; pass < 2; pass++) {
+    for (const [k, v] of Object.entries(named)) {
+      if (str.indexOf(k) >= 0) str = str.split(k).join(v);
+    }
+    str = str.replace(/&#(\d+);/g, (_, dec) => {
+      try { return String.fromCodePoint(parseInt(dec, 10)); } catch (e) { return _; }
+    });
+    str = str.replace(/&#x([0-9a-f]+);/gi, (_, hex) => {
+      try { return String.fromCodePoint(parseInt(hex, 16)); } catch (e) { return _; }
+    });
+  }
+  return str;
+}
+
+function gt(game, lang) { return !game ? '' : decodeEntities(lang === 'zh' && game.title_zh ? game.title_zh : game.title_en); }
+function gd(game, lang) { return !game ? '' : decodeEntities(lang === 'zh' && game.desc_zh ? game.desc_zh : game.desc_en); }
+function gh(game, lang) { return !game ? '' : decodeEntities(lang === 'zh' && game.howto_zh ? game.howto_zh : game.howto_en); }
 
 const SORTS = {
-  popular: 'g.plays DESC, g.id ASC',
+  popular: 'g.plays DESC, g.created_at DESC, g.id DESC',
   new: 'g.created_at DESC, g.id DESC',
-  likes: 'g.likes DESC, g.id ASC',
+  likes: 'g.likes DESC, g.created_at DESC, g.id DESC',
   name: 'g.title_en COLLATE NOCASE ASC',
   // admin "how hot is this game" views
   heat: 'g.plays DESC, g.likes DESC, g.id ASC',

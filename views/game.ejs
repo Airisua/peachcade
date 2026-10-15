@@ -38,7 +38,7 @@
         <h2><%= t('game.about') %></h2>
         <p><%= gd(game) %></p>
         <% if (game.tags) { %>
-        <div class="tags"><% game.tags.split(',').forEach(function (tag) { var tt = tag.trim(); if (tt) { %><a class="chip" href="/search?q=<%= encodeURIComponent(tt) %>"><%= tt %></a><% } }); %></div>
+        <div class="tags"><% game.tags.split(',').forEach(function (tag) { var tt = tag.trim(); if (tt && !['gamemonetize', 'ext', 'rss', 'json', 'mapi-games'].includes(tt.toLowerCase())) { %><a class="chip" href="/search?q=<%= encodeURIComponent(tt) %>"><%= tt %></a><% } }); %></div>
         <% } %>
       </section>
       <section class="panel" id="comments">
@@ -75,7 +75,7 @@
         <div class="mini-list">
           <% related.forEach(function (g) { %>
           <a class="mini-card" href="/game/<%= g.slug %>">
-            <img src="<%= g.thumb %>" alt="<%= gt(g) %>" loading="lazy">
+            <img src="<%= thumb(g, 'card') %>" alt="<%= gt(g) %>" loading="lazy" decoding="async">
             <span class="mini-meta"><b><%= gt(g) %></b><small class="muted"><%= fmt(g.plays) %> <%= t('game.plays') %></small></span>
           </a>
           <% }); %>

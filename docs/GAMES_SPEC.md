@@ -1,4 +1,4 @@
-# PixelPlay 内置游戏实现规范（子代理契约 v1.1）
+# Peachcade 内置游戏实现规范（子代理契约 v1.1）
 
 > 范围调整（v1.1）：本次交付内置 5 款演示游戏（2048、snake、memory-match、tic-tac-toe、minesweeper）。brick-breaker、pong-duel、flappy-wing 暂缓，后续可由管理员以后台「外部 embed_url」方式接入（见 README「接入游戏」章节）。
 

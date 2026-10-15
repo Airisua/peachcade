@@ -28,7 +28,7 @@ async function fetchText(url) {
       const res = await fetch(url, {
         signal: controller.signal,
         redirect: 'follow',
-        headers: { 'user-agent': 'PixelPlay-GameImporter/1.0 (+self-hosted portal)', accept: '*/*' }
+        headers: { 'user-agent': 'Peachcade-GameImporter/1.0 (+https://peachcat.fun)', accept: '*/*' }
       });
       if (!res.ok) {
         const err = new Error('HTTP ' + res.status);
@@ -54,14 +54,28 @@ async function fetchText(url) {
 }
 
 function decodeEntities(s) {
-  return String(s == null ? '' : s)
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#0?39;/g, "'")
-    .replace(/&apos;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&');
+  if (s == null) return '';
+  let str = String(s);
+  if (str.indexOf('&') === -1) return str;
+  const named = {
+    '&lt;': '<', '&gt;': '>', '&quot;': '"', '&apos;': "'", '&#039;': "'",
+    '&nbsp;': ' ', '&mdash;': '—', '&ndash;': '–', '&bull;': '•', '&times;': '×',
+    '&hellip;': '…', '&trade;': '™', '&copy;': '©', '&reg;': '®',
+    '&rsquo;': "'", '&lsquo;': "'", '&rdquo;': '"', '&ldquo;': '"',
+    '&middot;': '·', '&amp;': '&'
+  };
+  for (let pass = 0; pass < 2; pass++) {
+    for (const [k, v] of Object.entries(named)) {
+      if (str.indexOf(k) >= 0) str = str.split(k).join(v);
+    }
+    str = str.replace(/&#(\d+);/g, (_, dec) => {
+      try { return String.fromCodePoint(parseInt(dec, 10)); } catch (e) { return _; }
+    });
+    str = str.replace(/&#x([0-9a-f]+);/gi, (_, hex) => {
+      try { return String.fromCodePoint(parseInt(hex, 16)); } catch (e) { return _; }
+    });
+  }
+  return str;
 }
 
 function stripTags(s) {

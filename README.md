@@ -1,6 +1,6 @@
-# PixelPlay - a self-hosted HTML5 games portal
+# Peachcade - a self-hosted HTML5 games portal
 
-PixelPlay is a dynamic, database-driven games website a premier destination for instant, free HTML5 browser games with user accounts, community features, and management tooling.
+Peachcade is a dynamic, database-driven games website and a premier destination for instant, free HTML5 browser games with user accounts, community features, and management tooling.
 
 ## Features
 
@@ -8,7 +8,7 @@ PixelPlay is a dynamic, database-driven games website a premier destination for 
   categories, search with live suggestions, sorting, pagination, random game.
 - 5 built-in playable mini games (ported as standalone HTML5 pages, embedded in a
   16:9 player): 2048, Snake Classic, Memory Match, Tic-Tac-Toe, Minesweeper.
-- Game integration model: like the big portals, PixelPlay aggregates games.
+- Game integration model: like the big portals, Peachcade aggregates games.
   Admins can embed any external HTML5 game by setting an embed URL per game
   (iframe). Built-in games simply use a local embed URL, e.g. /games/2048/.
 - Accounts: register / login (bcrypt hashing + JWT in an httpOnly cookie),
@@ -173,7 +173,7 @@ The admin panel includes a feed importer at /wyj/import:
 
 ## 中文摘要
 
-PixelPlay 是一个可自托管的多人在线小游戏站（动态渲染，非静态页面），提供极速畅玩的精品网页小游戏，支持完整账号体系、社区互动与管理后台。核心能力：
+Peachcade 是一个可自托管的多人在线网页街机小游戏站（动态渲染，非静态页面），提供极速畅玩的精品网页小游戏，支持完整账号体系、社区互动与管理后台。核心能力：
 
 - 动态游戏库：分类 / 搜索（实时联想）/ 热门、最新、好评排序 / 随机开玩。
 - 内置 5 款可玩小游戏（2048、贪吃蛇、记忆翻牌、井字棋、扫雷），并以 iframe

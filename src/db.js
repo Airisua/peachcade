@@ -177,9 +177,9 @@ function seed() {
   for (const [slug, en, zh, sort] of CATEGORIES) upsertCat.run(slug, en, zh, sort);
 
   const defaults = {
-    site_name: 'PixelPlay',
-    tagline_en: 'Instant HTML5 games — play free in your browser',
-    tagline_zh: '即点即玩 · 免费在线小游戏',
+    site_name: 'Peachcade',
+    tagline_en: 'Free Online Browser Games — Play Instantly',
+    tagline_zh: '免费免下载在线小游戏 · 即点即玩',
     footer_text_en: '',
     footer_text_zh: '',
     ads_txt: '# GameMonetize publisher ads.txt - replace with the snippet from your publisher dashboard',
@@ -188,6 +188,11 @@ function seed() {
   };
   const insSet = db.prepare('INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)');
   for (const [k, v] of Object.entries(defaults)) insSet.run(k, v);
+
+  // Auto-migrate legacy site_name and tagline if still default
+  db.prepare("UPDATE settings SET value='Peachcade' WHERE key='site_name' AND value='PixelPlay'").run();
+  db.prepare("UPDATE settings SET value='Free Online Browser Games — Play Instantly' WHERE key='tagline_en' AND value='Instant HTML5 games — play free in your browser'").run();
+  db.prepare("UPDATE settings SET value='免费免下载在线小游戏 · 即点即玩' WHERE key='tagline_zh' AND value='即点即玩 · 免费在线小游戏'").run();
 
   if (!db.prepare('SELECT COUNT(*) n FROM users').get().n) {
     const adminUser = process.env.ADMIN_USERNAME || 'mqx';

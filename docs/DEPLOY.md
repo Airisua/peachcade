@@ -1,6 +1,6 @@
-# PixelPlay 部署文档
+# Peachcade 部署文档
 
-本文档面向把 PixelPlay 部署到服务器的场景，推荐使用 Docker 一键部署。
+本文档面向把 Peachcade 部署到服务器的场景，推荐使用 Docker 一键部署。
 
 ## 1. 服务器准备
 

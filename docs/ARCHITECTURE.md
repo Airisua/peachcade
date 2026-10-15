@@ -1,4 +1,4 @@
-# PixelPlay architecture
+# Peachcade architecture
 
 ## Request pipeline (server.js)
 

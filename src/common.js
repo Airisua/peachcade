@@ -32,8 +32,8 @@ function common(req, res, next) {
   res.locals.year = new Date().getFullYear();
   res.locals.siteUrl = String(process.env.SITE_URL || (req.protocol + '://' + (req.get('host') || 'localhost'))).replace(/\/+$/, '');
   res.locals.site = {
-    name: getSetting('site_name', 'PixelPlay'),
-    tagline: lang === 'zh' ? getSetting('tagline_zh', '') : getSetting('tagline_en', ''),
+    name: getSetting('site_name', 'Peachcade'),
+    tagline: lang === 'zh' ? getSetting('tagline_zh', '免费免下载在线小游戏 · 即点即玩') : getSetting('tagline_en', 'Free Online Browser Games — Play Instantly'),
     footerText: lang === 'zh' ? getSetting('footer_text_zh', '') : getSetting('footer_text_en', '')
   };
   const cats = db.prepare('SELECT c.*, (SELECT COUNT(*) FROM games g WHERE g.category=c.slug AND g.published=1) AS n FROM categories c ORDER BY c.sort, c.slug').all();

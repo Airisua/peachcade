@@ -11,9 +11,9 @@
         <summary><%= t('nav.categories') %><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-chevron"></use></svg></summary>
         <div class="dropdown-panel">
           <% navCategories.forEach(function (c) { %>
-          <a href="/category/<%= c.slug %>"><span><%= catName(c) %></span><b><%= c.n %></b></a>
+          <a href="/category/<%= c.slug %>"><svg class="ic cat-drop-ic"><use href="<%= catIcon(c) %>"></use></svg><span><%= catName(c) %></span><b><%= c.n %></b></a>
           <% }); %>
-          <a class="dropdown-all" href="/games"><span><%= t('common.allGames') %></span></a>
+          <a class="dropdown-all" href="/games"><svg class="ic cat-drop-ic"><use href="/img/icons.svg?v=<%= assetV %>#i-gamepad"></use></svg><span><%= t('common.allGames') %></span></a>
         </div>
       </details>
     </nav>

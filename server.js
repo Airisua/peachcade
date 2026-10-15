@@ -71,7 +71,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log('[PixelPlay] listening on http://localhost:' + PORT);
+  console.log('[Peachcade] listening on http://localhost:' + PORT);
 });
 
 module.exports = app;

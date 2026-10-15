@@ -50,7 +50,7 @@ async function fetchSource(url) {
     const res = await fetch(url, {
       signal: controller.signal,
       redirect: 'follow',
-      headers: { 'user-agent': 'PixelPlay-ThumbCache/1.0 (+self-hosted portal)', accept: 'image/*' }
+      headers: { 'user-agent': 'Peachcade-ThumbCache/1.0 (+https://peachcat.fun)', accept: 'image/*' }
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const type = String(res.headers.get('content-type') || '');

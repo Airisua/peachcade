@@ -5,7 +5,7 @@ const path = require('path');
 let JSDOM = null, VirtualConsole = null;
 try { const jd = require('jsdom'); JSDOM = jd.JSDOM; VirtualConsole = jd.VirtualConsole; } catch (e) { JSDOM = null; }
 const { db } = require('../src/db');
-const { featuredRotation } = require('../src/queries');
+const { featuredRotation, gt } = require('../src/queries');
 const BASE = process.env.SMOKE_BASE || ('http://localhost:' + (process.env.PORT || 3000));
 let pass = 0, fail = 0;
 const failures = [];
@@ -60,8 +60,11 @@ function client() {
 }
 (async function () {
   const user = client();
+  ok(gt({ title_en: 'CatchFish &mdash; Fishing Master' }) === 'CatchFish — Fishing Master', 'entity decoding decodes named mdash entity');
+  ok(gt({ title_en: 'Double &amp;mdash; test &#8212;' }) === 'Double — test —', 'entity decoding decodes double-encoded and numeric entities');
   let r = await user.get('/');
   ok(r.status === 200 && r.text.includes('/game/2048') && !r.text.includes('热门游戏'), 'home renders EN with games', r.status);
+  ok(r.text.includes('Peachcade'), 'home renders new brand name Peachcade');
   r = await user.get('/lang/zh?next=/');
   ok(r.status === 302, 'lang switch to zh', r.status);
   r = await user.get('/');
@@ -111,7 +114,7 @@ function client() {
   }
   r = await user.get('/');
   const homeLd = ldBlocks(r.text);
-  ok(homeLd.length > 0 && homeLd.every(Boolean) && homeLd.some((b) => b['@type'] === 'WebSite' && b.potentialAction), 'home has WebSite + SearchAction JSON-LD', JSON.stringify(homeLd.map((b) => b && b['@type'])));
+  ok(homeLd.length > 0 && homeLd.every(Boolean) && homeLd.some((b) => b['@type'] === 'WebSite' && b.potentialAction && b.alternateName && b.alternateName.includes('PeachCat Games')), 'home has WebSite + SearchAction + alternateName JSON-LD', JSON.stringify(homeLd.map((b) => b && b['@type'])));
   r = await user.get('/game/2048');
   const gameLd = ldBlocks(r.text);
   ok(gameLd.length > 0 && gameLd.every(Boolean) && gameLd.some((b) => b['@type'] === 'VideoGame' && b.name === '2048' && b.offers), 'game page has valid VideoGame JSON-LD');
@@ -481,7 +484,7 @@ function client() {
   } else ok(false, 'ad id found');
   r = await user.get('/');
   ok(!r.text.includes('SMOKE-AD-123'), 'ad removed from homepage', r.status);
-  const baseSettings = { _csrf: admin.csrf(), site_name: 'PixelPlay', tagline_en: 'Instant HTML5 games - play free in your browser', tagline_zh: '即点即玩 · 免费在线小游戏', footer_text_en: '', footer_text_zh: '', registration_open: 'on' };
+  const baseSettings = { _csrf: admin.csrf(), site_name: 'Peachcade', tagline_en: 'Free Online Browser Games — Play Instantly', tagline_zh: '免费免下载在线小游戏 · 即点即玩', footer_text_en: '', footer_text_zh: '', registration_open: 'on' };
   resp = await admin.post('/wyj/settings', Object.assign({}, baseSettings, { ads_enabled: 'on' }));
   ok(resp.status === 302, 'settings save (ads on)', resp.status);
   resp = await admin.post('/wyj/settings', baseSettings);
