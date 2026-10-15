@@ -5,7 +5,7 @@
   <div class="notice ok"><%= t('admin.importDone', { n: done }) %> · <%= t('admin.importSkipped', { n: skipped }) %></div>
   <% } %>
   <p class="muted small"><%= t('admin.importHint') %></p>
-  <form method="post" action="/admin/import/preview" class="form">
+  <form method="post" action="/wyj/import/preview" class="form">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <div class="form-grid">
       <label><%= t('admin.importProvider') %>

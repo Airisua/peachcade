@@ -32,7 +32,7 @@
         <div class="dropdown-panel">
           <div class="menu-head"><b><%= user.username %></b><small><%= user.email %></small></div>
           <a href="/profile"><svg class="ic"><use href="/img/icons.svg#i-user"></use></svg><%= t('nav.profile') %></a>
-          <% if (user.role === 'admin') { %><a href="/admin"><svg class="ic"><use href="/img/icons.svg#i-shield"></use></svg><%= t('nav.admin') %></a><% } %>
+          <% if (user.role === 'admin') { %><a href="/wyj"><svg class="ic"><use href="/img/icons.svg#i-shield"></use></svg><%= t('nav.admin') %></a><% } %>
           <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrf %>"><button type="submit" class="linklike"><svg class="ic"><use href="/img/icons.svg#i-logout"></use></svg><%= t('nav.logout') %></button></form>
         </div>
       </details>

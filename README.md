@@ -13,7 +13,7 @@ PixelPlay is a dynamic, database-driven games website a premier destination for 
   (iframe). Built-in games simply use a local embed URL, e.g. /games/2048/.
 - Accounts: register / login (bcrypt hashing + JWT in an httpOnly cookie),
   favorites, play history, comments on games.
-- Independent admin panel at /admin: dashboard stats, game CRUD with EN/ZH
+- Independent admin panel at /wyj: dashboard stats, game CRUD with EN/ZH
   fields and thumbnail upload, comment moderation, user management (roles /
   ban), ad management, site settings (name, taglines, ads on-off, open
   registration).
@@ -35,7 +35,7 @@ Open http://localhost:3000
 
 Default accounts (created on first start, change them!):
 
-- Admin: admin / admin123  (admin panel: /admin)
+- Admin: mqx / mqx331606110  (admin panel: /wyj)
 - Demo player: player / player123
 
 Useful scripts:
@@ -65,7 +65,7 @@ Create a .env file next to docker-compose.yml (see .env.example):
     JWT_SECRET=change-me                    -- REQUIRED in production
     ADMIN_USERNAME=admin                    -- initial admin (first start only)
     ADMIN_EMAIL=admin@example.com
-    ADMIN_PASSWORD=admin123                 -- change it!
+    ADMIN_PASSWORD=mqx331606110              -- change it!
 
 The initial admin account is created only when the database is empty. After
 first start you can also change the password from the admin UI, or reset the
@@ -80,23 +80,23 @@ database and set new values.
 
 ## Admin guide (short)
 
-- Games: /admin/games -> New game. Fill EN/ZH titles, descriptions and "how to
+- Games: /wyj/games -> New game. Fill EN/ZH titles, descriptions and "how to
   play", pick a category, set a thumbnail (upload PNG/JPG/WebP/GIF <= 2 MB or
   paste a URL), and set the Embed URL. For a built-in game use the local path
   (/games/<slug>/); for an external game use its iframe URL. Check
   "Published" to make it visible; "Featured" games appear on the homepage hero
   and featured row.
-- Ads: /admin/ads -> add an ad: choose slot, type html (paste an AdSense or
+- Ads: /wyj/ads -> add an ad: choose slot, type html (paste an AdSense or
   any ad-network snippet) or image (image URL + link). Toggle enabled/disabled
-  per ad; switch all ads off in /admin/settings (ads_enabled).
-- Comments: /admin/comments to hide or delete user comments.
-- Users: /admin/users to promote/demote admins, ban or delete accounts.
-- Settings: /admin/settings - site name, taglines (EN/ZH), footer text,
+  per ad; switch all ads off in /wyj/settings (ads_enabled).
+- Comments: /wyj/comments to hide or delete user comments.
+- Users: /wyj/users to promote/demote admins, ban or delete accounts.
+- Settings: /wyj/settings - site name, taglines (EN/ZH), footer text,
   ads on/off, registration open/closed.
 
 ## Importing games from a distribution platform
 
-The admin panel includes a feed importer at /admin/import:
+The admin panel includes a feed importer at /wyj/import:
 
 - GameMonetize works out of the box: pick the preset and click "Preview feed".
 - GameDistribution / GamePix / any other platform: register as a publisher
@@ -125,7 +125,7 @@ The admin panel includes a feed importer at /admin/import:
     src/routes/site.js      home, listing, search, category, game page, comments
     src/routes/auth.js      login/register/profile/password
     src/routes/api.js       JSON API: game search, like, favorite
-    src/routes/admin.js     admin panel (games, users, comments, ads, settings)
+    src/routes/wyj.js     admin panel (games, users, comments, ads, settings)
     views/                  EJS templates (public site + admin panel)
     public/css|js|img       styles, front-end JS, SVG icon sprite, thumbnails
     public/games/<slug>/    the 5 built-in games (standalone HTML5 pages)
@@ -153,15 +153,15 @@ PixelPlay 是一个可自托管的多人在线小游戏站（动态渲染，非�
   方式嵌入 16:9 播放器；同时效仿大型游戏站，支持站长在后台通过 Embed URL
   接入任意外部 HTML5 游戏。
 - 账号系统：注册 / 登录（bcrypt + httpOnly JWT Cookie）、收藏、最近玩过、评论。
-- 独立管理后台 /admin：仪表盘、游戏增删改查（中英双语文案 + 缩略图上传）、
+- 独立管理后台 /wyj：仪表盘、游戏增删改查（中英双语文案 + 缩略图上传）、
   评论审核、用户管理（角色 / 封禁）、广告管理、站点设置。
 - 广告位：6 个可配置位置，支持 AdSense 等 HTML 代码或图片横幅，未配置时显示占位。
 - 中英文切换：默认英文，页头 / 页脚一键切换中文。
 - Docker 一键部署：docker compose up -d --build，含 /healthz 健康检查。
-- 游戏导入：后台「导入游戏」(/admin/import) 支持从 GameMonetize（免注册可先预览）
+- 游戏导入：后台「导入游戏」(/wyj/import) 支持从 GameMonetize（免注册可先预览）
   或任意自定义 RSS/JSON 游戏源批量导入，自动去重、默认存草稿；正式接入前请先在
   平台注册出版商并登记你的站点域名。
 - 文档：README（本文件）、docs/ARCHITECTURE.md、docs/DEPLOY.md、docs/GAMES_SPEC.md。
 
-本地启动：npm install && npm start，默认管理员 admin / admin123（请尽快修改）。
+本地启动：npm install && npm start，默认管理员 mqx / mqx331606110（请尽快修改）。
 

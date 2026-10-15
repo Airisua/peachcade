@@ -11,8 +11,8 @@
       <td><%= a.type %></td>
       <td><span class="badge <%= a.enabled ? 'ok' : 'off' %>"><%= a.enabled ? t('admin.on') : t('admin.off') %></span></td>
       <td class="actions">
-        <form method="post" action="/admin/ads/<%= a.id %>/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.togglePublish') %></button></form>
-        <form method="post" action="/admin/ads/<%= a.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
+        <form method="post" action="/wyj/ads/<%= a.id %>/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.togglePublish') %></button></form>
+        <form method="post" action="/wyj/ads/<%= a.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
       </td>
     </tr>
     <% }); %>
@@ -21,7 +21,7 @@
 </section>
 <section class="panel">
   <h2><%= t('admin.adNew') %></h2>
-  <form method="post" action="/admin/ads" class="form">
+  <form method="post" action="/wyj/ads" class="form">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <div class="form-grid">
       <label><%= t('admin.adSlot') %><select name="slot"><% slots.forEach(function (s) { %><option value="<%= s %>"><%= s %></option><% }); %></select></label>

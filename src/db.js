@@ -181,11 +181,10 @@ function seed() {
   for (const [k, v] of Object.entries(defaults)) insSet.run(k, v);
 
   if (!db.prepare('SELECT COUNT(*) n FROM users').get().n) {
-    const adminUser = process.env.ADMIN_USERNAME || 'admin';
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
-    const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminUser = process.env.ADMIN_USERNAME || 'mqx';
+    const adminEmail = process.env.ADMIN_EMAIL || 'mqx@peachcat.fun';
+    const adminPass = process.env.ADMIN_PASSWORD || 'mqx331606110';
     db.prepare('INSERT INTO users(username,email,password_hash,role) VALUES(?,?,?,?)').run(adminUser, adminEmail, bcrypt.hashSync(adminPass, 10), 'admin');
-    db.prepare('INSERT INTO users(username,email,password_hash,role) VALUES(?,?,?,?)').run('player', 'player@example.com', bcrypt.hashSync('player123', 10), 'user');
   }
 
   if (!db.prepare('SELECT COUNT(*) n FROM games').get().n) {
@@ -201,14 +200,13 @@ function seed() {
 
   if (!db.prepare('SELECT COUNT(*) n FROM comments').get().n) {
     const admin = db.prepare('SELECT id FROM users WHERE role=? LIMIT 1').get('admin');
-    const player = db.prepare('SELECT id FROM users WHERE username=?').get('player');
     const g2048 = db.prepare('SELECT id FROM games WHERE slug=?').get('2048');
     const gSnake = db.prepare('SELECT id FROM games WHERE slug=?').get('snake');
     const gMine = db.prepare('SELECT id FROM games WHERE slug=?').get('minesweeper');
-    if (admin && player && g2048 && gSnake && gMine) {
+    if (admin && g2048 && gSnake && gMine) {
       const ins = db.prepare('INSERT INTO comments(game_id,user_id,content,created_at) VALUES(?,?,?,?)');
       ins.run(g2048.id, admin.id, 'Classic and addictive. What is your best score?', isoDaysAgo(5));
-      ins.run(gSnake.id, player.id, 'So simple, so hard to stop playing!', isoDaysAgo(3));
+      ins.run(gSnake.id, admin.id, 'So simple, so hard to stop playing!', isoDaysAgo(3));
       ins.run(gMine.id, admin.id, 'Careful, the last row is a trap.', isoDaysAgo(1));
     }
   }

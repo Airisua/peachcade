@@ -10,9 +10,9 @@
     <td><%= u.comments %></td>
     <td class="muted small"><%= fmtDate(u.created_at) %></td>
     <td class="actions">
-      <form method="post" action="/admin/users/<%= u.id %>/role" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= u.role === 'admin' ? t('admin.makeUser') : t('admin.makeAdmin') %></button></form>
-      <form method="post" action="/admin/users/<%= u.id %>/ban" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= u.banned ? t('admin.unban') : t('admin.ban') %></button></form>
-      <form method="post" action="/admin/users/<%= u.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
+      <form method="post" action="/wyj/users/<%= u.id %>/role" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= u.role === 'admin' ? t('admin.makeUser') : t('admin.makeAdmin') %></button></form>
+      <form method="post" action="/wyj/users/<%= u.id %>/ban" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= u.banned ? t('admin.unban') : t('admin.ban') %></button></form>
+      <form method="post" action="/wyj/users/<%= u.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
     </td>
   </tr>
   <% }); %>

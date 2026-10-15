@@ -33,7 +33,7 @@
     curl http://127.0.0.1:3000/healthz        # 应返回 {"ok":true,...}
     docker compose ps                          # 状态应为 running/healthy
 
-浏览器访问 http://服务器IP:3000 。默认管理员 admin / admin123（由 .env 决定，
+浏览器访问 http://服务器IP:3000 。默认管理员 mqx / mqx331606110（由 .env 决定，
 首次启动建库时写入；请务必在 .env 中改成强密码后再首次启动）。
 
 提示：初始管理员账号只在数据库为空时创建。若先启动过再改 .env，需要删除
@@ -105,5 +105,5 @@
   （会清空全部数据）；或事先用另一个管理员账号在后台重置。
 - 想彻底重置：docker compose down && rm -rf data/app.db* public/uploads/* && docker compose up -d
 - 中文 / 英文内容：站点默认英文；点击页头右上角 EN/中文 切换。后台双语文案可随时编辑。
-- 广告不显示：确认 /admin/settings 中 ads_enabled 已开启，且对应广告位有启用的广告
+- 广告不显示：确认 /wyj/settings 中 ads_enabled 已开启，且对应广告位有启用的广告
   （未配置时前台只显示占位框）。

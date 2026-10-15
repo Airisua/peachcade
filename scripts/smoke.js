@@ -102,51 +102,51 @@ function client() {
   ok(resp.status === 302, 'comment posted', resp.status);
   r = await user.get('/game/2048');
   ok(r.text.includes(ctext), 'comment visible on page', r.status);
-  r = await user.get('/admin');
+  r = await user.get('/wyj');
   ok(r.status === 302 && r.location.indexOf('/login') >= 0, 'admin guarded for normal user', r.status + ' ' + r.location);
   const admin = client();
   await admin.get('/login');
-  resp = await admin.post('/login', { _csrf: admin.csrf(), username: 'admin', password: process.env.ADMIN_PASSWORD || 'admin123' });
+  resp = await admin.post('/login', { _csrf: admin.csrf(), username: process.env.ADMIN_USERNAME || 'mqx', password: process.env.ADMIN_PASSWORD || 'mqx331606110' });
   ok(resp.status === 302 && resp.location === '/', 'admin login', resp.status + ' ' + resp.location);
-  for (const p of ['/admin', '/admin/games', '/admin/import', '/admin/users', '/admin/comments', '/admin/ads', '/admin/settings']) {
+  for (const p of ['/wyj', '/wyj/games', '/wyj/import', '/wyj/users', '/wyj/comments', '/wyj/ads', '/wyj/settings']) {
     r = await admin.get(p);
     ok(r.status === 200, 'admin page ' + p, r.status);
   }
-  resp = await admin.post('/admin/import/preview', { _csrf: admin.csrf(), provider: 'json', url: 'http://127.0.0.1:9/nope', num: 5, page: 1 });
-  ok(resp.status === 302 && resp.location.indexOf('/admin/import') === 0, 'import preview handles unreachable feed', resp.status + ' ' + resp.location);
+  resp = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: 'http://127.0.0.1:9/nope', num: 5, page: 1 });
+  ok(resp.status === 302 && resp.location.indexOf('/wyj/import') === 0, 'import preview handles unreachable feed', resp.status + ' ' + resp.location);
   const slug = 'smoke-game-' + Date.now().toString().slice(-6);
-  resp = await admin.post('/admin/games', { _csrf: admin.csrf(), title_en: 'Smoke Game', slug: slug, category: 'puzzle', embed_url: '/games/2048/', published: 'on' });
+  resp = await admin.post('/wyj/games', { _csrf: admin.csrf(), title_en: 'Smoke Game', slug: slug, category: 'puzzle', embed_url: '/games/2048/', published: 'on' });
   ok(resp.status === 302, 'admin creates game', resp.status);
-  r = await admin.get('/admin/games?q=' + slug);
-  const newId = extractId(r.text, '/admin/games/');
+  r = await admin.get('/wyj/games?q=' + slug);
+  const newId = extractId(r.text, '/wyj/games/');
   ok(!!newId, 'created game appears in admin list');
   if (newId) {
     r = await user.get('/game/' + slug);
     ok(r.status === 200, 'new game public page', r.status);
-    resp = await admin.post('/admin/games/' + newId + '/delete', { _csrf: admin.csrf() });
+    resp = await admin.post('/wyj/games/' + newId + '/delete', { _csrf: admin.csrf() });
     ok(resp.status === 302, 'admin deletes game', resp.status);
     r = await user.get('/game/' + slug);
     ok(r.status === 404, 'deleted game is 404', r.status);
   }
-  resp = await admin.post('/admin/ads', { _csrf: admin.csrf(), slot: 'header', type: 'html', title: 'Smoke Ad', html: '<div id="smoke-ad-marker">SMOKE-AD-123</div>', enabled: 'on', sort: '0' });
+  resp = await admin.post('/wyj/ads', { _csrf: admin.csrf(), slot: 'header', type: 'html', title: 'Smoke Ad', html: '<div id="smoke-ad-marker">SMOKE-AD-123</div>', enabled: 'on', sort: '0' });
   ok(resp.status === 302, 'ad created', resp.status);
   r = await user.get('/');
   ok(r.text.includes('SMOKE-AD-123'), 'ad renders on homepage', r.status);
-  r = await admin.get('/admin/ads');
-  const adId = extractId(r.text, '/admin/ads/');
+  r = await admin.get('/wyj/ads');
+  const adId = extractId(r.text, '/wyj/ads/');
   if (adId) {
-    resp = await admin.post('/admin/ads/' + adId + '/delete', { _csrf: admin.csrf() });
+    resp = await admin.post('/wyj/ads/' + adId + '/delete', { _csrf: admin.csrf() });
     ok(resp.status === 302, 'ad deleted', resp.status);
   } else ok(false, 'ad id found');
   r = await user.get('/');
   ok(!r.text.includes('SMOKE-AD-123'), 'ad removed from homepage', r.status);
   const baseSettings = { _csrf: admin.csrf(), site_name: 'PixelPlay', tagline_en: 'Instant HTML5 games - play free in your browser', tagline_zh: '即点即玩 · 免费在线小游戏', footer_text_en: '', footer_text_zh: '', registration_open: 'on' };
-  resp = await admin.post('/admin/settings', Object.assign({}, baseSettings, { ads_enabled: 'on' }));
+  resp = await admin.post('/wyj/settings', Object.assign({}, baseSettings, { ads_enabled: 'on' }));
   ok(resp.status === 302, 'settings save (ads on)', resp.status);
-  resp = await admin.post('/admin/settings', baseSettings);
+  resp = await admin.post('/wyj/settings', baseSettings);
   r = await user.get('/');
   ok(!r.text.includes('ad-slot-header') && !r.text.includes('ad-slot-home-mid'), 'ads can be disabled', r.status);
-  resp = await admin.post('/admin/settings', Object.assign({}, baseSettings, { ads_enabled: 'on' }));
+  resp = await admin.post('/wyj/settings', Object.assign({}, baseSettings, { ads_enabled: 'on' }));
   r = await user.get('/');
   ok(r.text.includes('ad-slot-header'), 'ads re-enabled with placeholders', r.status);
   r = await user.get('/healthz');

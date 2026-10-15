@@ -1,5 +1,5 @@
 <%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
-<form method="post" action="/admin/settings" class="panel form wide">
+<form method="post" action="/wyj/settings" class="panel form wide">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
   <div class="form-grid">
     <label><%= t('admin.settings_site_name') %><input name="site_name" value="<%= values.site_name %>"></label>

@@ -1,7 +1,7 @@
 <%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
 <div class="toolbar">
-  <form class="searchbox small" action="/admin/games" method="get"><svg class="ic"><use href="/img/icons.svg#i-search"></use></svg><input name="q" value="<%= q %>" placeholder="<%= t('nav.searchPlaceholder') %>"></form>
-  <a class="btn btn-primary" href="/admin/games/new"><svg class="ic"><use href="/img/icons.svg#i-plus"></use></svg><%= t('admin.newGame') %></a>
+  <form class="searchbox small" action="/wyj/games" method="get"><svg class="ic"><use href="/img/icons.svg#i-search"></use></svg><input name="q" value="<%= q %>" placeholder="<%= t('nav.searchPlaceholder') %>"></form>
+  <a class="btn btn-primary" href="/wyj/games/new"><svg class="ic"><use href="/img/icons.svg#i-plus"></use></svg><%= t('admin.newGame') %></a>
 </div>
 <table class="tbl">
   <tr><th><%= t('admin.tblId') %></th><th></th><th><%= t('admin.tblTitle') %></th><th><%= t('admin.tblSlug') %></th><th><%= t('admin.tblCategory') %></th><th><%= t('admin.tblSource') %></th><th><%= t('admin.tblPlays') %></th><th>F</th><th>P</th><th><%= t('admin.tblActions') %></th></tr>
@@ -17,10 +17,10 @@
     <td><%= g.featured ? '★' : '' %></td>
     <td><%= g.published ? '✓' : '—' %></td>
     <td class="actions">
-      <a class="btn btn-sm btn-ghost" href="/admin/games/<%= g.id %>/edit"><%= t('admin.edit') %></a>
-      <form method="post" action="/admin/games/<%= g.id %>/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.togglePublish') %></button></form>
-      <form method="post" action="/admin/games/<%= g.id %>/feature" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.toggleFeature') %></button></form>
-      <form method="post" action="/admin/games/<%= g.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
+      <a class="btn btn-sm btn-ghost" href="/wyj/games/<%= g.id %>/edit"><%= t('admin.edit') %></a>
+      <form method="post" action="/wyj/games/<%= g.id %>/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.togglePublish') %></button></form>
+      <form method="post" action="/wyj/games/<%= g.id %>/feature" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.toggleFeature') %></button></form>
+      <form method="post" action="/wyj/games/<%= g.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
     </td>
   </tr>
   <% }); %>

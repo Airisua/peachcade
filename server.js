@@ -17,6 +17,9 @@ const authRouter = require('./src/routes/auth');
 const apiRouter = require('./src/routes/api');
 const adminRouter = require('./src/routes/admin');
 
+// non-obvious admin path (security through obscurity for the dashboards)
+const ADMIN_BASE = process.env.ADMIN_BASE || '/wyj';
+
 const app = express();
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 
@@ -39,7 +42,7 @@ app.use(csrfGuard);
 app.use('/', siteRouter);
 app.use('/', authRouter);
 app.use('/api', apiRouter);
-app.use('/admin', adminRouter);
+app.use(ADMIN_BASE, adminRouter);
 
 // static files are served after routes so that page routes such as /games
 // are never shadowed by same-named directories inside public/

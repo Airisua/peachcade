@@ -9,8 +9,8 @@
     <td class="comment-cell"><%= c.content %></td>
     <td class="muted small"><%= fmtDate(c.created_at) %></td>
     <td class="actions">
-      <form method="post" action="/admin/comments/<%= c.id %>/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.toggleHide') %></button></form>
-      <form method="post" action="/admin/comments/<%= c.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
+      <form method="post" action="/wyj/comments/<%= c.id %>/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit"><%= t('admin.toggleHide') %></button></form>
+      <form method="post" action="/wyj/comments/<%= c.id %>/delete" class="inline" data-confirm-form="1"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger" type="submit"><%= t('common.delete') %></button></form>
     </td>
   </tr>
   <% }); %>

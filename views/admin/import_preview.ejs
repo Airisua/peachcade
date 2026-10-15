@@ -5,7 +5,7 @@
   <% if (!items.length) { %>
   <p class="muted"><%= t('admin.importEmpty') %></p>
   <% } else { %>
-  <form method="post" action="/admin/import/confirm">
+  <form method="post" action="/wyj/import/confirm">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <input type="hidden" name="token" value="<%= token %>">
     <table class="tbl">
@@ -24,7 +24,7 @@
     <div class="form-row">
       <label class="check"><input type="checkbox" name="publish" <%= publish ? 'checked' : '' %>><%= t('admin.importPublish') %></label>
       <button class="btn btn-primary" type="submit"><%= t('admin.importConfirm') %></button>
-      <a class="btn btn-ghost" href="/admin/import"><%= t('admin.importBack') %></a>
+      <a class="btn btn-ghost" href="/wyj/import"><%= t('admin.importBack') %></a>
     </div>
   </form>
   <% } %>
