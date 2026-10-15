@@ -19,6 +19,7 @@ body.admin{background:#0b0b12}
 .stat span{color:var(--muted);font-size:13px}
 .admin-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 .tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tbl th{text-align:left;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--line)}
 .tbl td{padding:9px 10px;border-bottom:1px solid #1e1e2d;vertical-align:middle}
 .tbl tr:hover td{background:rgba(255,255,255,.02)}

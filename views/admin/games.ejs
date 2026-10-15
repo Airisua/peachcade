@@ -29,6 +29,7 @@
 <form method="post" action="/wyj/games/bulk" id="bulk-form">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
 </form>
+<div class="tbl-wrap">
 <table class="tbl">
   <tr>
     <th><input type="checkbox" data-check-all form="bulk-form" title="<%= t('admin.bulkSelectAll') %>"></th>
@@ -69,6 +70,7 @@
   </tr>
   <% }); %>
 </table>
+</div>
 <% if (typeof note !== 'undefined' && note) { %><div class="notice ok"><%= note %></div><% } %>
 <%- include('../partials/pagination', { page: page, pages: pages, base: base }) %>
 <%- include('../partials/admin_bottom') %>
