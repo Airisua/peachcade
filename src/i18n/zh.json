@@ -244,5 +244,9 @@
   "admin.importShowing": "以下是本次从源拉取的批次",
   "admin.importPageLabel": "源页码",
   "admin.importRateLimited": "游戏源正在限流本站服务器（HTTP 429），通常几分钟内自动解除。请稍等片刻后点「重试本页」。建议一页一页导入，不要连续快速翻页。",
-  "admin.importRetry": "重试本页"
+  "admin.importRetry": "重试本页",
+  "admin.importScanInfo": "已扫描 {pages} 页 · 找到 {found} 款未导入游戏",
+  "admin.importAutoSkip": "已导入的游戏会自动跳过，不再显示",
+  "admin.importContinue": "继续扫描",
+  "admin.importNoNew": "扫描的页面中没有发现新游戏（都已在库中）。"
 }

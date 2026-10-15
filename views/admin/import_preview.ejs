@@ -14,18 +14,25 @@
     <a class="btn btn-ghost" href="/wyj/import"><%= t('admin.importBack') %></a>
   </form>
   <% } else if (!items.length) { %>
-  <p class="muted"><%= t('admin.importEmpty') %></p>
+  <p class="muted"><%= t('admin.importNoNew') %></p>
+  <form method="post" action="/wyj/import/preview" class="inline">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="provider" value="<%= provider %>">
+    <input type="hidden" name="url" value="<%= rawUrl %>">
+    <input type="hidden" name="num" value="<%= num %>">
+    <input type="hidden" name="page" value="<%= nextPage %>">
+    <button class="btn btn-primary" type="submit"><%= t('admin.importContinue') %></button>
+    <a class="btn btn-ghost" href="/wyj/import"><%= t('admin.importBack') %></a>
+  </form>
   <% } else { %>
   <div class="toolbar">
-    <span class="muted small"><%= t('admin.importShowing', { n: items.length }) %></span>
+    <span class="muted small"><%= t('admin.importScanInfo', { found: items.length, pages: scanned }) %><br><%= t('admin.importAutoSkip') %></span>
     <form method="post" action="/wyj/import/preview" class="inline">
       <input type="hidden" name="_csrf" value="<%= csrf %>">
       <input type="hidden" name="provider" value="<%= provider %>">
       <input type="hidden" name="url" value="<%= rawUrl %>">
       <input type="hidden" name="num" value="<%= num %>">
-      <button class="btn btn-sm btn-ghost" type="submit" name="page" value="<%= page - 1 %>" <%= page <= 1 ? 'disabled' : '' %>>← <%= t('common.prev') %></button>
-      <span class="muted small" style="align-self:center"><%= t('admin.importPageLabel') %> <b><%= page %></b></span>
-      <button class="btn btn-sm btn-ghost" type="submit" name="page" value="<%= page + 1 %>"> <%= t('common.next') %> →</button>
+      <button class="btn btn-sm btn-primary" type="submit" name="page" value="<%= nextPage %>"><%= t('admin.importContinue') %> →</button>
     </form>
   </div>
   <form method="post" action="/wyj/import/confirm">

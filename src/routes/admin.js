@@ -286,6 +286,59 @@ router.get('/import', (req, res) => {
   });
 });
 
+const IMPORT_SCAN_LIMIT = 5;
+const FEED_PAGE_DELAY_MS = 250;
+
+function gameTitleFor(res, it) {
+  try { return res.locals.gt(it); } catch (e) { return it.title_en || ''; }
+}
+
+async function fetchFreshGames(res, o) {
+  const seen = new Set();
+  const fresh = [];
+  let scanned = 0;
+  let lastName = '';
+  let lastSlug = '';
+  let lastUrl = '';
+  try {
+    for (let i = 0; i < IMPORT_SCAN_LIMIT && fresh.length < o.num; i++) {
+      const page = o.startPage + i;
+      if (i > 0) await new Promise((r) => setTimeout(r, FEED_PAGE_DELAY_MS));
+      const result = await providers.fetchGames({ provider: o.provider, url: o.url, num: o.num, page: page });
+      scanned++;
+      lastUrl = result.url;
+      for (const it of result.items || []) {
+        const slug = providers.slugFor(o.provider, it);
+        if (seen.has(slug)) continue;
+        seen.add(slug);
+        if (db.prepare('SELECT 1 FROM games WHERE slug=? OR embed_url=?').get(slug, it.url)) continue;
+        fresh.push({
+          sourceId: it.sourceId,
+          title: it.title,
+          titleZh: gameTitleFor(res, { title_en: it.title }),
+          desc: (it.description || '').slice(0, 500),
+          howto: (it.instructions || '').slice(0, 2000),
+          category: providers.mapCategory(it.category, o.cats),
+          catLabel: it.category || '',
+          size: it.width && it.height ? it.width + 'x' + it.height : '',
+          slug: slug,
+          thumb: it.thumb || '/img/games/default.svg',
+          url: it.url,
+          tags: providers.tagsFor(o.provider, it.tags)
+        });
+        lastName = it.title;
+        lastSlug = slug;
+        if (fresh.length >= o.num) break;
+      }
+      if (!(result.items || []).length) break;
+    }
+    return { fresh, scanned, lastName: lastName || lastSlug, lastUrl };
+  } catch (e) {
+    if (scanned > 0) return { fresh, scanned, lastName: lastName || lastSlug, lastUrl, partial: true };
+    throw e;
+  }
+}
+
 router.post('/import/preview', async (req, res) => {
   if (csrfFail(req, res)) return;
   const provider = String(req.body.provider || 'gamemonetize');
@@ -296,29 +349,23 @@ router.post('/import/preview', async (req, res) => {
   try {
     pruneImportCache();
     const cacheKey = [provider, rawUrl, num, page].join('|');
-    let result = feedPageCache.get(cacheKey);
-    if (!result) {
-      result = await providers.fetchGames({ provider, url: rawUrl, num: num, page: page });
-      feedPageCache.set(cacheKey, { url: result.url, items: result.items, ts: Date.now() });
-    }
-    const cats = db.prepare('SELECT * FROM categories ORDER BY sort').all();
-    const items = (result.items || []).map((it) => {
-      const slug = providers.slugFor(provider, it);
-      return {
-        sourceId: it.sourceId,
-        title: it.title,
-        desc: (it.description || '').slice(0, 500),
-        howto: (it.instructions || '').slice(0, 2000),
-        category: providers.mapCategory(it.category, cats),
-        catLabel: it.category || '',
-        size: it.width && it.height ? it.width + 'x' + it.height : '',
-        slug: slug,
-        thumb: it.thumb || '/img/games/default.svg',
-        url: it.url,
-        tags: providers.tagsFor(provider, it.tags),
-        existing: !!db.prepare('SELECT 1 FROM games WHERE slug=? OR embed_url=?').get(slug, it.url)
+    let cached = feedPageCache.get(cacheKey);
+    if (!cached) {
+      const cats = db.prepare('SELECT * FROM categories ORDER BY sort').all();
+      const out = await fetchFreshGames(res, { provider: provider, url: rawUrl, num: num, startPage: page, cats: cats });
+      cached = {
+        url: out.lastUrl,
+        items: out.fresh,
+        scanned: out.scanned,
+        nextPage: page + Math.max(1, out.scanned),
+        last: out.lastName || '',
+        ts: Date.now()
       };
-    });
+      feedPageCache.set(cacheKey, cached);
+    }
+    // re-filter on every render: games imported after this page was fetched must disappear too
+    const items = (cached.items || []).filter((it) => !db.prepare('SELECT 1 FROM games WHERE slug=? OR embed_url=?').get(it.slug, it.url));
+    const nextPage = (cached.nextPage && cached.nextPage > page) ? cached.nextPage : page + Math.max(1, cached.scanned || 1);
     const token = crypto.randomBytes(12).toString('hex');
     importCache.set(token, { items: items, ts: Date.now(), provider: provider, publish: !!req.body.publish });
     res.render('admin/import_preview', {
@@ -327,11 +374,14 @@ router.post('/import/preview', async (req, res) => {
       items: items,
       provider: provider,
       publish: !!req.body.publish,
-      feedUrl: result.url,
+      feedUrl: cached.url || rawUrl,
       rawUrl: rawUrl,
       page: page,
       num: num,
-      feedBusy: feedBusy
+      feedBusy: feedBusy,
+      scanned: cached.scanned,
+      nextPage: nextPage,
+      lastTitle: cached.last
     });
   } catch (e) {
     if (e && e.status === 429) {
@@ -346,7 +396,10 @@ router.post('/import/preview', async (req, res) => {
         rawUrl: rawUrl,
         page: page,
         num: num,
-        feedBusy: feedBusy
+        feedBusy: feedBusy,
+        scanned: 0,
+        nextPage: page,
+        lastTitle: ''
       });
       return;
     }

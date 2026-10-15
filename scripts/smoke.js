@@ -125,7 +125,7 @@ function client() {
   resp = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: 'http://127.0.0.1:9/nope', num: 5, page: 1 });
   ok(resp.status === 302 && resp.location.indexOf('/wyj/import') === 0, 'import preview handles unreachable feed', resp.status + ' ' + resp.location);
 
-  // import preview pagination (navigate the distribution feed page by page)
+  // import preview: auto-scan + auto-dedupe (only not-yet-imported games are shown)
   const fixture = http.createServer((fq, fres) => {
     const u = new URL(fq.url, 'http://127.0.0.1');
     const n = Math.min(48, parseInt(u.searchParams.get('num'), 10) || 24);
@@ -141,13 +141,34 @@ function client() {
   await new Promise((res2) => fixture.listen(0, '127.0.0.1', res2));
   const fixturePort = fixture.address().port;
   const pagedFeed = 'http://127.0.0.1:' + fixturePort + '/feed?num={num}&page={page}';
-  r = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: pagedFeed, num: 6, page: 1 });
-  ok(r.status === 200 && r.text.indexOf('name="page"') >= 0, 'preview exposes feed pagination controls', r.status);
-  ok(r.text.includes('value="2"'), 'preview offers next feed page button');
-  ok(r.text.includes('disabled'), 'preview disables previous on first page');
-  r = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: pagedFeed, num: 6, page: 2 });
-  ok(r.status === 200 && r.text.indexOf('value="3"') >= 0 && r.text.indexOf('value="1"') >= 0, 'preview navigates to feed page 2', r.status);
-  ok(r.text.includes('Fixture Game 7') && !r.text.includes('Fixture Game 1<'), 'feed page 2 shows the next batch', r.status);
+  // first pass: scan pages 1-3 (6 per page) to gather 12 new games
+  r = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: pagedFeed, num: 12, page: 1 });
+  const firstPass = [...r.text.matchAll(/Fixture Game (\d+)</g)].map((m) => Number(m[1]));
+  ok(r.status === 200 && firstPass.indexOf(1) >= 0 && firstPass.indexOf(12) >= 0, 'preview lists the first new games', JSON.stringify(firstPass));
+  ok(/已扫描|Scanned/.test(r.text) && /继续扫描|Scan for more/.test(r.text), 'preview reports scan progress with a continue button');
+  const scanInfo = (r.text.match(/已扫描\s*\d+\s*页|Scanned \d+ feed/) || [''])[0];
+  ok(/\d/.test(scanInfo), 'scan info includes a page count', scanInfo);
+  // import two games (fixture 1 and 2) so the next preview must skip them
+  const bulkSel = [];
+  const token = (r.text.match(/name="token" value="([^"]+)"/) || [])[1] || '';
+  ok(!!token, 'preview provides an import token');
+  const itemIds = [...r.text.matchAll(/name="sel" value="(\d+)"/g)].map((m) => m[1]);
+  resp = await admin.post('/wyj/import/confirm', { _csrf: admin.csrf(), token: token, publish: 'on', sel: itemIds.slice(0, 2) });
+  ok(resp.status === 302, 'import confirm accepts the scanned batch', resp.status);
+  ok((await user.get('/game/fixture-game-1-ext-1')).status === 200, 'imported fixture game is live', '');
+  // second pass: the imported games must be filtered out automatically
+  r = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: pagedFeed, num: 12, page: 1 });
+  const shownGames = [...r.text.matchAll(/Fixture Game (\d+)</g)].map((m) => Number(m[1]));
+  ok(r.status === 200 && shownGames.length > 0, 'preview still lists fresh games after an import', r.status);
+  ok(shownGames.indexOf(1) === -1 && shownGames.indexOf(2) === -1, 'preview auto-skips already imported games', JSON.stringify(shownGames));
+  ok(shownGames.indexOf(3) >= 0, 'fresh games remain visible', JSON.stringify(shownGames));
+  const importedAgain = shownGames.indexOf(1) >= 0 || shownGames.indexOf(2) >= 0;
+  ok(!importedAgain, 'imported games no longer appear in the preview');
+  // cleanup imported fixtures
+  const cleanupIds = [];
+  const listPage = await admin.get('/wyj/games?q=fixture-game-1-ext');
+  for (const m of listPage.text.matchAll(/name="sel" value="(\d+)"[^>]*>\s*<\/td>[\s\S]{0,900}?<code>(fixture-game-1-ext[^<]+)<\/code>/g)) cleanupIds.push(m[1]);
+  if (cleanupIds.length) await admin.post('/wyj/games/bulk', { _csrf: admin.csrf(), action: 'delete', sel: cleanupIds });
   fixture.close();
 
   // rate-limited feed (HTTP 429) shows a friendly notice with retry instead of a bare redirect.

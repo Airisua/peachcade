@@ -244,5 +244,9 @@
   "admin.importShowing": "Showing the selected batch from the feed",
   "admin.importPageLabel": "Feed page",
   "admin.importRateLimited": "The game feed is rate-limiting this server (HTTP 429). This usually clears within a few minutes. Wait a bit, then hit Retry. Tip: import one page at a time instead of flipping through many pages quickly.",
-  "admin.importRetry": "Retry this page"
+  "admin.importRetry": "Retry this page",
+  "admin.importScanInfo": "Scanned {pages} feed page(s) · found {found} new game(s)",
+  "admin.importAutoSkip": "Already-imported games are skipped automatically",
+  "admin.importContinue": "Scan for more",
+  "admin.importNoNew": "Nothing new found in the scanned pages (everything there is already imported)."
 }
