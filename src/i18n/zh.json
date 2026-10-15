@@ -240,5 +240,7 @@
   "admin.bulkUnfeature": "取消精选",
   "admin.bulkDelete": "批量删除",
   "admin.bulkCount": "已更新 {n} 款游戏。",
-  "js.bulkNone": "请先勾选至少一款游戏。"
+  "js.bulkNone": "请先勾选至少一款游戏。",
+  "admin.importShowing": "以下是本次从源拉取的批次",
+  "admin.importPageLabel": "源页码"
 }

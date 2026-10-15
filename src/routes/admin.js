@@ -286,11 +286,12 @@ router.post('/import/preview', async (req, res) => {
   if (csrfFail(req, res)) return;
   try {
     const provider = String(req.body.provider || 'gamemonetize');
+    const page = Math.max(1, parseInt(req.body.page, 10) || 1);
     const result = await providers.fetchGames({
       provider,
       url: String(req.body.url || ''),
       num: req.body.num,
-      page: req.body.page
+      page: page
     });
     const cats = db.prepare('SELECT * FROM categories ORDER BY sort').all();
     const items = result.items.map((it) => {
@@ -319,7 +320,10 @@ router.post('/import/preview', async (req, res) => {
       items: items,
       provider: provider,
       publish: !!req.body.publish,
-      feedUrl: result.url
+      feedUrl: result.url,
+      rawUrl: String(req.body.url || ''),
+      page: page,
+      num: parseInt(req.body.num, 10) || 24
     });
   } catch (e) {
     res.redirect(ADMIN_BASE + '/import?err=importFailed');

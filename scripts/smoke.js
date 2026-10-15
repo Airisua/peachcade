@@ -1,4 +1,5 @@
 'use strict';
+const http = require('http');
 const BASE = process.env.SMOKE_BASE || ('http://localhost:' + (process.env.PORT || 3000));
 let pass = 0, fail = 0;
 const failures = [];
@@ -123,6 +124,31 @@ function client() {
   }
   resp = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: 'http://127.0.0.1:9/nope', num: 5, page: 1 });
   ok(resp.status === 302 && resp.location.indexOf('/wyj/import') === 0, 'import preview handles unreachable feed', resp.status + ' ' + resp.location);
+
+  // import preview pagination (navigate the distribution feed page by page)
+  const fixture = http.createServer((fq, fres) => {
+    const u = new URL(fq.url, 'http://127.0.0.1');
+    const n = Math.min(48, parseInt(u.searchParams.get('num'), 10) || 24);
+    const pg = Math.max(1, parseInt(u.searchParams.get('page'), 10) || 1);
+    const games = [];
+    for (let i = 1; i <= n; i++) {
+      const id = (pg - 1) * n + i;
+      games.push({ id, title: 'Fixture Game ' + id, embed_url: 'https://example.com/game/' + id, thumbnail: 'https://example.com/t/' + id + '.png', category: 'puzzle', tags: 'fixture' });
+    }
+    fres.setHeader('content-type', 'application/json');
+    fres.end(JSON.stringify({ games }));
+  });
+  await new Promise((res2) => fixture.listen(0, '127.0.0.1', res2));
+  const fixturePort = fixture.address().port;
+  const pagedFeed = 'http://127.0.0.1:' + fixturePort + '/feed?num={num}&page={page}';
+  r = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: pagedFeed, num: 6, page: 1 });
+  ok(r.status === 200 && r.text.indexOf('name="page"') >= 0, 'preview exposes feed pagination controls', r.status);
+  ok(r.text.includes('value="2"'), 'preview offers next feed page button');
+  ok(r.text.includes('disabled'), 'preview disables previous on first page');
+  r = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: pagedFeed, num: 6, page: 2 });
+  ok(r.status === 200 && r.text.indexOf('value="3"') >= 0 && r.text.indexOf('value="1"') >= 0, 'preview navigates to feed page 2', r.status);
+  ok(r.text.includes('Fixture Game 7') && !r.text.includes('Fixture Game 1<'), 'feed page 2 shows the next batch', r.status);
+  fixture.close();
   const slug = 'smoke-game-' + Date.now().toString().slice(-6);
   resp = await admin.post('/wyj/games', { _csrf: admin.csrf(), title_en: 'Smoke Game', slug: slug, category: 'puzzle', embed_url: '/games/2048/', published: 'on' });
   ok(resp.status === 302, 'admin creates game', resp.status);

@@ -240,5 +240,7 @@
   "admin.bulkUnfeature": "Unfeature",
   "admin.bulkDelete": "Delete",
   "admin.bulkCount": "Updated {n} game(s).",
-  "js.bulkNone": "Select at least one game first."
+  "js.bulkNone": "Select at least one game first.",
+  "admin.importShowing": "Showing the selected batch from the feed",
+  "admin.importPageLabel": "Feed page"
 }

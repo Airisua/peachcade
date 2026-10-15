@@ -5,6 +5,18 @@
   <% if (!items.length) { %>
   <p class="muted"><%= t('admin.importEmpty') %></p>
   <% } else { %>
+  <div class="toolbar">
+    <span class="muted small"><%= t('admin.importShowing', { n: items.length }) %></span>
+    <form method="post" action="/wyj/import/preview" class="inline">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <input type="hidden" name="provider" value="<%= provider %>">
+      <input type="hidden" name="url" value="<%= rawUrl %>">
+      <input type="hidden" name="num" value="<%= num %>">
+      <button class="btn btn-sm btn-ghost" type="submit" name="page" value="<%= page - 1 %>" <%= page <= 1 ? 'disabled' : '' %>>← <%= t('common.prev') %></button>
+      <span class="muted small" style="align-self:center"><%= t('admin.importPageLabel') %> <b><%= page %></b></span>
+      <button class="btn btn-sm btn-ghost" type="submit" name="page" value="<%= page + 1 %>"> <%= t('common.next') %> →</button>
+    </form>
+  </div>
   <form method="post" action="/wyj/import/confirm">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <input type="hidden" name="token" value="<%= token %>">
