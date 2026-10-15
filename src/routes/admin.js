@@ -34,9 +34,11 @@ router.get('/', (req, res) => {
 router.get('/games', (req, res) => {
   const q = String(req.query.q || '').slice(0, 64);
   const data = listGames({ q, sort: 'new', page: parseInt(req.query.page, 10) || 1, per: 24, includeUnpublished: true });
+  let note = '';
+  if (req.query.n) note = res.locals.t('admin.bulkCount', { n: parseInt(req.query.n, 10) || 0 });
   res.render('admin/games', {
     pageTitle: res.locals.t('admin.games'),
-    games: data.games, page: data.page, pages: data.pages, q,
+    games: data.games, page: data.page, pages: data.pages, q, note,
     base: ADMIN_BASE + '/games?q=' + encodeURIComponent(q) + '&'
   });
 });
@@ -97,6 +99,32 @@ function saveGame(req, res, id) {
 router.post('/games', upload.single('thumb_file'), (req, res) => {
   if (csrfFail(req, res)) return;
   saveGame(req, res, null);
+});
+
+// bulk operations on the games list (multi-select: publish / hide / feature / delete)
+router.post('/games/bulk', (req, res) => {
+  if (csrfFail(req, res)) return;
+  const action = String(req.body.action || '');
+  const raw = req.body.sel;
+  const parts = Array.isArray(raw) ? raw : [raw];
+  const ids = parts
+    .reduce((acc, v) => acc.concat(String(v || '').split(',')), [])
+    .map((v) => parseInt(v, 10) || 0)
+    .filter((v) => v > 0);
+  if (!ids.length) return res.redirect(ADMIN_BASE + '/games?err=badRequest');
+  const uniq = Array.from(new Set(ids));
+  const marks = uniq.map(() => '?').join(',');
+  const tx = db.transaction(() => {
+    if (action === 'publish') return db.prepare('UPDATE games SET published=1 WHERE id IN (' + marks + ')').run(uniq).changes;
+    if (action === 'unpublish') return db.prepare('UPDATE games SET published=0 WHERE id IN (' + marks + ')').run(uniq).changes;
+    if (action === 'feature') return db.prepare('UPDATE games SET featured=1 WHERE id IN (' + marks + ')').run(uniq).changes;
+    if (action === 'unfeature') return db.prepare('UPDATE games SET featured=0 WHERE id IN (' + marks + ')').run(uniq).changes;
+    if (action === 'delete') return db.prepare('DELETE FROM games WHERE id IN (' + marks + ')').run(uniq).changes;
+    return null;
+  });
+  const n = tx();
+  if (n === null) return res.redirect(ADMIN_BASE + '/games?err=badRequest');
+  res.redirect(ADMIN_BASE + '/games?ok=updated&n=' + n);
 });
 
 router.post('/games/:id', upload.single('thumb_file'), (req, res) => {

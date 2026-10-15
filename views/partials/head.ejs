@@ -21,4 +21,4 @@
 <link rel="canonical" href="<%= siteUrl + path %>">
 </head>
 <body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
-<script>window.CSRF = <%- JSON.stringify(csrf) %>; window.I18N = <%- JSON.stringify({ copied: t('js.copied'), likeLogin: t('js.likeLogin'), confirmDelete: t('common.confirmDelete') }) %>;</script>
+<script>window.CSRF = <%- JSON.stringify(csrf) %>; window.I18N = <%- JSON.stringify({ copied: t('js.copied'), likeLogin: t('js.likeLogin'), confirmDelete: t('common.confirmDelete'), bulkNone: t('js.bulkNone') }) %>;</script>

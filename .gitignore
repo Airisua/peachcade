@@ -7,3 +7,4 @@ public/uploads/*
 npm-debug.log*
 *.log
 scripts/tmp/
+logs-server*.txt

@@ -231,5 +231,14 @@
   "auth.emailPlaceholder": "name@example.com",
   "auth.passwordReq": "At least 6 characters",
   "admin.settings_ads_txt": "ads.txt content (ad-network verification)",
-  "admin.settings_ads_txt_hint": "Served as plain text at /ads.txt. Paste the ads.txt snippet from your ad network publisher dashboard here."
+  "admin.settings_ads_txt_hint": "Served as plain text at /ads.txt. Paste the ads.txt snippet from your ad network publisher dashboard here.",
+  "admin.bulkHint": "Selected: ",
+  "admin.bulkSelectAll": "Select all on this page",
+  "admin.bulkPublish": "Publish",
+  "admin.bulkUnpublish": "Hide",
+  "admin.bulkFeature": "Feature",
+  "admin.bulkUnfeature": "Unfeature",
+  "admin.bulkDelete": "Delete",
+  "admin.bulkCount": "Updated {n} game(s).",
+  "js.bulkNone": "Select at least one game first."
 }

@@ -93,6 +93,25 @@
       var form = master.closest('form');
       if (!form) return;
       $$('input[name="sel"]', form).forEach(function (cb) { if (!cb.disabled) cb.checked = master.checked; });
+      updateBulkCount(form);
+    });
+  });
+
+  function updateBulkCount(form) {
+    var el = $('#bulk-count');
+    if (!form || !el || !form.contains(el)) return;
+    el.textContent = String($$('input[name="sel"]:checked', form).length);
+  }
+  $$('input[name="sel"]').forEach(function (cb) {
+    cb.addEventListener('change', function () { updateBulkCount(cb.closest('form')); });
+  });
+  $$('.bulk-actions button').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      var form = btn.closest('form');
+      if (form && $$('input[name="sel"]:checked', form).length === 0) {
+        e.preventDefault();
+        toast(I18N.bulkNone || 'Select at least one item first.');
+      }
     });
   });
   // password visibility toggle

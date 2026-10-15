@@ -28,6 +28,12 @@ body.admin{background:#0b0b12}
 .row-hidden td{opacity:.45;text-decoration:line-through}
 .toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:14px 0}
 .toolbar .searchbox{max-width:320px;min-width:200px}
+.bulkbar{align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0 0 14px}
+.bulk-actions{display:flex;gap:8px;flex-wrap:wrap}
+.bulk-actions .btn-primary{padding:5px 12px;font-size:12.5px;border-radius:8px}
+.bulkbar .muted b{color:#fff;margin-left:2px;font-variant-numeric:tabular-nums}
+.tbl td:first-child,.tbl th:first-child{width:34px;text-align:center}
+.tbl input[type=checkbox]{width:15px !important;height:15px !important;margin:0 !important;accent-color:var(--brand);cursor:pointer}
 .mini-comment{border-bottom:1px solid #1e1e2d;padding:9px 0;font-size:13.5px}
 .mini-comment p{margin:2px 0 0;color:var(--muted)}
 code{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12.5px}

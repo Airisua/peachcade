@@ -23,7 +23,16 @@ function client() {
     opts = opts || {};
     const headers = Object.assign({}, opts.headers || {});
     let body;
-    if (opts.form) { body = new URLSearchParams(opts.form).toString(); headers['content-type'] = 'application/x-www-form-urlencoded'; }
+    if (opts.form) {
+      const usp = new URLSearchParams();
+      for (const k of Object.keys(opts.form)) {
+        const v = opts.form[k];
+        if (Array.isArray(v)) v.forEach(function (x) { usp.append(k, x); });
+        else usp.set(k, v);
+      }
+      body = usp.toString();
+      headers['content-type'] = 'application/x-www-form-urlencoded';
+    }
     if (jar.size) headers.cookie = Array.from(jar.entries()).map(function (e) { return e[0] + '=' + e[1]; }).join('; ');
     const r = await fetch(BASE + path, { method, headers, body, redirect: 'manual' });
     const setc = r.headers.getSetCookie ? r.headers.getSetCookie() : [];
@@ -128,6 +137,41 @@ function client() {
     r = await user.get('/game/' + slug);
     ok(r.status === 404, 'deleted game is 404', r.status);
   }
+
+  // bulk operations (multi-select publish / hide / delete)
+  const slugA = 'smoke-a-' + Date.now().toString(36);
+  const slugB = 'smoke-b-' + Date.now().toString(36);
+  await admin.post('/wyj/games', { _csrf: admin.csrf(), title_en: 'Smoke Bulk A', slug: slugA, category: 'puzzle', embed_url: '/games/2048/', published: 'on' });
+  await admin.post('/wyj/games', { _csrf: admin.csrf(), title_en: 'Smoke Bulk B', slug: slugB, category: 'puzzle', embed_url: '/games/2048/', published: 'on' });
+  r = await admin.get('/wyj/games?q=smoke-');
+  const bulkIds = [];
+  const idBySlug = new Map();
+  for (const m of r.text.matchAll(/name="sel" value="(\d+)"><\/td>[\s\S]{0,900}?<code>([^<]+)<\/code>/g)) {
+    bulkIds.push(m[1]);
+    idBySlug.set(m[2], m[1]);
+  }
+  ok(bulkIds.length >= 2 && r.text.includes('data-check-all') && idBySlug.has(slugA) && idBySlug.has(slugB), 'games list exposes multi-select checkboxes', JSON.stringify(bulkIds));
+  const pair = [idBySlug.get(slugA), idBySlug.get(slugB)];
+  if (pair[0] && pair[1]) {
+    resp = await admin.post('/wyj/games/bulk', { _csrf: admin.csrf(), action: 'unpublish', sel: pair });
+    ok(resp.status === 302 && resp.location.indexOf('n=2') >= 0, 'bulk hide updates 2 games', resp.status + ' ' + resp.location);
+    r = await user.get('/game/' + slugA);
+    ok(r.status === 404, 'bulk hidden game not public', r.status);
+    resp = await admin.post('/wyj/games/bulk', { _csrf: admin.csrf(), action: 'publish', sel: pair });
+    ok(resp.status === 302 && resp.location.indexOf('n=2') >= 0, 'bulk publish updates 2 games', resp.status + ' ' + resp.location);
+    r = await user.get('/game/' + slugA);
+    ok(r.status === 200, 'bulk published game is public again', r.status);
+    resp = await admin.post('/wyj/games/bulk', { _csrf: admin.csrf(), action: 'delete', sel: pair });
+    ok(resp.status === 302 && resp.location.indexOf('n=2') >= 0, 'bulk delete removes 2 games', resp.status + ' ' + resp.location);
+    r = await user.get('/game/' + slugA);
+    ok(r.status === 404, 'bulk deleted game is 404', r.status);
+  }
+  await admin.post('/wyj/games/bulk', { _csrf: admin.csrf(), action: 'delete', sel: bulkIds });
+  resp = await admin.post('/wyj/games/bulk', { _csrf: admin.csrf(), action: 'publish', sel: [] });
+  ok(resp.status === 302 && resp.location.indexOf('err=badRequest') >= 0, 'bulk with empty selection rejected', resp.status + ' ' + resp.location);
+  resp = await admin.post('/wyj/games/bulk', { _csrf: admin.csrf(), action: 'bogus', sel: ['1'] });
+  ok(resp.status === 302 && resp.location.indexOf('err=badRequest') >= 0, 'bulk with unknown action rejected', resp.status + ' ' + resp.location);
+
   resp = await admin.post('/wyj/ads', { _csrf: admin.csrf(), slot: 'header', type: 'html', title: 'Smoke Ad', html: '<div id="smoke-ad-marker">SMOKE-AD-123</div>', enabled: 'on', sort: '0' });
   ok(resp.status === 302, 'ad created', resp.status);
   r = await user.get('/');
