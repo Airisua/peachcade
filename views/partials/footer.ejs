@@ -24,6 +24,16 @@
     </div>
   </div>
   <%- include('ad', { slot: 'footer' }) %>
+  <% if (typeof popularTags !== 'undefined' && popularTags && popularTags.length) { %>
+  <div class="container footer-tags">
+    <span class="footer-tags-label muted small"><%= t('nav.popularTags') %>:</span>
+    <div class="footer-tags-list">
+      <% popularTags.forEach(function (pt) { %>
+      <a class="chip chip-sm" href="/tag/<%= pt.slug %>"><%= pt.tag %></a>
+      <% }); %>
+    </div>
+  </div>
+  <% } %>
   <div class="container footer-bottom">
     <span><%= t('footer.legal', { year: year, site: site.name }) %> · <a href="mailto:wyjv58787@gmail.com" class="muted"><%= t('footer.contact') %>: wyjv58787@gmail.com</a></span>
     <span class="muted"><%= t('footer.builtWith') %></span>

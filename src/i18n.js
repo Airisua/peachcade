@@ -22,8 +22,14 @@ function makeT(lang) {
 }
 
 function i18nMiddleware(req, res, next) {
+  const queryLang = req.query && (req.query.lang || req.query.hl);
   const cookieLang = req.cookies && req.cookies.lang;
-  const lang = SUPPORTED_LANGS.includes(cookieLang) ? cookieLang : 'en';
+  const lang = (queryLang && SUPPORTED_LANGS.includes(queryLang))
+    ? queryLang
+    : (cookieLang && SUPPORTED_LANGS.includes(cookieLang) ? cookieLang : 'en');
+  if (queryLang && SUPPORTED_LANGS.includes(queryLang) && cookieLang !== queryLang) {
+    res.cookie('lang', queryLang, { sameSite: 'lax', maxAge: 365 * 864e5 });
+  }
   req.lang = lang;
   res.locals.lang = lang;
   res.locals.supportedLangs = [

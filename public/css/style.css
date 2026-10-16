@@ -357,3 +357,8 @@ textarea {
 .contact-pill a{color:#fff;text-decoration:none}
 .contact-pill a:hover{color:var(--brand2);text-decoration:underline}
 
+.footer-tags{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:18px;margin-top:20px;border-top:1px solid var(--line)}
+.footer-tags-label{font-weight:700;white-space:nowrap}
+.footer-tags-list{display:flex;gap:6px;flex-wrap:wrap}
+.chip-sm{padding:3px 9px;font-size:12px;border-radius:7px}
+

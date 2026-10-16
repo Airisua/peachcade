@@ -289,5 +289,10 @@
   "profile.updateEmail": "Update email",
   "about.contactTitle": "Contact & Inquiries",
   "about.contactP": "For business cooperation, game submissions, copyright inquiries, or player feedback, please get in touch via email:",
-  "footer.contact": "Contact"
+  "footer.contact": "Contact",
+  "seo.gameTitle": "Play {title} Free Online",
+  "seo.gameCta": "Play {title} free online in your browser on {site}. Instant play, no download required.",
+  "seo.tagHeading": "Free {tag} Games",
+  "seo.tagDesc": "Play the best free online {tag} games on {site}. Instant browser play, no download needed!",
+  "nav.popularTags": "Popular Tags"
 }

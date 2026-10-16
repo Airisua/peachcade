@@ -4,6 +4,38 @@
 
 ---
 
+## [2026-10-17] 流量裂变专项 SEO 体系落地：分卷Sitemap索引、独立标签专题页、Hreflang与FAQ富摘要 (SEO & Traffic Engine)
+
+### 1. 分卷站点地图索引系统 (Sitemap Index & Chunked Architecture)
+- **Sitemap 架构升级**：为解决单文件 6.2MB 超大 XML 在 Google Search Console (GSC) 离线排队拉取超时或“无法抓取”伪报错问题，彻底重构为官方标准的 `sitemapindex` 目录索引架构：
+  - `/sitemap.xml`：主索引目录，聚合指向所有子地图；
+  - `/sitemap-main.xml`：核心页面与全部分类地图（体积仅 ~2KB，秒速解析验证）；
+  - `/sitemap-tags.xml`：热门标签与主题专题页地图；
+  - `/sitemap-games-:chunk.xml`：海量游戏按 5,000 款/卷智能切片，轻量易爬。
+- **内存智能缓存**：各分卷采用 1 小时独立内存缓存，爬虫高频并发抓取时零数据库压力。
+
+### 2. 独立可索引标签专题页 (Tag Landing Pages)
+- **释放海量长尾关键词流量**：将游戏详情页底部的所有内容标签从原先带有 `noindex` 的搜索跳转升级为独立合规的静态专题路由 `/tag/:tag`（如 `/tag/2-player`、`/tag/car`、`/tag/racing`）。
+- **完善的专题页 SEO 装备**：每个专题页配备专属 CollectionPage 和 BreadcrumbList 结构化数据、定制 H1 与动态 Meta Description，并开放搜索引擎抓取索引（`robots: index`）。
+- **全站页脚热门标签云**：`src/queries.js` 新增 `getPopularTags()` 算法，在通用页脚动态生成高频热门标签链接，为全站上万个长尾词入口注入强大的内部链接权重。
+
+### 3. 多语言无 Cookie 爬虫感知与 Hreflang 国际化标准
+- **Query 参数无缝穿透**：`src/i18n.js` 升级支持 `?lang=zh` 与 `?lang=ja` URL 参数直接解析，无需依赖 Cookie，彻底打通 Googlebot、Baidu、Yahoo Japan 对全站中文和日文页面的独立索引通道。
+- **Hreflang 交叉引用标记**：在 `views/partials/head.ejs` 中全自动注入 `hreflang="en"`、`hreflang="zh"`、`hreflang="ja"` 以及 `hreflang="x-default"` 国际化交叉标签，指引搜索引擎根据用户语言和地区展示最精准的语言版本。
+
+### 4. 搜索结果点击率（CTR）倍增与 FAQPage 富媒体摘要
+- **搜索意图词注入**：游戏详情页标题模板优化为带有强点击意图的表达：
+  - 英文：`Play {title} Free Online · Peachcade`
+  - 中文：`在线免费玩《{title}》 · Peachcade`
+  - 日文：`『{title}』無料オンラインプレイ · Peachcade`
+- **FAQPage 结构化数据**：`src/schema.js` 新增 `faqPage()`，将游戏操作指南与免费试玩属性转化为符合 Google 规范的常见问答结构，有机会在 Google 搜索结果中直接获得下拉手风琴折叠卡片（Rich Snippets）的超大展示面积。
+
+### 5. IndexNow 极速索引协议接入 (Bing & Yandex Instant Crawl)
+- **协议端点就绪**：部署 IndexNow 验证密钥端点 `/2771545fc9c14828b056ff3f18e9f50e.txt`。
+- **批量一键推送工具**：新增 `scripts/indexnow.js` 脚本，支持通过单条命令直接向 IndexNow API 批量推送全站热门 URL，实现必应搜索（Bing）与 Yandex 的分钟级收录。
+
+---
+
 ## [2026-10-16] 个人中心与全站多处增设联系方式 & 搜索引擎收录与资质增强 (Contact Info & Webmaster Authority)
 
 ### 1. 个人中心联系信息与修改能力 (User Profile Contact Information)

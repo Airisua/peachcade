@@ -99,6 +99,7 @@ CREATE INDEX IF NOT EXISTS idx_games_pub_cat_plays ON games(published, category,
 CREATE INDEX IF NOT EXISTS idx_games_pub_created ON games(published, created_at DESC, id DESC);
 CREATE INDEX IF NOT EXISTS idx_games_pub_likes ON games(published, likes DESC, created_at DESC, id DESC);
 CREATE INDEX IF NOT EXISTS idx_games_pub_featured ON games(published, featured, plays DESC);
+CREATE INDEX IF NOT EXISTS idx_games_pub_tags ON games(published, tags);
 `;
 db.exec(SCHEMA);
 

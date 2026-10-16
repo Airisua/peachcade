@@ -1,6 +1,6 @@
 'use strict';
 const { db, getSetting } = require('./db');
-const { gt, gd, gh } = require('./queries');
+const { gt, gd, gh, getPopularTags } = require('./queries');
 const { ASSET_VERSION } = require('./assets');
 
 const OK_CODES = ['saved', 'created', 'updated', 'deleted', 'password', 'comment', 'login', 'registered'];
@@ -51,6 +51,7 @@ function common(req, res, next) {
   for (const c of cats) c.sample_thumb = (c.n > 0 && samples[c.slug]) ? samples[c.slug] : null;
   res.locals.categories = cats;
   res.locals.navCategories = cats.filter((c) => c.n > 0);
+  res.locals.popularTags = getPopularTags(18);
   res.locals.adsEnabled = getSetting('ads_enabled', '1') === '1';
   res.locals.adFor = (slot) => (res.locals.adsEnabled ? db.prepare('SELECT * FROM ads WHERE slot=? AND enabled=1 ORDER BY sort, id LIMIT 1').get(slot) : null);
   res.locals.gt = (g) => gt(g, lang);

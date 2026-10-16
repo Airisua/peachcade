@@ -136,18 +136,34 @@ function client() {
   ok(/<meta name="description" content="Free Puzzle games/.test(r.text), 'category page has its own meta description', (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1]);
   r = await user.get('/search?q=snake');
   ok(/<meta name="robots" content="noindex">/.test(r.text), 'search results are noindex');
+  // Sitemap Index & sub-sitemaps
   r = await user.get('/sitemap.xml');
-  ok(r.status === 200 && r.text.includes('<urlset') && r.text.includes('/game/2048'), 'sitemap.xml', r.status);
-  const sitemapUrls = (r.text.match(/<url>/g) || []).length;
-  const publishedGames = db.prepare('SELECT COUNT(*) n FROM games WHERE published=1').get().n;
-  const categoryRows = db.prepare('SELECT COUNT(*) n FROM categories').get().n;
-  ok(sitemapUrls === Math.min(publishedGames, 45000) + categoryRows + 3, 'sitemap lists every published game', sitemapUrls + ' of ' + (publishedGames + categoryRows + 3));
+  ok(r.status === 200 && r.text.includes('<sitemapindex') && r.text.includes('/sitemap-main.xml') && r.text.includes('/sitemap-games-1.xml'), 'sitemap.xml serves sitemapindex', r.status);
+  let rMain = await user.get('/sitemap-main.xml');
+  ok(rMain.status === 200 && rMain.text.includes('<urlset') && rMain.text.includes('/category/puzzle'), 'sitemap-main.xml lists main pages and categories');
+  let rTags = await user.get('/sitemap-tags.xml');
+  ok(rTags.status === 200 && rTags.text.includes('<urlset') && rTags.text.includes('/tag/'), 'sitemap-tags.xml lists popular tag URLs');
+  let rGames1 = await user.get('/sitemap-games-1.xml');
+  ok(rGames1.status === 200 && rGames1.text.includes('<urlset') && rGames1.text.includes('/game/2048'), 'sitemap-games-1.xml lists game URLs');
+  // Tag landing page
+  let rTagPage = await user.get('/tag/puzzle');
+  ok(rTagPage.status === 200 && rTagPage.text.includes('/game/2048') && !rTagPage.text.includes('noindex'), 'tag landing page /tag/puzzle is indexable and lists games');
+  ok(rTagPage.text.includes('BreadcrumbList') && rTagPage.text.includes('CollectionPage'), 'tag landing page has collection and breadcrumbs schema');
+  // Query-param language switching without cookie
+  let rLangQuery = await client().get('/?lang=zh');
+  ok(rLangQuery.status === 200 && rLangQuery.text.includes('热门游戏'), 'query param ?lang=zh overrides language for crawlers');
+  let rLangJa = await client().get('/?lang=ja');
+  ok(rLangJa.status === 200 && rLangJa.text.includes('いま人気のゲーム'), 'query param ?lang=ja overrides language for crawlers');
+  // IndexNow verification key endpoint
+  let rIndexNow = await user.get('/2771545fc9c14828b056ff3f18e9f50e.txt');
+  ok(rIndexNow.status === 200 && rIndexNow.text.includes('2771545fc9c14828b056ff3f18e9f50e'), 'IndexNow key file is served');
   r = await user.get('/robots.txt');
   ok(r.status === 200 && r.text.includes('Sitemap:') && r.text.includes('Disallow: /wyj/'), 'robots.txt guards admin and references sitemap', r.status);
   r = await user.get('/manifest.webmanifest');
   ok(r.status === 200 && r.text.includes('Peachcade'), 'manifest.webmanifest served as PWA app config', r.status);
   r = await user.get('/');
   ok(r.text.includes('cat-card'), 'home shows category strip');
+  ok(r.text.includes('hreflang="en"') && r.text.includes('hreflang="zh"') && r.text.includes('hreflang="ja"'), 'head includes hreflang alternates');
   // every static asset URL carries ?v=<hash> so a CDN / browser cache can never serve the
   // previous build after a release
   ok(/\/css\/style\.css\?v=[0-9a-f]{6,}/.test(r.text), 'stylesheet url is versioned');

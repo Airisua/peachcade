@@ -289,5 +289,10 @@
   "profile.updateEmail": "メールアドレスを更新",
   "about.contactTitle": "お問い合わせ",
   "about.contactP": "ビジネス提携、ゲーム掲載のご相談、著作権に関するお問い合わせ、プレイヤーの皆様からのご意見・ご要望は、下記メールアドレスまでお気軽にお問い合わせください：",
-  "footer.contact": "お問い合わせ"
+  "footer.contact": "お問い合わせ",
+  "seo.gameTitle": "『{title}』無料オンラインプレイ",
+  "seo.gameCta": "{site}で『{title}』を無料オンラインプレイ。ダウンロード・インストール不要ですぐに遊べます。",
+  "seo.tagHeading": "無料{tag}ゲーム一覧",
+  "seo.tagDesc": "{site}で人気の無料{tag}ゲームを今すぐプレイ。ダウンロード不要でブラウザですぐに遊べます！",
+  "nav.popularTags": "人気のタグ"
 }

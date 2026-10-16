@@ -88,6 +88,10 @@ function listGames(opt) {
   else if (o.status === "featured") where.push("g.featured=1");
   else if (!o.includeUnpublished) where.push("g.published=1");
   if (o.category) { where.push('g.category=?'); args.push(o.category); }
+  if (o.tag) {
+    where.push('(g.tags LIKE ? OR instr(lower(g.tags), ?) > 0)');
+    args.push('%' + o.tag + '%', o.tag.toLowerCase());
+  }
   if (o.q) {
     where.push('(g.title_en LIKE ? OR g.title_zh LIKE ? OR g.title_ja LIKE ? OR g.tags LIKE ? OR g.slug LIKE ?)');
     const like = '%' + o.q + '%';
@@ -102,4 +106,40 @@ function listGames(opt) {
   return { games: rows, total, page, pages };
 }
 
-module.exports = { gt, gd, gh, listGames, featuredRotation, shuffle, SORTS };
+
+let popularTagsCache = { at: 0, tags: [] };
+function getPopularTags(limit = 40) {
+  const want = Math.min(200, Math.max(1, parseInt(limit, 10) || 40));
+  if (Date.now() - popularTagsCache.at < 3600000 && popularTagsCache.tags.length) {
+    return popularTagsCache.tags.slice(0, want);
+  }
+  try {
+    const rows = db.prepare('SELECT tags FROM games WHERE published=1 AND length(tags) > 0 ORDER BY plays DESC LIMIT 2500').all();
+    const counts = {};
+    const ignore = new Set(['gamemonetize', 'ext', 'rss', 'json', 'mapi-games']);
+    for (const r of rows) {
+      if (!r.tags) continue;
+      const parts = r.tags.split(',');
+      for (let t of parts) {
+        t = t.trim().toLowerCase();
+        if (t && t.length >= 2 && t.length <= 30 && !ignore.has(t)) {
+          counts[t] = (counts[t] || 0) + 1;
+        }
+      }
+    }
+    const list = Object.entries(counts)
+      .filter(([_, c]) => c >= 1)
+      .sort((a, b) => b[1] - a[1])
+      .map(([tag, count]) => ({
+        tag,
+        count,
+        slug: tag.replace(/\s+/g, '-')
+      }));
+    popularTagsCache = { at: Date.now(), tags: list };
+    return list.slice(0, want);
+  } catch (e) {
+    return [];
+  }
+}
+
+module.exports = { gt, gd, gh, listGames, featuredRotation, shuffle, SORTS, getPopularTags };

@@ -289,5 +289,10 @@
   "profile.updateEmail": "更新邮箱",
   "about.contactTitle": "联系我们",
   "about.contactP": "商务合作、游戏接入、版权咨询或玩家建议，欢迎通过电子邮箱联系我们：",
-  "footer.contact": "联系方式"
+  "footer.contact": "联系方式",
+  "seo.gameTitle": "在线免费玩《{title}》",
+  "seo.gameCta": "在 {site} 免费在线畅玩《{title}》，即点即玩，无需下载安装。",
+  "seo.tagHeading": "{tag}小游戏大全",
+  "seo.tagDesc": "在 {site} 畅玩精选免费{tag}小游戏，即点即玩，免安装无插件！",
+  "nav.popularTags": "热门标签"
 }

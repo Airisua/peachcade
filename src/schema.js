@@ -101,4 +101,43 @@ function collectionPage(opt) {
   return block;
 }
 
-module.exports = { website, breadcrumbs, videoGame, collectionPage, itemList };
+function faqPage(game, opt) {
+  const o = opt || {};
+  const title = o.title || game.title_en;
+  const howto = o.howto || '';
+  const lang = o.lang || 'en';
+
+  const q1 = lang === 'zh' ? ('如何玩《' + title + '》？') : (lang === 'ja' ? ('『' + title + '』の操作方法・遊び方は？') : ('How do you play ' + title + '?'));
+  const q2 = lang === 'zh' ? ('《' + title + '》是免费的吗？需要下载吗？') : (lang === 'ja' ? ('『' + title + '』は無料で遊べますか？ダウンロードは必要ですか？') : ('Is ' + title + ' free to play online?'));
+  const a2 = lang === 'zh' ? ('是的，《' + title + '》100% 免费在线即点即玩，直接在电脑或手机浏览器中即可运行，无需下载或安装任何客户端与插件。')
+    : (lang === 'ja' ? ('はい、『' + title + '』はPC・スマホのブラウザで100%完全無料で遊べます。ダウンロードやインストールは一切不要です。')
+    : ('Yes, ' + title + ' is 100% free to play directly in your web browser on desktop, mobile, or tablet. No downloads, installs, or plugins required.'));
+
+  const items = [];
+  if (howto) {
+    items.push({
+      '@type': 'Question',
+      name: q1,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: howto
+      }
+    });
+  }
+  items.push({
+    '@type': 'Question',
+    name: q2,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: a2
+    }
+  });
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items
+  };
+}
+
+module.exports = { website, breadcrumbs, videoGame, collectionPage, itemList, faqPage };

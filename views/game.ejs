@@ -1,4 +1,4 @@
-<%- include('partials/head', { pageTitle: gt(game), ogTitle: gt(game), ogDesc: gd(game), ogImage: game.thumb }) %>
+<%- include('partials/head', { pageTitle: (typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle : gt(game), ogTitle: (typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle : gt(game), ogDesc: (typeof metaDesc !== 'undefined' && metaDesc) ? metaDesc : gd(game), ogImage: game.thumb }) %>
 <%- include('partials/header') %>
 <%- include('partials/ad', { slot: 'header' }) %>
 <main class="container">
@@ -44,7 +44,7 @@
         <h2><%= t('game.about') %></h2>
         <p><%= gd(game) %></p>
         <% if (game.tags) { %>
-        <div class="tags"><% game.tags.split(',').forEach(function (tag) { var tt = tag.trim(); if (tt && !['gamemonetize', 'ext', 'rss', 'json', 'mapi-games'].includes(tt.toLowerCase())) { %><a class="chip" href="/search?q=<%= encodeURIComponent(tt) %>"><%= tt %></a><% } }); %></div>
+        <div class="tags"><% game.tags.split(',').forEach(function (tag) { var tt = tag.trim(); if (tt && !['gamemonetize', 'ext', 'rss', 'json', 'mapi-games'].includes(tt.toLowerCase())) { %><a class="chip" href="/tag/<%= encodeURIComponent(tt.toLowerCase().replace(/\s+/g, '-')) %>"><%= tt %></a><% } }); %></div>
         <% } %>
       </section>
       <section class="panel" id="comments">
