@@ -223,6 +223,7 @@ function client() {
   ok(r.text.includes('FAQPage'), 'game page includes FAQPage rich schema');
   ok(r.text.includes('AggregateRating'), 'game page includes aggregateRating schema for Google stars');
   ok(r.text.includes('back-to-top'), 'page includes back-to-top button');
+  ok(r.text.includes('mobile-bottom-nav') && r.text.includes('mobile-nav-item'), 'page includes mobile bottom navigation bar');
   for (const slug of ['2048', 'snake', 'memory-match', 'tic-tac-toe', 'minesweeper']) {
     r = await user.get('/games/' + slug + '/index.html');
     ok(r.status === 200 && r.text.includes('game-root'), 'game file ' + slug, r.status);

@@ -40,6 +40,24 @@
   </div>
 </footer>
 <button id="back-to-top" class="back-to-top" aria-label="<%= t('common.backToTop') %>" title="<%= t('common.backToTop') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-arrow-up"></use></svg></button>
+<nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+  <a href="/" class="mobile-nav-item <%= path === '/' ? 'active' : '' %>">
+    <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-home"></use></svg>
+    <span><%= t('nav.home') %></span>
+  </a>
+  <a href="/games" class="mobile-nav-item <%= path.indexOf('/games') === 0 || path.indexOf('/category') === 0 ? 'active' : '' %>">
+    <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-gamepad"></use></svg>
+    <span><%= t('nav.games') %></span>
+  </a>
+  <a href="/random" class="mobile-nav-item">
+    <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-dice"></use></svg>
+    <span><%= t('nav.random') %></span>
+  </a>
+  <a href="<%= user ? '/profile' : '/login' %>" class="mobile-nav-item <%= path === '/profile' || path === '/login' ? 'active' : '' %>">
+    <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-user"></use></svg>
+    <span><%= user ? t('nav.profile') : t('nav.login') %></span>
+  </a>
+</nav>
 <script src="/js/main.js?v=<%= assetV %>" defer></script>
 </body>
 </html>

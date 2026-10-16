@@ -4,6 +4,30 @@
 
 ---
 
+## [2026-10-17] 视觉质感全维升级、微动效发光边框、播放器环境氛围光与移动端底栏导航 (UI/UX & Mobile Polish)
+
+### 1. 游戏卡片微动效与发光边框 (Card Glow & Micro-interactions)
+- **卡片动态光晕悬浮**：`.card:hover` 引入基于品牌紫粉色系的柔和霓虹光晕（`box-shadow: 0 16px 36px rgba(0,0,0,.55), 0 0 22px rgba(139,92,246,.22)`），配合 `translateY(-5px)`，营造高端游戏主机悬浮质感。
+- **封面平滑微缩放 (Image Zoom)**：卡片悬浮时封面图片采用硬件加速变换（`transform: scale(1.06)`，缓动曲线 `cubic-bezier(0.16, 1, 0.3, 1)`），标题文字同步发光高亮。
+- **播放徽章霓虹动效**：播放器圆形徽章弹出时伴随弹簧缩放与粉色电竞辉光（`box-shadow: 0 0 18px rgba(236,72,153,.65)`）。
+
+### 2. 骨架屏流光占位 (Skeleton Shimmer Loading)
+- **深色脉冲流光**：为所有游戏封面卡片、分类缩略图与推荐位设置 `@keyframes shimmer` 渐变动画占位，彻底消除网络慢速或首屏加载时的黑块与布局抖动，体验丝滑流畅。
+
+### 3. 播放器沉浸式环境氛围光 (Player Ambient Glow)
+- **影院/电竞环境光 (Ambient Mode)**：在游戏播放器容器 `.player-wrap` 背部通过隔离层伪元素（`isolation: isolate`）注入品牌渐变柔光（`radial-gradient` + `filter: blur(28px)`），游戏画面与周围暗色背景自然过渡。
+- **影院模式自适应联动**：切换影院宽屏模式时，环境光晕半径自动扩展至 `blur(44px)`，沉浸感倍增。
+
+### 4. 移动端 App 级常驻底部导航栏 (Mobile Bottom Nav)
+- **单手掌控体验**：在屏幕宽度 `<= 640px` 时自动呼出吸底毛玻璃操作栏，涵盖「首页」、「游戏库」、「随便玩玩」、「个人中心」四大核心入口，单手即可轻松盲操。
+- **全设备安全区避让**：内置 `env(safe-area-inset-bottom)` 自动避让 iPhone 底部横条（Home Indicator），浮动返回顶部按钮与页面底层均设置了防遮挡动态边距。
+
+### 5. 分类筛选横向平滑滑动条与全局暗色滚动条 (Horizontal Ribbon & Custom Scrollbar)
+- **移动端横向滑动胶囊栏**：分类页与标签列表的筛选条在移动端转为平滑横向滚动容器（`-webkit-overflow-scrolling: touch`），避免标签折行严重挤占首屏空间。
+- **全局电竞暗色滚动条**：自定义 WebKit 与 Firefox 纤细紫黑暗色滚动条与选中文本主题色高亮，消除浏览器原生白色滚动条带来的视觉割裂。
+
+---
+
 ## [2026-10-17] 沉浸式宽屏影院模式、Google富星级评分摘要、原生系统分享与返回顶部 (Player & SERP UX)
 
 ### 1. 宽屏影院模式与键盘快捷键交互 (Theater Mode)
