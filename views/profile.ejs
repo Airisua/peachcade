@@ -5,10 +5,26 @@
     <div class="avatar lg"><%= user.username.charAt(0).toUpperCase() %></div>
     <div>
       <h1><%= user.username %></h1>
-      <div class="muted small"><%= user.email %></div>
+      <div class="profile-contact muted small">
+        <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-mail"></use></svg>
+        <span><%= t('profile.contact') %>: <a href="mailto:<%= user.email %>"><%= user.email %></a></span>
+      </div>
       <div class="muted small"><%= t('profile.memberSince') %>: <%= fmtDate(user.created_at) %> · <%= t('profile.role') %>: <%= user.role === 'admin' ? t('profile.roleAdmin') : t('profile.roleUser') %></div>
     </div>
   </div>
+  <section class="section">
+    <div class="section-head"><h2><%= t('profile.contactInfo') %></h2></div>
+    <form method="post" action="/profile/email" class="panel form narrow">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="form-group">
+        <label for="profile_email"><%= t('profile.contactEmail') %></label>
+        <div class="input-wrap">
+          <input id="profile_email" class="form-input" type="email" name="email" value="<%= user.email %>" required>
+        </div>
+      </div>
+      <div class="form-row"><button class="btn btn-primary" type="submit"><%= t('profile.updateEmail') %></button></div>
+    </form>
+  </section>
   <section class="section">
     <div class="section-head"><h2><%= t('profile.favorites') %></h2></div>
     <% if (favorites.length) { %><div class="grid-cards"><% favorites.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div><% } else { %><p class="muted"><%= t('profile.noFavorites') %></p><% } %>

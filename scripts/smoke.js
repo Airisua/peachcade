@@ -239,6 +239,16 @@ function client() {
   ok(resp.status === 302 && resp.location.indexOf('ok=registered') >= 0, 'register works', resp.status + ' ' + resp.location);
   r = await user.get('/profile');
   ok(r.status === 200 && r.text.includes(uname), 'profile shows username', r.status);
+  ok(r.text.includes('profile-contact'), 'profile renders contact email row');
+  const newEmail = 'updated_' + uname + '@example.com';
+  resp = await user.post('/profile/email', { _csrf: user.csrf(), email: newEmail });
+  ok(resp.status === 302, 'profile email update post works', resp.status);
+  r = await user.get('/profile');
+  ok(r.status === 200 && r.text.includes(newEmail), 'profile displays updated email');
+  r = await user.get('/about');
+  ok(r.status === 200 && r.text.includes('wyjv58787@gmail.com'), 'about page displays official contact email');
+  r = await user.get('/');
+  ok(r.status === 200 && r.text.includes('wyjv58787@gmail.com'), 'footer displays contact email');
   r = await user.post('/api/like/1', null, { headers: { 'x-csrf-token': user.csrf() } });
   j = JSON.parse(r.text);
   ok(r.status === 200 && j.liked === true && typeof j.likes === 'number', 'like on', r.status + ' ' + r.text.slice(0, 80));

@@ -16,6 +16,12 @@ function website(site, siteUrl) {
     alternateName: ['PeachCat Games', 'peachcat.fun', 'Peachcade Games'],
     url: siteUrl + '/',
     description: site.tagline || '',
+    author: {
+      '@type': 'Organization',
+      name: site.name,
+      url: siteUrl,
+      email: 'wyjv58787@gmail.com'
+    },
     potentialAction: {
       '@type': 'SearchAction',
       target: { '@type': 'EntryPoint', urlTemplate: siteUrl + '/search?q={search_term_string}' },

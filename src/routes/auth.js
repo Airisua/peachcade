@@ -72,6 +72,15 @@ router.get('/profile', requireLogin, (req, res) => {
   res.render('profile', { pageTitle: res.locals.t('profile.title'), favorites, history, comments });
 });
 
+router.post('/profile/email', requireLogin, (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.redirect('/profile?err=invalidEmail');
+  const existing = db.prepare('SELECT id FROM users WHERE email=? AND id!=?').get(email, req.user.id);
+  if (existing) return res.redirect('/profile?err=emailTaken');
+  db.prepare('UPDATE users SET email=? WHERE id=?').run(email, req.user.id);
+  res.redirect('/profile?ok=saved');
+});
+
 router.post('/profile/password', requireLogin, (req, res) => {
   const oldP = String(req.body.old_password || '');
   const newP = String(req.body.new_password || '');

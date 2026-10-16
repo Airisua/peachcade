@@ -282,5 +282,12 @@
   "admin.gameDesc_ja": "游戏简介（日语）",
   "admin.gameHowto_ja": "操作说明（日语）",
   "admin.settings_tagline_ja": "网站标语（日语）",
-  "admin.settings_footer_text_ja": "页脚文案（日语）"
+  "admin.settings_footer_text_ja": "页脚文案（日语）",
+  "profile.contact": "联系方式",
+  "profile.contactInfo": "联系方式设置",
+  "profile.contactEmail": "联系邮箱",
+  "profile.updateEmail": "更新邮箱",
+  "about.contactTitle": "联系我们",
+  "about.contactP": "商务合作、游戏接入、版权咨询或玩家建议，欢迎通过电子邮箱联系我们：",
+  "footer.contact": "联系方式"
 }

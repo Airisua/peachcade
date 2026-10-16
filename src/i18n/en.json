@@ -282,5 +282,12 @@
   "admin.gameDesc_ja": "Description (Japanese)",
   "admin.gameHowto_ja": "How to play (Japanese)",
   "admin.settings_tagline_ja": "Tagline (Japanese)",
-  "admin.settings_footer_text_ja": "Footer text (Japanese)"
+  "admin.settings_footer_text_ja": "Footer text (Japanese)",
+  "profile.contact": "Contact",
+  "profile.contactInfo": "Contact Information",
+  "profile.contactEmail": "Contact Email",
+  "profile.updateEmail": "Update email",
+  "about.contactTitle": "Contact & Inquiries",
+  "about.contactP": "For business cooperation, game submissions, copyright inquiries, or player feedback, please get in touch via email:",
+  "footer.contact": "Contact"
 }

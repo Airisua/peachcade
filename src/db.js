@@ -217,10 +217,12 @@ function seed() {
   db.prepare("UPDATE settings SET value='Peachcade' WHERE key='site_name' AND value='PixelPlay'").run();
   db.prepare("UPDATE settings SET value='Free Online Browser Games — Play Instantly' WHERE key='tagline_en' AND value='Instant HTML5 games — play free in your browser'").run();
   db.prepare("UPDATE settings SET value='免费免下载在线小游戏 · 即点即玩' WHERE key='tagline_zh' AND value='即点即玩 · 免费在线小游戏'").run();
+  // Auto-migrate admin contact email
+  db.prepare("UPDATE users SET email='wyjv58787@gmail.com' WHERE username='mqx' AND (email='mqx@peachcat.fun' OR email LIKE '%example.com')").run();
 
   if (!db.prepare('SELECT COUNT(*) n FROM users').get().n) {
     const adminUser = process.env.ADMIN_USERNAME || 'mqx';
-    const adminEmail = process.env.ADMIN_EMAIL || 'mqx@peachcat.fun';
+    const adminEmail = process.env.ADMIN_EMAIL || 'wyjv58787@gmail.com';
     const adminPass = process.env.ADMIN_PASSWORD || 'mqx331606110';
     db.prepare('INSERT INTO users(username,email,password_hash,role) VALUES(?,?,?,?)').run(adminUser, adminEmail, bcrypt.hashSync(adminPass, 10), 'admin');
   }

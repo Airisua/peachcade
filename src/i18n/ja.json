@@ -282,5 +282,12 @@
   "admin.statusFeatured": "おすすめ",
   "game.loading": "ゲームを読み込み中...",
   "game.reload": "ゲームを再読み込み",
-  "game.trouble": "読み込みに時間がかかっていますか？"
+  "game.trouble": "読み込みに時間がかかっていますか？",
+  "profile.contact": "連絡先",
+  "profile.contactInfo": "連絡先情報の設定",
+  "profile.contactEmail": "連絡先メールアドレス",
+  "profile.updateEmail": "メールアドレスを更新",
+  "about.contactTitle": "お問い合わせ",
+  "about.contactP": "ビジネス提携、ゲーム掲載のご相談、著作権に関するお問い合わせ、プレイヤーの皆様からのご意見・ご要望は、下記メールアドレスまでお気軽にお問い合わせください：",
+  "footer.contact": "お問い合わせ"
 }

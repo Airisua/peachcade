@@ -6,6 +6,14 @@
     <p class="about-lead"><%= t('about.p1') %></p>
     <p><%= t('about.p2') %></p>
     <p><%= t('about.p3') %></p>
+    <div class="about-contact">
+      <h2><%= t('about.contactTitle') %></h2>
+      <p><%= t('about.contactP') %></p>
+      <div class="contact-pill">
+        <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-mail"></use></svg>
+        <a href="mailto:wyjv58787@gmail.com">wyjv58787@gmail.com</a>
+      </div>
+    </div>
   </div>
 </main>
 <%- include('partials/footer') %>

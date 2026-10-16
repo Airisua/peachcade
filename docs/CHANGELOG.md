@@ -4,6 +4,21 @@
 
 ---
 
+## [2026-10-16] 个人中心与全站多处增设联系方式 & 搜索引擎收录与资质增强 (Contact Info & Webmaster Authority)
+
+### 1. 个人中心联系信息与修改能力 (User Profile Contact Information)
+- **联系方式明晰展示**：在 `/profile` 页面头部新增 `.profile-contact` 样式，通过 `#i-mail` 矢量图标高亮展示用户当前绑定的联系邮箱，支持一键发起 `mailto:`。
+- **联系邮箱自主修改与校验**：新增「联系方式设置」表单板块与 `POST /profile/email` 路由，严格进行邮箱正则与数据库冲突排重校验，保存后即时生效。
+- **管理员账号联系方式更新**：系统自检并将初始超级管理员账号 `mqx` 的预设邮箱平滑更新为 `wyjv58787@gmail.com`。
+
+### 2. 全站站长联系入口与 Google E-E-A-T 资质强化
+- **关于页专属商务合作与意见反馈**：在 `/about`（关于页面）底部新增「Contact & Inquiries / 联系我们」独立卡片与 `.contact-pill`，面向广告合作商、外部游戏开发者与普通玩家清晰公示官方联络邮箱 `wyjv58787@gmail.com`。
+- **全站页脚持久化联系方式**：在通用页脚版权栏右侧补充站长联系直达链接，爬虫抓取任一公开页面均可索引站长真实有效联络渠道。
+- **WebSite JSON-LD 结构化数据强化**：在 `src/schema.js` 的 `WebSite` 实体中补充 `author` 组织实体与 `email: "wyjv58787@gmail.com"`，提升谷歌蜘蛛对网站实体可信度（E-E-A-T）的评分。
+- **图标矢量系统补充**：`public/img/icons.svg` 追加 `#i-mail` 邮件图标。
+
+---
+
 ## [2026-10-16] 全面引入日语版本支持与多语言交互体验升级 (Japanese Language Support)
 
 ### 1. 国际化架构升级 (Tri-lingual i18n Core)
