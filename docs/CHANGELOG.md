@@ -4,6 +4,26 @@
 
 ---
 
+## [2026-10-17] 沉浸式宽屏影院模式、Google富星级评分摘要、原生系统分享与返回顶部 (Player & SERP UX)
+
+### 1. 宽屏影院模式与键盘快捷键交互 (Theater Mode)
+- **影院宽屏模式 (Theater Mode)**：游戏播放控制栏新增「影院宽屏 (`#i-theater`)」按钮与键盘快捷键 `T`，支持将游戏播放窗口平滑扩展为全宽超大视图，无需进入隐藏浏览器标签与任务栏的操作系统级全屏，兼顾大屏畅玩与多标签切换。
+- **播放器快捷键系统**：
+  - 按 `F`：一键全屏 / 退出全屏；
+  - 按 `T`：一键切换影院宽屏模式；
+  - 自动隔离输入框，在评论区或搜索框输入时智能禁用快捷键触发。
+
+### 2. 真实评分徽章与 Google SERP 金色星级评分摘要 (AggregateRating)
+- **视觉评分徽章**：在游戏详情页头部新增金色五角星评分胶囊（`.rating-pill`），直观展示游戏综合评分（如 `★ 4.8 (96%)`），增强社交认同与玩家试玩转化率。
+- **Google 搜索星级卡片 (AggregateRating Schema)**：在 `src/schema.js` 的 `VideoGame` 结构化数据中注入 `aggregateRating` 实体，让 Google 搜索结果有机会直接展示金色评价星级（★★★★★），大幅拉升自然搜索点击率（CTR）。
+
+### 3. 原生移动端分享与返回顶部 (Native Web Share & Back to Top)
+- **Web Share API 原生分享**：`public/js/main.js` 升级分享逻辑，在手机端（iOS Safari / Android Chrome）优先调用系统原生分享面板，支持一键分享至微信、WhatsApp、Twitter/X、Telegram 等，桌面端无缝回退至剪贴板复制提示。
+- **平滑悬浮返回顶部**：全站底部注入 `#back-to-top` 悬浮按钮，滚动超过 400px 时优雅淡入，点击平滑滚动回顶部。
+- **爬虫请求去 Cookie 瘦身**：`src/csrf.js` 针对 `.xml` 和 `.txt` 资源跳过 CSRF 响应头设置，确保搜索引擎抓取到的静态地图完全纯净无缓存穿透干扰。
+
+---
+
 ## [2026-10-17] 流量裂变专项 SEO 体系落地：分卷Sitemap索引、独立标签专题页、Hreflang与FAQ富摘要 (SEO & Traffic Engine)
 
 ### 1. 分卷站点地图索引系统 (Sitemap Index & Chunked Architecture)

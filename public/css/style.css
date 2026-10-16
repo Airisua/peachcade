@@ -362,3 +362,18 @@ textarea {
 .footer-tags-list{display:flex;gap:6px;flex-wrap:wrap}
 .chip-sm{padding:3px 9px;font-size:12px;border-radius:7px}
 
+/* rating pill */
+.rating-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:#fde047;padding:2px 8px;border-radius:999px;font-weight:700}
+.rating-pill .ic-gold{width:13px;height:13px;color:#facc15}
+
+/* theater mode */
+.player-wrap.theater{max-width:100% !important;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.player-wrap.theater .player-box{aspect-ratio:auto;height:calc(82vh - 80px);min-height:500px}
+#theater-btn.on{color:var(--brand2);background:rgba(236,72,153,.15)}
+
+/* back to top floating button */
+.back-to-top{position:fixed;right:22px;bottom:24px;width:42px;height:42px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--text);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);cursor:pointer;opacity:0;visibility:hidden;transform:translateY(12px);transition:.22s;z-index:90}
+.back-to-top.show{opacity:1;visibility:visible;transform:translateY(0)}
+.back-to-top:hover{background:var(--panel2);color:#fff;border-color:var(--brand);transform:translateY(-2px)}
+.back-to-top .ic{width:18px;height:18px}
+

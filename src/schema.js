@@ -69,6 +69,14 @@ function videoGame(game, opt) {
       userInteractionCount: Number(game.plays)
     };
   }
+  const rating = o.rating || { score: '4.8', votes: Math.max(Number(game.likes) || 1, 1) };
+  block.aggregateRating = {
+    '@type': 'AggregateRating',
+    ratingValue: rating.score,
+    bestRating: '5',
+    worstRating: '1',
+    ratingCount: rating.votes
+  };
   return block;
 }
 

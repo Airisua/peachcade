@@ -294,5 +294,7 @@
   "seo.gameCta": "在 {site} 免费在线畅玩《{title}》，即点即玩，无需下载安装。",
   "seo.tagHeading": "{tag}小游戏大全",
   "seo.tagDesc": "在 {site} 畅玩精选免费{tag}小游戏，即点即玩，免安装无插件！",
-  "nav.popularTags": "热门标签"
+  "nav.popularTags": "热门标签",
+  "game.theater": "影院宽屏",
+  "common.backToTop": "返回顶部"
 }

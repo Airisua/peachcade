@@ -2,6 +2,7 @@
 const crypto = require('crypto');
 
 function csrfMiddleware(req, res, next) {
+  if (req.path.endsWith('.xml') || req.path.endsWith('.txt')) return next();
   if (!req.cookies.csrf) {
     const t = crypto.randomBytes(16).toString('hex');
     res.cookie('csrf', t, { sameSite: 'lax', httpOnly: false });

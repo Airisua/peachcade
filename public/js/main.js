@@ -82,9 +82,14 @@
   $$('[data-share]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var url = window.location.href;
-      function done() { toast(I18N.copied || 'Copied!'); }
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, done);
-      else done();
+      var title = document.title;
+      if (navigator.share) {
+        navigator.share({ title: title, url: url }).catch(function () {});
+      } else {
+        function done() { toast(I18N.copied || 'Copied!'); }
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, done);
+        else done();
+      }
     });
   });
 
@@ -109,16 +114,39 @@
     });
   });
 
+  var pWrap = $(".player-wrap");
+  var tBtn = $("#theater-btn");
+  function toggleTheater() {
+    if (!pWrap) return;
+    pWrap.classList.toggle("theater");
+    if (tBtn) tBtn.classList.toggle("on", pWrap.classList.contains("theater"));
+  }
+  if (tBtn) tBtn.addEventListener("click", toggleTheater);
+
   var pBox = $("#player-box");
   if (pBox) {
     document.addEventListener("keydown", function (e) {
+      var tag = (document.activeElement && document.activeElement.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || (document.activeElement && document.activeElement.isContentEditable)) return;
       if (e.key === "f" || e.key === "F") {
-        var tag = (document.activeElement && document.activeElement.tagName) || "";
-        if (tag === "INPUT" || tag === "TEXTAREA" || (document.activeElement && document.activeElement.isContentEditable)) return;
         e.preventDefault();
         if (document.fullscreenElement) document.exitFullscreen();
         else if (pBox.requestFullscreen) pBox.requestFullscreen();
+      } else if (e.key === "t" || e.key === "T") {
+        e.preventDefault();
+        toggleTheater();
       }
+    });
+  }
+
+  var btt = $("#back-to-top");
+  if (btt) {
+    window.addEventListener("scroll", function () {
+      if (window.scrollY > 400) btt.classList.add("show");
+      else btt.classList.remove("show");
+    }, { passive: true });
+    btt.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
 

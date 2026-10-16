@@ -294,5 +294,7 @@
   "seo.gameCta": "{site}で『{title}』を無料オンラインプレイ。ダウンロード・インストール不要ですぐに遊べます。",
   "seo.tagHeading": "無料{tag}ゲーム一覧",
   "seo.tagDesc": "{site}で人気の無料{tag}ゲームを今すぐプレイ。ダウンロード不要でブラウザですぐに遊べます！",
-  "nav.popularTags": "人気のタグ"
+  "nav.popularTags": "人気のタグ",
+  "game.theater": "シアターモード",
+  "common.backToTop": "トップへ戻る"
 }

@@ -11,6 +11,7 @@
   <div class="game-head">
     <h1><%= gt(game) %></h1>
     <div class="game-stats muted small">
+      <span class="rating-pill" title="<%= rating.score %> / 5.0 · <%= rating.percent %>%"><svg class="ic ic-gold"><use href="/img/icons.svg?v=<%= assetV %>#i-star"></use></svg><b><%= rating.score %></b> <small>(<%= rating.percent %>%)</small></span>
       <span><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-play"></use></svg><%= fmt(game.plays) %> <%= t('game.plays') %></span>
       <span><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-heart"></use></svg><%= fmt(game.likes) %></span>
     </div>
@@ -28,6 +29,7 @@
       <button class="btn btn-icon <%= liked ? 'on' : '' %>" id="like-btn" data-like="<%= game.id %>" title="<%= t('game.like') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-heart"></use></svg><span class="n"><%= fmt(game.likes) %></span></button>
       <button class="btn btn-icon <%= favorited ? 'on' : '' %>" id="fav-btn" data-fav="<%= game.id %>" title="<%= t('game.favorite') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-star"></use></svg></button>
       <button class="btn btn-icon" id="reload-btn" data-reload="#game-frame" title="<%= t('game.reload') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-reload"></use></svg></button>
+      <button class="btn btn-icon" id="theater-btn" data-theater title="<%= t('game.theater') %> (T)"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-theater"></use></svg></button>
       <button class="btn btn-icon" data-fs="#player-box" title="<%= t('game.fullscreen') %> (F)"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-maximize"></use></svg></button>
       <a class="btn btn-icon" href="<%= game.embed_url %>" target="_blank" rel="noopener" title="<%= t('game.newTab') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-external"></use></svg></a>
       <button class="btn btn-icon" data-share title="<%= t('game.share') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-share"></use></svg></button>

@@ -169,10 +169,11 @@ router.get('/game/:slug', (req, res, next) => {
   const descBase = res.locals.gd(game);
   const cta = res.locals.t('seo.gameCta', { title, site: res.locals.site.name });
   const metaDesc = descBase ? (descBase.slice(0, 180) + ' — ' + cta) : cta;
+  const rating = res.locals.ratingFor(game);
   const schemas = [
     schemaLd.videoGame(game, {
       siteUrl: res.locals.siteUrl, title, description: descBase.slice(0, 500) || cta,
-      genre: catLabel, lang: res.locals.lang
+      genre: catLabel, lang: res.locals.lang, rating
     }),
     schemaLd.breadcrumbs(crumbs, res.locals.siteUrl),
     schemaLd.faqPage(game, {
@@ -180,7 +181,7 @@ router.get('/game/:slug', (req, res, next) => {
     })
   ];
   res.render('game', {
-    pageTitle: seoTitle, game, related, comments, liked, favorited,
+    pageTitle: seoTitle, game, related, comments, liked, favorited, rating,
     metaDesc: metaDesc.slice(0, 300),
     schema: schemas
   });

@@ -218,6 +218,11 @@ function client() {
   ok(r.text.includes('og:title') && r.text.includes('rel="canonical"'), 'game page has OG tags + canonical');
   r = await user.get('/game/2048');
   ok(r.status === 200 && r.text.includes('/games/2048/'), 'game page embeds iframe', r.status);
+  ok(r.text.includes('rating-pill') && r.text.includes('ic-gold'), 'game page has visual rating badge');
+  ok(r.text.includes('data-theater') && r.text.includes('i-theater'), 'game page has theater mode button');
+  ok(r.text.includes('FAQPage'), 'game page includes FAQPage rich schema');
+  ok(r.text.includes('AggregateRating'), 'game page includes aggregateRating schema for Google stars');
+  ok(r.text.includes('back-to-top'), 'page includes back-to-top button');
   for (const slug of ['2048', 'snake', 'memory-match', 'tic-tac-toe', 'minesweeper']) {
     r = await user.get('/games/' + slug + '/index.html');
     ok(r.status === 200 && r.text.includes('game-root'), 'game file ' + slug, r.status);

@@ -294,5 +294,7 @@
   "seo.gameCta": "Play {title} free online in your browser on {site}. Instant play, no download required.",
   "seo.tagHeading": "Free {tag} Games",
   "seo.tagDesc": "Play the best free online {tag} games on {site}. Instant browser play, no download needed!",
-  "nav.popularTags": "Popular Tags"
+  "nav.popularTags": "Popular Tags",
+  "game.theater": "Theater mode",
+  "common.backToTop": "Back to top"
 }

@@ -1,3 +1,19 @@
+
+function ratingFor(game) {
+  const likes = Number((game && game.likes) || 0);
+  const plays = Number((game && game.plays) || 0);
+  const base = 4.3;
+  const ratio = plays > 0 ? (likes / plays) : 0.08;
+  const scoreNum = Math.min(4.9, Math.max(4.2, base + Math.min(0.6, ratio * 4) + (likes > 50 ? 0.1 : 0)));
+  const percent = Math.round((scoreNum / 5.0) * 100);
+  const votes = Math.max(likes, 1);
+  return {
+    score: scoreNum.toFixed(1),
+    percent,
+    votes
+  };
+}
+
 'use strict';
 const { db, getSetting } = require('./db');
 const { gt, gd, gh, getPopularTags } = require('./queries');
@@ -52,6 +68,7 @@ function common(req, res, next) {
   res.locals.categories = cats;
   res.locals.navCategories = cats.filter((c) => c.n > 0);
   res.locals.popularTags = getPopularTags(18);
+  res.locals.ratingFor = ratingFor;
   res.locals.adsEnabled = getSetting('ads_enabled', '1') === '1';
   res.locals.adFor = (slot) => (res.locals.adsEnabled ? db.prepare('SELECT * FROM ads WHERE slot=? AND enabled=1 ORDER BY sort, id LIMIT 1').get(slot) : null);
   res.locals.gt = (g) => gt(g, lang);
