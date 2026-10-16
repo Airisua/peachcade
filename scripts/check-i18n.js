@@ -4,6 +4,8 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 const en = JSON.parse(fs.readFileSync(path.join(root, 'src/i18n/en.json'), 'utf8'));
 const zh = JSON.parse(fs.readFileSync(path.join(root, 'src/i18n/zh.json'), 'utf8'));
+const ja = JSON.parse(fs.readFileSync(path.join(root, 'src/i18n/ja.json'), 'utf8'));
+
 function walk(dir, out) {
   for (const f of fs.readdirSync(dir)) {
     const p = path.join(dir, f);
@@ -28,8 +30,13 @@ let problems = 0;
 for (const k of used) {
   if (!(k in en)) { console.log('MISSING en key: ' + k); problems++; }
   if (!(k in zh)) { console.log('MISSING zh key: ' + k); problems++; }
+  if (!(k in ja)) { console.log('MISSING ja key: ' + k); problems++; }
 }
-for (const k of Object.keys(en)) if (!(k in zh)) { console.log('zh dict missing: ' + k); problems++; }
+for (const k of Object.keys(en)) {
+  if (!(k in zh)) { console.log('zh dict missing: ' + k); problems++; }
+  if (!(k in ja)) { console.log('ja dict missing: ' + k); problems++; }
+}
 for (const k of Object.keys(zh)) if (!(k in en)) { console.log('en dict missing: ' + k); problems++; }
-console.log('checked ' + files.length + ' files, ' + used.size + ' used keys, ' + Object.keys(en).length + ' dict keys');
+for (const k of Object.keys(ja)) if (!(k in en)) { console.log('en dict missing ja key: ' + k); problems++; }
+console.log('checked ' + files.length + ' files, ' + used.size + ' used keys, ' + Object.keys(en).length + ' dict keys (en, zh, ja)');
 if (problems) { console.log('PROBLEMS: ' + problems); process.exitCode = 1; } else { console.log('i18n OK'); }

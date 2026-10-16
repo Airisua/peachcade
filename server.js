@@ -61,7 +61,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
 app.use((req, res) => {
   let suggestions = [];
   try {
-    suggestions = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.published=1 ORDER BY g.plays DESC LIMIT 4').all();
+    suggestions = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.published=1 ORDER BY g.plays DESC LIMIT 4').all();
   } catch (e) { /* ignore */ }
   res.status(404).render('error', { status: 404, message: res.locals.t('err.notFound'), suggestions });
 });

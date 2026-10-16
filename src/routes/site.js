@@ -23,7 +23,7 @@ router.get('/', (req, res) => {
   const hero = featured[0] || popular[0] || null;
   let continueList = [];
   if (req.user) {
-    continueList = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, MAX(p.created_at) AS last_play FROM plays_log p JOIN games g ON g.id=p.game_id LEFT JOIN categories c ON c.slug=g.category WHERE p.user_id=? GROUP BY g.id ORDER BY last_play DESC LIMIT 4').all(req.user.id);
+    continueList = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja, MAX(p.created_at) AS last_play FROM plays_log p JOIN games g ON g.id=p.game_id LEFT JOIN categories c ON c.slug=g.category WHERE p.user_id=? GROUP BY g.id ORDER BY last_play DESC LIMIT 4').all(req.user.id);
   }
   const total = db.prepare('SELECT COUNT(*) n FROM games WHERE published=1').get().n;
   res.render('index', {
@@ -115,18 +115,18 @@ router.get('/thumb/:key', async (req, res) => {
 });
 
 router.get('/game/:slug', (req, res, next) => {
-  const game = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.slug=?').get(req.params.slug);
+  const game = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.slug=?').get(req.params.slug);
   if (!game) return next();
   const isAdmin = req.user && req.user.role === 'admin';
   if (!game.published && !isAdmin) return next();
   db.prepare('UPDATE games SET plays=plays+1 WHERE id=?').run(game.id);
   if (req.user) db.prepare('INSERT INTO plays_log(user_id,game_id) VALUES(?,?)').run(req.user.id, game.id);
-  const related = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.published=1 AND g.category=? AND g.id!=? ORDER BY g.plays DESC LIMIT 8').all(game.category, game.id);
+  const related = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.published=1 AND g.category=? AND g.id!=? ORDER BY g.plays DESC LIMIT 8').all(game.category, game.id);
   const comments = db.prepare('SELECT cm.*, u.username, u.role FROM comments cm JOIN users u ON u.id=cm.user_id WHERE cm.game_id=? AND cm.hidden=0 ORDER BY cm.created_at DESC LIMIT 50').all(game.id);
   const liked = req.user ? !!db.prepare('SELECT 1 FROM likes WHERE user_id=? AND game_id=?').get(req.user.id, game.id) : false;
   const favorited = req.user ? !!db.prepare('SELECT 1 FROM favorites WHERE user_id=? AND game_id=?').get(req.user.id, game.id) : false;
   const title = res.locals.gt(game);
-  const catLabel = res.locals.catName({ name_en: game.cat_en, name_zh: game.cat_zh });
+  const catLabel = res.locals.catName({ name_en: game.cat_en, name_zh: game.cat_zh, name_ja: game.cat_ja });
   const crumbs = [{ name: res.locals.t('nav.home'), url: '/' }];
   if (game.cat_en) crumbs.push({ name: catLabel, url: '/category/' + game.category });
   crumbs.push({ name: title, url: '/game/' + game.slug });
@@ -164,7 +164,7 @@ router.post('/comment/:id/delete', requireLogin, (req, res) => {
 });
 
 router.get('/lang/:code', (req, res) => {
-  const code = req.params.code === 'zh' ? 'zh' : 'en';
+  const code = ['zh', 'ja', 'en'].includes(req.params.code) ? req.params.code : 'en';
   res.cookie('lang', code, { sameSite: 'lax', maxAge: 365 * 864e5 });
   let next = String(req.query.next || '/');
   if (!next.startsWith('/') || next.startsWith('//')) next = '/';

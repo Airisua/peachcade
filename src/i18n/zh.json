@@ -277,5 +277,10 @@
   "admin.statusFeatured": "推荐",
   "game.loading": "游戏载入中...",
   "game.reload": "重新载入游戏",
-  "game.trouble": "游戏载入缓慢？"
+  "game.trouble": "游戏载入缓慢？",
+  "admin.gameTitle_ja": "游戏名称（日语）",
+  "admin.gameDesc_ja": "游戏简介（日语）",
+  "admin.gameHowto_ja": "操作说明（日语）",
+  "admin.settings_tagline_ja": "网站标语（日语）",
+  "admin.settings_footer_text_ja": "页脚文案（日语）"
 }

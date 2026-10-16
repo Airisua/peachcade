@@ -4,7 +4,7 @@
 <main class="container">
   <nav class="breadcrumb muted small">
     <a href="/"><%= t('nav.home') %></a><span>/</span>
-    <a href="/category/<%= game.category %>"><%= game['cat_' + lang] || game.category %></a><span>/</span>
+    <a href="/category/<%= game.category %>"><%= catName({ name_en: game.cat_en, name_zh: game.cat_zh, name_ja: game.cat_ja }) || game.category %></a><span>/</span>
     <span><%= gt(game) %></span>
   </nav>
   <% if (!game.published) { %><div class="notice warn"><%= t('game.unpublishedBadge') %></div><% } %>

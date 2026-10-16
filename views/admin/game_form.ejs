@@ -4,12 +4,15 @@
   <div class="form-grid">
     <label><%= t('admin.gameTitle_en') %><input name="title_en" value="<%= game ? game.title_en : '' %>" required></label>
     <label><%= t('admin.gameTitle_zh') %><input name="title_zh" value="<%= game ? game.title_zh : '' %>"></label>
+    <label><%= t('admin.gameTitle_ja') %><input name="title_ja" value="<%= game ? (game.title_ja || '') : '' %>"></label>
     <label><%= t('admin.gameSlug') %><input name="slug" value="<%= game ? game.slug : '' %>" placeholder="auto-from-english-title"></label>
     <label><%= t('admin.gameCategory') %><select name="category"><% categories.forEach(function (c) { %><option value="<%= c.slug %>" <%= game && game.category === c.slug ? 'selected' : '' %>><%= c.name_en %></option><% }); %></select></label>
     <label class="span2"><%= t('admin.gameDesc_en') %><input name="desc_en" value="<%= game ? game.desc_en : '' %>"></label>
     <label class="span2"><%= t('admin.gameDesc_zh') %><input name="desc_zh" value="<%= game ? game.desc_zh : '' %>"></label>
+    <label class="span2"><%= t('admin.gameDesc_ja') %><input name="desc_ja" value="<%= game ? (game.desc_ja || '') : '' %>"></label>
     <label class="span2"><%= t('admin.gameHowto_en') %><textarea name="howto_en" rows="2"><%= game ? game.howto_en : '' %></textarea></label>
     <label class="span2"><%= t('admin.gameHowto_zh') %><textarea name="howto_zh" rows="2"><%= game ? game.howto_zh : '' %></textarea></label>
+    <label class="span2"><%= t('admin.gameHowto_ja') %><textarea name="howto_ja" rows="2"><%= game ? (game.howto_ja || '') : '' %></textarea></label>
     <label><%= t('admin.gameTags') %><input name="tags" value="<%= game ? game.tags : '' %>"></label>
     <label><%= t('admin.gameThumb') %><input name="thumb" value="<%= game ? game.thumb : '' %>"></label>
     <label class="span2"><%= t('admin.gameThumbFile') %><input type="file" name="thumb_file" accept="image/png,image/jpeg,image/webp,image/gif"></label>

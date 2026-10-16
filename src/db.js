@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS categories (
   slug TEXT PRIMARY KEY,
   name_en TEXT NOT NULL,
   name_zh TEXT NOT NULL,
+  name_ja TEXT NOT NULL DEFAULT '',
   sort INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS games (
@@ -30,10 +31,13 @@ CREATE TABLE IF NOT EXISTS games (
   slug TEXT NOT NULL UNIQUE,
   title_en TEXT NOT NULL,
   title_zh TEXT NOT NULL DEFAULT '',
+  title_ja TEXT NOT NULL DEFAULT '',
   desc_en TEXT NOT NULL DEFAULT '',
   desc_zh TEXT NOT NULL DEFAULT '',
+  desc_ja TEXT NOT NULL DEFAULT '',
   howto_en TEXT NOT NULL DEFAULT '',
   howto_zh TEXT NOT NULL DEFAULT '',
+  howto_ja TEXT NOT NULL DEFAULT '',
   category TEXT NOT NULL DEFAULT 'casual',
   tags TEXT NOT NULL DEFAULT '',
   thumb TEXT NOT NULL DEFAULT '/img/games/default.svg',
@@ -99,9 +103,22 @@ CREATE INDEX IF NOT EXISTS idx_games_pub_featured ON games(published, featured, 
 db.exec(SCHEMA);
 
 // lightweight migrations for databases created by earlier versions
+const catCols = db.pragma('table_info(categories)');
+if (!catCols.some((c) => c.name === 'name_ja')) {
+  db.exec('ALTER TABLE categories ADD COLUMN name_ja TEXT NOT NULL DEFAULT ""');
+}
 const gameCols = db.pragma('table_info(games)');
 if (!gameCols.some((c) => c.name === 'source')) {
   db.exec('ALTER TABLE games ADD COLUMN source TEXT NOT NULL DEFAULT ""');
+}
+if (!gameCols.some((c) => c.name === 'title_ja')) {
+  db.exec('ALTER TABLE games ADD COLUMN title_ja TEXT NOT NULL DEFAULT ""');
+}
+if (!gameCols.some((c) => c.name === 'desc_ja')) {
+  db.exec('ALTER TABLE games ADD COLUMN desc_ja TEXT NOT NULL DEFAULT ""');
+}
+if (!gameCols.some((c) => c.name === 'howto_ja')) {
+  db.exec('ALTER TABLE games ADD COLUMN howto_ja TEXT NOT NULL DEFAULT ""');
 }
 
 function getSetting(key, def = '') {
@@ -113,20 +130,20 @@ function setSetting(key, value) {
 }
 
 const CATEGORIES = [
-  ['puzzle', 'Puzzle', '益智', 1],
-  ['arcade', 'Arcade', '街机', 2],
-  ['action', 'Action', '动作', 3],
-  ['casual', 'Casual', '休闲', 4],
-  ['skill', 'Skill', '技巧', 5],
-  ['board', 'Board', '棋牌', 6],
-  ['racing', 'Racing', '赛车', 7],
-  ['shooting', 'Shooting', '射击', 8],
-  ['sports', 'Sports', '体育', 9],
-  ['platform', 'Platformer', '闯关', 10],
-  ['adventure', 'Adventure', '冒险', 11],
-  ['simulation', 'Simulation', '模拟', 12],
-  ['clicker', 'Clicker', '放置', 13],
-  ['girls', 'Girls', '女生', 14]
+  ['puzzle', 'Puzzle', '益智', 'パズル', 1],
+  ['arcade', 'Arcade', '街机', 'アーケード', 2],
+  ['action', 'Action', '动作', 'アクション', 3],
+  ['casual', 'Casual', '休闲', 'カジュアル', 4],
+  ['skill', 'Skill', '技巧', 'スキル', 5],
+  ['board', 'Board', '棋牌', 'ボードゲーム', 6],
+  ['racing', 'Racing', '赛车', 'レース', 7],
+  ['shooting', 'Shooting', '射击', 'シューティング', 8],
+  ['sports', 'Sports', '体育', 'スポーツ', 9],
+  ['platform', 'Platformer', '闯关', 'プラットフォーマー', 10],
+  ['adventure', 'Adventure', '冒险', 'アドベンチャー', 11],
+  ['simulation', 'Simulation', '模拟', 'シミュレーション', 12],
+  ['clicker', 'Clicker', '放置', 'クリッカー', 13],
+  ['girls', 'Girls', '女生', 'ガールズ', 14]
 ];
 
 const SEED_GAMES = [
@@ -178,15 +195,17 @@ function isoDaysAgo(days) {
 
 function seed() {
   const bcrypt = require('bcryptjs');
-  const upsertCat = db.prepare('INSERT INTO categories(slug,name_en,name_zh,sort) VALUES(?,?,?,?) ON CONFLICT(slug) DO UPDATE SET name_en=excluded.name_en, name_zh=excluded.name_zh, sort=excluded.sort');
-  for (const [slug, en, zh, sort] of CATEGORIES) upsertCat.run(slug, en, zh, sort);
+  const upsertCat = db.prepare('INSERT INTO categories(slug,name_en,name_zh,name_ja,sort) VALUES(?,?,?,?,?) ON CONFLICT(slug) DO UPDATE SET name_en=excluded.name_en, name_zh=excluded.name_zh, name_ja=excluded.name_ja, sort=excluded.sort');
+  for (const [slug, en, zh, ja, sort] of CATEGORIES) upsertCat.run(slug, en, zh, ja, sort);
 
   const defaults = {
     site_name: 'Peachcade',
     tagline_en: 'Free Online Browser Games — Play Instantly',
     tagline_zh: '免费免下载在线小游戏 · 即点即玩',
+    tagline_ja: '無料・ダウンロード不要のオンラインブラウザゲーム · 今すぐ遊べる',
     footer_text_en: '',
     footer_text_zh: '',
+    footer_text_ja: '',
     ads_txt: '# GameMonetize publisher ads.txt - replace with the snippet from your publisher dashboard',
     ads_enabled: '1',
     registration_open: '1'
@@ -205,6 +224,13 @@ function seed() {
     const adminPass = process.env.ADMIN_PASSWORD || 'mqx331606110';
     db.prepare('INSERT INTO users(username,email,password_hash,role) VALUES(?,?,?,?)').run(adminUser, adminEmail, bcrypt.hashSync(adminPass, 10), 'admin');
   }
+
+  // Auto-seed Japanese localizations for built-in seed games
+  db.prepare("UPDATE games SET title_ja='2048', desc_ja='同じ数字のタイルをスライドさせて合体し、2048とその先のハイスコアを目指そう。', howto_ja='矢印キー / WASDまたはスワイプでタイルを移動。同じ数字が重なると合体します。' WHERE slug='2048' AND (title_ja IS NULL OR title_ja='')").run();
+  db.prepare("UPDATE games SET title_ja='スネーク クラシック', desc_ja='リンゴを食べて成長しながら生き残れ！懐かしくも新しいレトロスネークゲーム。', howto_ja='矢印キーまたはWASDで方向転換（スマホはスワイプ）。壁や自分の体に衝突しないように注意。' WHERE slug='snake' AND (title_ja IS NULL OR title_ja='')").run();
+  db.prepare("UPDATE games SET title_ja='絵合わせ神経衰弱', desc_ja='カードをめくって同じ絵柄のペアを見つけよう。できるだけ少ない手数でクリアを目指せ。', howto_ja='クリックまたはタップでカードをめくり、同じ絵柄のペアを揃えて消去します。' WHERE slug='memory-match' AND (title_ja IS NULL OR title_ja='')").run();
+  db.prepare("UPDATE games SET title_ja='三目並べ (Tic-Tac-Toe)', desc_ja='3×3マスの王道頭脳対決。手強いAIに挑戦して勝利を掴もう。', howto_ja='マスをクリックして自分の「X」を配置。AIより先に縦・横・斜めのいずれかに3つ並べれば勝利。' WHERE slug='tic-tac-toe' AND (title_ja IS NULL OR title_ja='')").run();
+  db.prepare("UPDATE games SET title_ja='マインスイーパ', desc_ja='隠された地雷を避けながら、すべての安全なマスを開放しよう。', howto_ja='左クリックでマスを開き、右クリックで地雷フラグを設置。数字は周囲にある地雷の数を示します。' WHERE slug='minesweeper' AND (title_ja IS NULL OR title_ja='')").run();
 
   if (!db.prepare('SELECT COUNT(*) n FROM games').get().n) {
     const ins = db.prepare('INSERT INTO games(slug,title_en,title_zh,desc_en,desc_zh,howto_en,howto_zh,category,tags,thumb,embed_url,plays,likes,featured,published,created_at) VALUES(@slug,@title_en,@title_zh,@desc_en,@desc_zh,@howto_en,@howto_zh,@category,@tags,@thumb,@embed_url,@plays,@likes,@featured,1,@created_at)');

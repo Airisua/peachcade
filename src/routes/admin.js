@@ -112,16 +112,19 @@ function saveGame(req, res, id) {
   const b = req.body;
   const title_en = String(b.title_en || '').trim().slice(0, 120);
   const title_zh = String(b.title_zh || '').trim().slice(0, 120);
+  const title_ja = String(b.title_ja || '').trim().slice(0, 120);
   if (!title_en) return res.redirect(ADMIN_BASE + '/games?err=badRequest');
   const slug = slugify(b.slug || title_en) || 'game-' + Date.now();
   const thumb = req.file ? ('/uploads/' + req.file.filename) : (String(b.thumb || '').trim() || '/img/games/default.svg');
   const embed_url = String(b.embed_url || '').trim() || ('/games/' + slug + '/');
   const data = {
-    slug, title_en, title_zh,
+    slug, title_en, title_zh, title_ja,
     desc_en: String(b.desc_en || '').slice(0, 500),
     desc_zh: String(b.desc_zh || '').slice(0, 500),
+    desc_ja: String(b.desc_ja || '').slice(0, 500),
     howto_en: String(b.howto_en || '').slice(0, 2000),
     howto_zh: String(b.howto_zh || '').slice(0, 2000),
+    howto_ja: String(b.howto_ja || '').slice(0, 2000),
     category: String(b.category || 'casual').slice(0, 32),
     tags: String(b.tags || '').slice(0, 200),
     thumb, embed_url,
@@ -130,10 +133,10 @@ function saveGame(req, res, id) {
   };
   try {
     if (id) {
-      db.prepare('UPDATE games SET slug=@slug,title_en=@title_en,title_zh=@title_zh,desc_en=@desc_en,desc_zh=@desc_zh,howto_en=@howto_en,howto_zh=@howto_zh,category=@category,tags=@tags,thumb=@thumb,embed_url=@embed_url,featured=@featured,published=@published WHERE id=@id').run(Object.assign({}, data, { id }));
+      db.prepare('UPDATE games SET slug=@slug,title_en=@title_en,title_zh=@title_zh,title_ja=@title_ja,desc_en=@desc_en,desc_zh=@desc_zh,desc_ja=@desc_ja,howto_en=@howto_en,howto_zh=@howto_zh,howto_ja=@howto_ja,category=@category,tags=@tags,thumb=@thumb,embed_url=@embed_url,featured=@featured,published=@published WHERE id=@id').run(Object.assign({}, data, { id }));
       res.redirect(ADMIN_BASE + '/games/' + id + '/edit?ok=updated');
     } else {
-      const info = db.prepare('INSERT INTO games(slug,title_en,title_zh,desc_en,desc_zh,howto_en,howto_zh,category,tags,thumb,embed_url,featured,published) VALUES(@slug,@title_en,@title_zh,@desc_en,@desc_zh,@howto_en,@howto_zh,@category,@tags,@thumb,@embed_url,@featured,@published)').run(data);
+      const info = db.prepare('INSERT INTO games(slug,title_en,title_zh,title_ja,desc_en,desc_zh,desc_ja,howto_en,howto_zh,howto_ja,category,tags,thumb,embed_url,featured,published) VALUES(@slug,@title_en,@title_zh,@title_ja,@desc_en,@desc_zh,@desc_ja,@howto_en,@howto_zh,@howto_ja,@category,@tags,@thumb,@embed_url,@featured,@published)').run(data);
       res.redirect(ADMIN_BASE + '/games/' + info.lastInsertRowid + '/edit?ok=created');
     }
   } catch (e) {
@@ -289,7 +292,7 @@ router.post('/ads/:id/toggle', (req, res) => {
   res.redirect(ADMIN_BASE + '/ads?ok=updated');
 });
 
-const SETTING_KEYS = ['site_name', 'tagline_en', 'tagline_zh', 'footer_text_en', 'footer_text_zh', 'ads_enabled', 'registration_open', 'ads_txt'];
+const SETTING_KEYS = ['site_name', 'tagline_en', 'tagline_zh', 'tagline_ja', 'footer_text_en', 'footer_text_zh', 'footer_text_ja', 'ads_enabled', 'registration_open', 'ads_txt'];
 
 router.get('/settings', (req, res) => {
   const values = {};

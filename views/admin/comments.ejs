@@ -5,7 +5,7 @@
   <tr class="<%= c.hidden ? 'row-hidden' : '' %>">
     <td><%= c.id %></td>
     <td><%= c.username %></td>
-    <td><a href="/game/<%= c.game_slug %>" target="_blank"><%= lang === 'zh' && c.game_title_zh ? c.game_title_zh : c.game_title_en %></a></td>
+    <td><a href="/game/<%= c.game_slug %>" target="_blank"><%= gt({ title_en: c.game_title_en, title_zh: c.game_title_zh, title_ja: c.game_title_ja }) %></a></td>
     <td class="comment-cell"><%= c.content %></td>
     <td class="muted small"><%= fmtDate(c.created_at) %></td>
     <td class="actions">

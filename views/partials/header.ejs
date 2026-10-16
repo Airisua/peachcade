@@ -23,9 +23,16 @@
       <div class="suggest" id="search-suggest"></div>
     </form>
     <div class="header-actions">
-      <a class="lang-switch" href="/lang/<%= otherLang %>?next=<%= encodeURIComponent(path) %>" title="<%= t('nav.language') %>">
-        <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-globe"></use></svg><%= otherLang === 'zh' ? '中文' : 'EN' %>
-      </a>
+      <details class="dropdown lang-dropdown">
+        <summary class="lang-switch" title="<%= t('nav.language') %>">
+          <svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-globe"></use></svg><span><%= currentLang.label %></span><svg class="ic ic-caret"><use href="/img/icons.svg?v=<%= assetV %>#i-chevron"></use></svg>
+        </summary>
+        <div class="dropdown-panel lang-panel">
+          <% supportedLangs.forEach(function (l) { %>
+          <a href="/lang/<%= l.code %>?next=<%= encodeURIComponent(path) %>" class="<%= lang === l.code ? 'active' : '' %>"><%= l.label %></a>
+          <% }); %>
+        </div>
+      </details>
       <% if (user) { %>
       <details class="dropdown usermenu">
         <summary class="avatar" title="<%= user.username %>"><%= user.username.charAt(0).toUpperCase() %></summary>

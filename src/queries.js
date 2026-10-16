@@ -26,9 +26,9 @@ function decodeEntities(s) {
   return str;
 }
 
-function gt(game, lang) { return !game ? '' : decodeEntities(lang === 'zh' && game.title_zh ? game.title_zh : game.title_en); }
-function gd(game, lang) { return !game ? '' : decodeEntities(lang === 'zh' && game.desc_zh ? game.desc_zh : game.desc_en); }
-function gh(game, lang) { return !game ? '' : decodeEntities(lang === 'zh' && game.howto_zh ? game.howto_zh : game.howto_en); }
+function gt(game, lang) { if (!game) return ''; if (lang === 'zh' && game.title_zh) return decodeEntities(game.title_zh); if (lang === 'ja' && game.title_ja) return decodeEntities(game.title_ja); return decodeEntities(game.title_en); }
+function gd(game, lang) { if (!game) return ''; if (lang === 'zh' && game.desc_zh) return decodeEntities(game.desc_zh); if (lang === 'ja' && game.desc_ja) return decodeEntities(game.desc_ja); return decodeEntities(game.desc_en); }
+function gh(game, lang) { if (!game) return ''; if (lang === 'zh' && game.howto_zh) return decodeEntities(game.howto_zh); if (lang === 'ja' && game.howto_ja) return decodeEntities(game.howto_ja); return decodeEntities(game.howto_en); }
 
 const SORTS = {
   popular: 'g.plays DESC, g.created_at DESC, g.id DESC',
@@ -46,7 +46,7 @@ const SORTS = {
 // extra counters, only selected when a caller asks for them (admin listings)
 const STAT_COLUMNS = ', (SELECT COUNT(*) FROM favorites f WHERE f.game_id=g.id) AS favs, (SELECT COUNT(*) FROM comments cm WHERE cm.game_id=g.id AND cm.hidden=0) AS cmts';
 
-const GAME_SELECT = 'SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh FROM games g LEFT JOIN categories c ON c.slug=g.category ';
+const GAME_SELECT = 'SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja FROM games g LEFT JOIN categories c ON c.slug=g.category ';
 
 function shuffle(list) {
   const a = list.slice();
@@ -89,9 +89,9 @@ function listGames(opt) {
   else if (!o.includeUnpublished) where.push("g.published=1");
   if (o.category) { where.push('g.category=?'); args.push(o.category); }
   if (o.q) {
-    where.push('(g.title_en LIKE ? OR g.title_zh LIKE ? OR g.tags LIKE ? OR g.slug LIKE ?)');
+    where.push('(g.title_en LIKE ? OR g.title_zh LIKE ? OR g.title_ja LIKE ? OR g.tags LIKE ? OR g.slug LIKE ?)');
     const like = '%' + o.q + '%';
-    args.push(like, like, like, like);
+    args.push(like, like, like, like, like);
   }
   const w = where.length ? 'WHERE ' + where.join(' AND ') : '';
   const order = SORTS[o.sort] || SORTS.popular;

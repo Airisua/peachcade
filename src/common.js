@@ -31,10 +31,20 @@ function common(req, res, next) {
   res.locals.assetV = ASSET_VERSION;
   res.locals.year = new Date().getFullYear();
   res.locals.siteUrl = String(process.env.SITE_URL || (req.protocol + '://' + (req.get('host') || 'localhost'))).replace(/\/+$/, '');
+  const taglines = {
+    zh: getSetting('tagline_zh', '免费免下载在线小游戏 · 即点即玩'),
+    ja: getSetting('tagline_ja', '無料・ダウンロード不要のオンラインブラウザゲーム · 今すぐ遊べる'),
+    en: getSetting('tagline_en', 'Free Online Browser Games — Play Instantly')
+  };
+  const footerTexts = {
+    zh: getSetting('footer_text_zh', ''),
+    ja: getSetting('footer_text_ja', ''),
+    en: getSetting('footer_text_en', '')
+  };
   res.locals.site = {
     name: getSetting('site_name', 'Peachcade'),
-    tagline: lang === 'zh' ? getSetting('tagline_zh', '免费免下载在线小游戏 · 即点即玩') : getSetting('tagline_en', 'Free Online Browser Games — Play Instantly'),
-    footerText: lang === 'zh' ? getSetting('footer_text_zh', '') : getSetting('footer_text_en', '')
+    tagline: taglines[lang] || taglines.en,
+    footerText: footerTexts[lang] || footerTexts.en
   };
   const cats = db.prepare('SELECT c.*, (SELECT COUNT(*) FROM games g WHERE g.category=c.slug AND g.published=1) AS n FROM categories c ORDER BY c.sort, c.slug').all();
   const samples = categorySamples();
@@ -46,7 +56,7 @@ function common(req, res, next) {
   res.locals.gt = (g) => gt(g, lang);
   res.locals.gd = (g) => gd(g, lang);
   res.locals.gh = (g) => gh(g, lang);
-  res.locals.catName = (c) => (!c ? '' : (lang === 'zh' ? c.name_zh : c.name_en));
+  res.locals.catName = (c) => (!c ? '' : (lang === 'zh' ? (c.name_zh || c.name_en) : (lang === 'ja' ? (c.name_ja || c.name_en) : c.name_en)));
   // thumbnails: provider images are proxied and resized by /thumb/<slug>.<size>.jpg
   // (see src/thumbs.js); local assets (built-in games, uploads) are served as-is
   res.locals.thumb = (g, size) => {
@@ -72,7 +82,8 @@ function common(req, res, next) {
   res.locals.fmtDate = (s) => {
     if (!s) return '';
     const d = new Date(String(s).replace(' ', 'T') + 'Z');
-    return d.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    const localeMap = { zh: 'zh-CN', ja: 'ja-JP', en: 'en-US' };
+    return d.toLocaleDateString(localeMap[lang] || 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
   const ok = req.query.ok;
   res.locals.okMsg = ok && OK_CODES.includes(ok) ? res.locals.t('ok.' + ok) : null;

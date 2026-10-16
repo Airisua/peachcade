@@ -49,7 +49,7 @@ function videoGame(game, opt) {
     operatingSystem: 'Web browser',
     playMode: 'SinglePlayer',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
-    inLanguage: o.lang === 'zh' ? 'zh-CN' : 'en'
+    inLanguage: o.lang === 'zh' ? 'zh-CN' : (o.lang === 'ja' ? 'ja-JP' : 'en')
   };
   const img = abs(game.thumb, siteUrl);
   if (img) block.image = img;

@@ -69,6 +69,14 @@ function client() {
   ok(r.status === 302, 'lang switch to zh', r.status);
   r = await user.get('/');
   ok(r.status === 200 && r.text.includes('热门游戏'), 'home renders ZH', r.status);
+  r = await user.get('/lang/ja?next=/');
+  ok(r.status === 302, 'lang switch to ja', r.status);
+  r = await user.get('/');
+  ok(r.status === 200 && r.text.includes('いま人気のゲーム') && r.text.includes('lang="ja"'), 'home renders JA with localized headings', r.status);
+  r = await user.get('/game/snake');
+  ok(r.status === 200 && r.text.includes('スネーク クラシック'), 'game detail renders Japanese title in JA mode');
+  r = await user.get('/about');
+  ok(r.status === 200 && r.text.includes('Peachcadeについて'), 'about page renders Japanese in JA mode');
   r = await user.get('/lang/en?next=/');
   ok(r.status === 302, 'lang switch back to en', r.status);
   r = await user.get('/games');
@@ -94,6 +102,9 @@ function client() {
     r = await user.get('/lang/zh?next=/games');
     r = await user.get('/games');
     ok(/首页/.test(r.text) && /末页/.test(r.text), 'pager shows localised first/last labels');
+    r = await user.get('/lang/ja?next=/games');
+    r = await user.get('/games');
+    ok(/先頭/.test(r.text) && /末尾/.test(r.text), 'pager shows Japanese first/last labels');
     r = await user.get('/lang/en?next=/games');
   } finally {
     for (const id of pagerIds) db.prepare('DELETE FROM games WHERE id=?').run(id);

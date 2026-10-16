@@ -24,7 +24,7 @@
       <% comments.forEach(function (c) { %>
       <div class="comment">
         <div class="comment-body">
-          <div class="comment-head"><b><a href="/game/<%= c.game_slug %>"><%= lang === 'zh' && c.game_title_zh ? c.game_title_zh : c.game_title_en %></a></b><span class="muted small"><%= fmtDate(c.created_at) %></span></div>
+          <div class="comment-head"><b><a href="/game/<%= c.game_slug %>"><%= gt({ title_en: c.game_title_en, title_zh: c.game_title_zh, title_ja: c.game_title_ja }) %></a></b><span class="muted small"><%= fmtDate(c.created_at) %></span></div>
           <p><%= c.content %></p>
           <form method="post" action="/comment/<%= c.id %>/delete" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button type="submit" class="linklike danger small" data-confirm="1"><%= t('common.delete') %></button></form>
         </div>

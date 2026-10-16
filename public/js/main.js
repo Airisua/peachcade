@@ -209,4 +209,11 @@
       if (!window.confirm(I18N.confirmDelete || 'Are you sure?')) { e.preventDefault(); e.stopPropagation(); }
     });
   });
+
+  // Close open dropdowns when clicking outside
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('details.dropdown')) {
+      $$('details.dropdown[open]').forEach(function (d) { d.removeAttribute('open'); });
+    }
+  });
 })();

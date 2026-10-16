@@ -5,8 +5,10 @@
     <label><%= t('admin.settings_site_name') %><input name="site_name" value="<%= values.site_name %>"></label>
     <label><%= t('admin.settings_tagline_en') %><input name="tagline_en" value="<%= values.tagline_en %>"></label>
     <label><%= t('admin.settings_tagline_zh') %><input name="tagline_zh" value="<%= values.tagline_zh %>"></label>
+    <label><%= t('admin.settings_tagline_ja') %><input name="tagline_ja" value="<%= values.tagline_ja %>"></label>
     <label><%= t('admin.settings_footer_text_en') %><input name="footer_text_en" value="<%= values.footer_text_en %>"></label>
     <label><%= t('admin.settings_footer_text_zh') %><input name="footer_text_zh" value="<%= values.footer_text_zh %>"></label>
+    <label><%= t('admin.settings_footer_text_ja') %><input name="footer_text_ja" value="<%= values.footer_text_ja %>"></label>
   </div>
   <div class="form-row">
     <label class="check"><input type="checkbox" name="ads_enabled" <%= values.ads_enabled === '1' ? 'checked' : '' %>><%= t('admin.settings_ads_enabled') %></label>
@@ -22,8 +24,10 @@
     <input type="hidden" name="site_name" value="<%= values.site_name %>">
     <input type="hidden" name="tagline_en" value="<%= values.tagline_en %>">
     <input type="hidden" name="tagline_zh" value="<%= values.tagline_zh %>">
+    <input type="hidden" name="tagline_ja" value="<%= values.tagline_ja %>">
     <input type="hidden" name="footer_text_en" value="<%= values.footer_text_en %>">
     <input type="hidden" name="footer_text_zh" value="<%= values.footer_text_zh %>">
+    <input type="hidden" name="footer_text_ja" value="<%= values.footer_text_ja %>">
     <% if (values.ads_enabled === '1') { %><input type="hidden" name="ads_enabled" value="on"><% } %>
     <% if (values.registration_open === '1') { %><input type="hidden" name="registration_open" value="on"><% } %>
     <div class="form-group">

@@ -277,5 +277,10 @@
   "admin.statusFeatured": "Featured",
   "game.loading": "Loading game...",
   "game.reload": "Reload game",
-  "game.trouble": "Game taking too long?"
+  "game.trouble": "Game taking too long?",
+  "admin.gameTitle_ja": "Title (Japanese)",
+  "admin.gameDesc_ja": "Description (Japanese)",
+  "admin.gameHowto_ja": "How to play (Japanese)",
+  "admin.settings_tagline_ja": "Tagline (Japanese)",
+  "admin.settings_footer_text_ja": "Footer text (Japanese)"
 }

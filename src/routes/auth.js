@@ -66,9 +66,9 @@ router.post('/logout', (req, res) => {
 });
 
 router.get('/profile', requireLogin, (req, res) => {
-  const favorites = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh FROM favorites f JOIN games g ON g.id=f.game_id LEFT JOIN categories c ON c.slug=g.category WHERE f.user_id=? ORDER BY f.created_at DESC').all(req.user.id);
-  const history = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, MAX(p.created_at) AS last_play FROM plays_log p JOIN games g ON g.id=p.game_id LEFT JOIN categories c ON c.slug=g.category WHERE p.user_id=? GROUP BY g.id ORDER BY last_play DESC LIMIT 12').all(req.user.id);
-  const comments = db.prepare('SELECT cm.*, g.slug AS game_slug, g.title_en AS game_title_en, g.title_zh AS game_title_zh FROM comments cm JOIN games g ON g.id=cm.game_id WHERE cm.user_id=? ORDER BY cm.created_at DESC LIMIT 50').all(req.user.id);
+  const favorites = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja FROM favorites f JOIN games g ON g.id=f.game_id LEFT JOIN categories c ON c.slug=g.category WHERE f.user_id=? ORDER BY f.created_at DESC').all(req.user.id);
+  const history = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja, MAX(p.created_at) AS last_play FROM plays_log p JOIN games g ON g.id=p.game_id LEFT JOIN categories c ON c.slug=g.category WHERE p.user_id=? GROUP BY g.id ORDER BY last_play DESC LIMIT 12').all(req.user.id);
+  const comments = db.prepare('SELECT cm.*, g.slug AS game_slug, g.title_en AS game_title_en, g.title_zh AS game_title_zh, g.title_ja AS game_title_ja FROM comments cm JOIN games g ON g.id=cm.game_id WHERE cm.user_id=? ORDER BY cm.created_at DESC LIMIT 50').all(req.user.id);
   res.render('profile', { pageTitle: res.locals.t('profile.title'), favorites, history, comments });
 });
 
