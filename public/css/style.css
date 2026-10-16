@@ -26,7 +26,8 @@ a{color:inherit;text-decoration:none}
 a:hover{color:#fff}
 img{max-width:100%;display:block}
 h1,h2,h3,h4{margin:0 0 .45em;line-height:1.25}
-.container{max-width:1200px;margin:0 auto;padding:0 18px}
+.container{max-width:1560px;margin:0 auto;padding:0 clamp(16px,2vw,32px)}
+@media (min-width:1920px){.container{max-width:1680px}}
 .muted{color:var(--muted)}
 .small{font-size:12.5px}
 .center{text-align:center}
@@ -168,7 +169,7 @@ textarea {
 .lang-switch .ic-caret{width:11px;height:11px;opacity:.7;margin-left:2px}
 
 /* search */
-.searchbox{position:relative;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px 12px;min-width:230px;flex:1;max-width:340px}
+.searchbox{position:relative;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px 14px;min-width:240px;flex:1;max-width:440px}
 .searchbox:focus-within{border-color:var(--brand)}
 .searchbox .ic{color:var(--muted)}
 .searchbox input{background:none !important;border:0 !important;outline:none !important;color:var(--text);font-size:14px;width:100%;height:auto !important;padding:0 !important;box-shadow:none !important;display:inline-block !important}
@@ -233,7 +234,7 @@ textarea {
 .game-head h1{font-size:clamp(22px,3vw,32px);margin:0;font-weight:900}
 .game-stats{display:flex;gap:16px}
 .game-stats span{display:inline-flex;align-items:center;gap:6px}
-.player-wrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);isolation:isolate}
+.player-wrap{position:relative;max-width:1280px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);isolation:isolate}
 .player-wrap::before{content:"";position:absolute;inset:-3px;border-radius:20px;background:radial-gradient(circle at 50% 30%,rgba(139,92,246,.28),rgba(236,72,153,.16) 50%,transparent 75%);filter:blur(28px);opacity:.75;z-index:-1;pointer-events:none;transition:opacity .35s ease,filter .35s ease}
 .player-wrap.theater::before{inset:-6px;filter:blur(44px);opacity:.9;background:radial-gradient(circle at 50% 40%,rgba(139,92,246,.42),rgba(34,211,238,.20) 50%,transparent 80%)}
 .player-box{position:relative;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}
@@ -241,7 +242,7 @@ textarea {
 .player-box:fullscreen{border-radius:0;aspect-ratio:auto}
 .player-bar{display:flex;gap:9px;padding-top:11px;flex-wrap:wrap}
 .player-bar .btn:hover{border-color:rgba(139,92,246,.4);box-shadow:0 4px 14px rgba(139,92,246,.2)}
-.game-cols{display:grid;grid-template-columns:1fr 320px;gap:22px;margin-top:22px;align-items:start}
+.game-cols{display:grid;grid-template-columns:1fr 320px;gap:22px;margin:22px auto 0;max-width:1280px;align-items:start}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px}
 .panel h2{font-size:16.5px;color:#d9d9ea}
 .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
