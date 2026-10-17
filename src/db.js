@@ -94,6 +94,16 @@ CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL DEFAULT ''
 );
+CREATE TABLE IF NOT EXISTS cpa_leads (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lead_id TEXT NOT NULL UNIQUE,
+  subid TEXT NOT NULL DEFAULT '',
+  campaign_id TEXT NOT NULL DEFAULT '',
+  campaign_name TEXT NOT NULL DEFAULT '',
+  payout REAL NOT NULL DEFAULT 0,
+  country_iso TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 CREATE INDEX IF NOT EXISTS idx_games_category ON games(category);
 CREATE INDEX IF NOT EXISTS idx_games_plays ON games(plays);
 CREATE INDEX IF NOT EXISTS idx_plays_log_user ON plays_log(user_id, created_at);

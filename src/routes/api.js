@@ -5,6 +5,32 @@ const { db } = require('../db');
 const { listGames } = require('../queries');
 const { requireLogin } = require('../auth');
 
+const CPALEAD_POSTBACK_PASSWORD = process.env.CPALEAD_PASSWORD || 'peachcade123';
+
+router.get('/postback/cpalead', (req, res) => {
+  const pwd = String(req.query.password || '').trim();
+  if (CPALEAD_POSTBACK_PASSWORD && pwd && pwd !== CPALEAD_POSTBACK_PASSWORD) {
+    return res.status(403).send('Forbidden: invalid password');
+  }
+  const leadId = String(req.query.lead_id || '').trim();
+  if (!leadId) {
+    return res.status(400).send('Missing lead_id');
+  }
+  const subid = String(req.query.subid || '').slice(0, 100);
+  const campaignId = String(req.query.campaign_id || '').slice(0, 100);
+  const campaignName = String(req.query.campaign_name || '').slice(0, 255);
+  const payout = parseFloat(req.query.payout) || 0;
+  const country = String(req.query.country_iso || req.query.country_code || '').slice(0, 10);
+
+  try {
+    db.prepare('INSERT OR IGNORE INTO cpa_leads(lead_id, subid, campaign_id, campaign_name, payout, country_iso) VALUES(?,?,?,?,?,?)')
+      .run(leadId, subid, campaignId, campaignName, payout, country);
+  } catch (e) {
+    // duplicate lead or db busy; return 200 so CPAlead knows callback was delivered
+  }
+  res.status(200).send('OK');
+});
+
 router.get('/games', (req, res) => {
   const data = listGames({
     q: String(req.query.q || '').slice(0, 64),

@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-10-18] CPAlead Postback (S2S) 回调接收端与实时转化持久化 (CPAlead Postback Integration)
+
+### 1. 自动化 S2S Postback 接口 (/api/postback/cpalead)
+- **服务端接收端点**：实现专用的 `GET /api/postback/cpalead` 回调处理接口，解析 `{subid}`、`{lead_id}`、`{campaign_id}`、`{campaign_name}`、`{payout}`、`{country_iso}`、`{password}` 等官方宏。
+- **防重幂等与安全保护**：建立 SQLite `cpa_leads` 转化流水表，以 `lead_id` 为唯一索引杜绝网络重发或并发导致的数据重复，内置共享安全密码校验。
+- **用户 ID 智能传递**：玩家登录状态下访问 `/rewards` 时，自动在任务墙 iframe 地址中附带 `?subid={username}`，完成任务时能够精准追踪到具体哪个用户完成了哪笔佣金。
+
+---
+
 ## [2026-10-18] 独立福利任务中心与 CPAlead 暗黑任务墙原生集成 (CPAlead Offerwall & /rewards Page)
 
 ### 1. 全新独立福利专页 (/rewards)

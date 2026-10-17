@@ -79,6 +79,14 @@ function client() {
   ok(r.status === 200 && r.text.includes('Peachcadeについて'), 'about page renders Japanese in JA mode');
   r = await user.get('/rewards');
   ok(r.status === 200 && r.text.includes('cdnnd.com/wall/KDhq') && r.text.includes('iframe'), 'rewards page embeds CPAlead offerwall', r.status);
+  // CPAlead Postback test
+  r = await user.get('/api/postback/cpalead?lead_id=smoke-lead-123&subid=testuser&payout=1.25&campaign_id=999&campaign_name=SmokeOffer&password=peachcade123');
+  ok(r.status === 200 && r.text === 'OK', 'cpalead postback accepts valid lead', r.status);
+  r = await user.get('/api/postback/cpalead?lead_id=smoke-lead-123&subid=testuser&payout=1.25&campaign_id=999&campaign_name=SmokeOffer&password=peachcade123');
+  ok(r.status === 200 && r.text === 'OK', 'cpalead postback handles duplicate lead_id idempotently', r.status);
+  const leadRow = db.prepare('SELECT * FROM cpa_leads WHERE lead_id=?').get('smoke-lead-123');
+  ok(leadRow && leadRow.payout === 1.25 && leadRow.subid === 'testuser', 'lead recorded in database');
+  db.prepare('DELETE FROM cpa_leads WHERE lead_id=?').run('smoke-lead-123');
   r = await user.get('/lang/en?next=/');
   ok(r.status === 302, 'lang switch back to en', r.status);
   r = await user.get('/games');
