@@ -86,7 +86,7 @@ function client() {
   // temporary published fixtures are added for the check and removed afterwards.
   const pagerIds = [];
   const pagerIns = db.prepare("INSERT INTO games(slug,title_en,category,thumb,embed_url,source,published) VALUES(?,?,?,?,?,?,1)");
-  for (let i = 1; i <= 26; i++) {
+  for (let i = 1; i <= 52; i++) {
     pagerIds.push(pagerIns.run('pager-fixture-' + i, 'Pager Fixture ' + i, 'puzzle', '/img/games/default.svg', 'https://example.com/pager/' + i, 'smoke').lastInsertRowid);
   }
   try {

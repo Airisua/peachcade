@@ -8,6 +8,8 @@ const { rateLimit } = require('../ratelimit');
 const schemaLd = require('../schema');
 const thumbs = require('../thumbs');
 
+const GAMES_PER_PAGE = 48;
+
 const commentLimiter = rateLimit({ windowMs: 60000, max: 10, scope: 'comment' });
 
 function page(n) { const v = parseInt(n, 10); return !v || v < 1 ? 1 : v; }
@@ -34,7 +36,7 @@ router.get('/', (req, res) => {
 
 router.get('/games', (req, res) => {
   const sort = safeSort(req.query.sort);
-  const data = listGames({ sort, page: page(req.query.page), per: 24 });
+  const data = listGames({ sort, page: page(req.query.page), per: GAMES_PER_PAGE });
   const heading = res.locals.t('common.allGames');
   res.render('list', {
     pageTitle: heading,
@@ -57,7 +59,7 @@ router.get('/category/:slug', (req, res, next) => {
   const cat = db.prepare('SELECT * FROM categories WHERE slug=?').get(req.params.slug);
   if (!cat) return next();
   const sort = safeSort(req.query.sort);
-  const data = listGames({ sort, category: cat.slug, page: page(req.query.page), per: 24 });
+  const data = listGames({ sort, category: cat.slug, page: page(req.query.page), per: GAMES_PER_PAGE });
   const catLabel = res.locals.catName(cat);
   const catDesc = res.locals.t('seo.category', { name: catLabel });
   res.render('list', {
@@ -83,9 +85,9 @@ router.get('/tag/:tag', (req, res, next) => {
   if (!rawTag) return next();
   const cleanTag = rawTag.toLowerCase().replace(/[-_]+/g, ' ').trim();
   const sort = safeSort(req.query.sort);
-  let data = listGames({ tag: cleanTag, sort, page: page(req.query.page), per: 24 });
+  let data = listGames({ tag: cleanTag, sort, page: page(req.query.page), per: GAMES_PER_PAGE });
   if (!data.total && cleanTag !== rawTag.toLowerCase()) {
-    data = listGames({ tag: rawTag.toLowerCase(), sort, page: page(req.query.page), per: 24 });
+    data = listGames({ tag: rawTag.toLowerCase(), sort, page: page(req.query.page), per: GAMES_PER_PAGE });
   }
   const tagDisplay = cleanTag.split(/\s+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   const heading = res.locals.t('seo.tagHeading', { tag: tagDisplay });
@@ -115,7 +117,7 @@ router.get('/tag/:tag', (req, res, next) => {
 router.get('/search', (req, res) => {
   const q = String(req.query.q || '').slice(0, 64);
   const sort = safeSort(req.query.sort);
-  const data = q ? listGames({ q, sort, page: page(req.query.page), per: 24 }) : { games: [], page: 1, pages: 1, total: 0 };
+  const data = q ? listGames({ q, sort, page: page(req.query.page), per: GAMES_PER_PAGE }) : { games: [], page: 1, pages: 1, total: 0 };
   res.render('list', {
     pageTitle: res.locals.t('list.searchResults', { q }),
     heading: res.locals.t('list.searchResults', { q }),
