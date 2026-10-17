@@ -211,7 +211,7 @@ function seed() {
     footer_text_en: '',
     footer_text_zh: '',
     footer_text_ja: '',
-    ads_txt: '# GameMonetize publisher ads.txt - replace with the snippet from your publisher dashboard',
+    ads_txt: 'google.com, pub-2264028095354486, DIRECT, f08c47fec0942fa0\n\n# GameMonetize publisher ads.txt\ngoogle.com, pub-5519830896693885, DIRECT, f08c47fec0942fa0\ngoogle.com, pub-4764333688337558, DIRECT, f08c47fec0942fa0',
     ads_enabled: '1',
     registration_open: '1'
   };
@@ -224,6 +224,13 @@ function seed() {
   db.prepare("UPDATE settings SET value='免费免下载在线小游戏 · 即点即玩' WHERE key='tagline_zh' AND value='即点即玩 · 免费在线小游戏'").run();
   // Auto-migrate admin contact email
   db.prepare("UPDATE users SET email='wyjv58787@gmail.com' WHERE username='mqx' AND (email='mqx@peachcat.fun' OR email LIKE '%example.com')").run();
+  // Auto-migrate Google AdSense publisher snippet into ads_txt
+  const googleAdSenseSnippet = 'google.com, pub-2264028095354486, DIRECT, f08c47fec0942fa0';
+  const currentAds = getSetting('ads_txt', '');
+  if (!currentAds.includes('pub-2264028095354486')) {
+    const updatedAds = currentAds ? (googleAdSenseSnippet + '\n\n' + currentAds).trim() : googleAdSenseSnippet;
+    setSetting('ads_txt', updatedAds);
+  }
 
   if (!db.prepare('SELECT COUNT(*) n FROM users').get().n) {
     const adminUser = process.env.ADMIN_USERNAME || 'mqx';

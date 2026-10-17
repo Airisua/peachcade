@@ -4,6 +4,14 @@
 
 ---
 
+## [2026-10-17] Google AdSense 授权发布商验证代码落地至 Ads.txt (Google AdSense Authorization in ads.txt)
+
+### 1. 部署 Google AdSense 专属发布商 ID
+- **所有权验证代码写入**：将官方验证代码 `google.com, pub-2264028095354486, DIRECT, f08c47fec0942fa0` 配置至全站动态 `ads.txt` 首行，与现有 GameMonetize 广告联盟代码协同共存，顺利通过 Google 广告发布商身份验证与网站审核。
+- **动态无缓存穿透与纯净响应**：`/ads.txt` 接口保持纯文本响应，严格剥离 Cookie 设置并支持 Google 爬虫与审核机器人即时抓取验证。
+
+---
+
 ## [2026-10-17] 前台中文选项隐藏、纯国际化双语（EN/JA）与后台专属中文面板 (Public EN/JA & Admin-Only Chinese)
 
 ### 1. 前台隐藏中文语言切换选项 (Hide Chinese on Public Frontend)
