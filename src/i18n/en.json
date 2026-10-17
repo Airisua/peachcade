@@ -295,6 +295,12 @@
   "seo.tagHeading": "Free {tag} Games",
   "seo.tagDesc": "Play the best free online {tag} games on {site}. Instant browser play, no download needed!",
   "nav.popularTags": "Popular Tags",
+  "nav.rewards": "Rewards",
+  "rewards.title": "Rewards & Free Offers",
+  "rewards.badge": "Earn Free Rewards",
+  "rewards.desc": "Complete fun mobile quests, try free games, and complete simple surveys to support Peachcade and unlock rewards!",
+  "rewards.safetyTip": "100% verified advertiser offers powered by CPAlead",
+  "rewards.newTab": "Open in full window",
   "game.theater": "Theater mode",
   "common.backToTop": "Back to top"
 }

@@ -295,6 +295,12 @@
   "seo.tagHeading": "{tag}小游戏大全",
   "seo.tagDesc": "在 {site} 畅玩精选免费{tag}小游戏，即点即玩，免安装无插件！",
   "nav.popularTags": "热门标签",
+  "nav.rewards": "福利任务",
+  "rewards.title": "福利任务与专属礼包",
+  "rewards.badge": "免费赢福利",
+  "rewards.desc": "完成趣味手游试玩、调查问卷或热门应用下载，支持 Peachcade 持续免费运营，赢取丰厚金币与特权礼包！",
+  "rewards.safetyTip": "由官方广告合作伙伴 CPAlead 提供 100% 安全认证任务",
+  "rewards.newTab": "在新窗口全屏打开",
   "game.theater": "影院宽屏",
   "common.backToTop": "返回顶部"
 }

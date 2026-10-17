@@ -4,6 +4,17 @@
 
 ---
 
+## [2026-10-18] 独立福利任务中心与 CPAlead 暗黑任务墙原生集成 (CPAlead Offerwall & /rewards Page)
+
+### 1. 全新独立福利专页 (/rewards)
+- **独立路由与无感集成**：新增 `/rewards` 专属独立路由与 `views/rewards.ejs` 模板，将 CPAlead 专属定制的暗黑电竞风任务墙（`https://www.cdnnd.com/wall/KDhq`）以沙盒 iFrame 形式嵌入页面。
+- **智能自适应与安全隔离**：配置严格的 `sandbox` 与 `referrerpolicy='no-referrer'` 属性，支持任务墙在移动端与 PC 端自适应高度，底部配备官方安全认证标识与新窗口全屏打开按钮。
+
+### 2. 顶栏导航与页脚专属入口 (Header & Footer Navigation)
+- **全站直达转化通道**：在主导航栏与页脚链接区加入「🎁 Rewards」入口，支持 EN、ZH、JA 三语无缝切换（Rewards / 福利任务 / リワード）。
+
+---
+
 ## [2026-10-17] Google AdSense 授权发布商验证代码落地至 Ads.txt (Google AdSense Authorization in ads.txt)
 
 ### 1. 部署 Google AdSense 专属发布商 ID

@@ -221,6 +221,13 @@ router.get('/about', (req, res) => {
   res.render('about', { pageTitle: res.locals.t('about.title') });
 });
 
+router.get('/rewards', (req, res) => {
+  res.render('rewards', { 
+    pageTitle: res.locals.t('rewards.title'),
+    metaDesc: res.locals.t('rewards.desc')
+  });
+});
+
 router.get('/healthz', (req, res) => {
   res.json({ ok: true, uptime: process.uptime() });
 });

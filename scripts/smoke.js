@@ -77,6 +77,8 @@ function client() {
   ok(r.status === 200 && r.text.includes('スネーク クラシック'), 'game detail renders Japanese title in JA mode');
   r = await user.get('/about');
   ok(r.status === 200 && r.text.includes('Peachcadeについて'), 'about page renders Japanese in JA mode');
+  r = await user.get('/rewards');
+  ok(r.status === 200 && r.text.includes('cdnnd.com/wall/KDhq') && r.text.includes('iframe'), 'rewards page embeds CPAlead offerwall', r.status);
   r = await user.get('/lang/en?next=/');
   ok(r.status === 302, 'lang switch back to en', r.status);
   r = await user.get('/games');

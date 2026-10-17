@@ -295,6 +295,12 @@
   "seo.tagHeading": "無料{tag}ゲーム一覧",
   "seo.tagDesc": "{site}で人気の無料{tag}ゲームを今すぐプレイ。ダウンロード不要でブラウザですぐに遊べます！",
   "nav.popularTags": "人気のタグ",
+  "nav.rewards": "リワード",
+  "rewards.title": "リワード＆無料オファー",
+  "rewards.badge": "無料特典を獲得",
+  "rewards.desc": "ゲームの無料プレイや簡単なお試しクエストを完了して、Peachcadeを応援しながら豪華リワードを獲得しよう！",
+  "rewards.safetyTip": "CPAlead提携の100%安全確認済みスポンサーオファー",
+  "rewards.newTab": "別ウィンドウで全画面表示",
   "game.theater": "シアターモード",
   "common.backToTop": "トップへ戻る"
 }
