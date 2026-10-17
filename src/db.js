@@ -8,6 +8,10 @@ fs.mkdirSync(DATA_DIR, { recursive: true });
 const db = new Database(path.join(DATA_DIR, 'app.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
+db.pragma('synchronous = NORMAL');
+db.pragma('temp_store = MEMORY');
+db.pragma('cache_size = -64000');
+db.pragma('mmap_size = 268435456');
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (

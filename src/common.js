@@ -41,6 +41,21 @@ function categorySamples() {
   return map;
 }
 
+const CATEGORY_CACHE_TTL_MS = 30 * 1000;
+let categoryCache = { at: 0, rows: [] };
+function getCategoriesWithCount() {
+  if (Date.now() - categoryCache.at < CATEGORY_CACHE_TTL_MS && categoryCache.rows.length) {
+    return categoryCache.rows;
+  }
+  const rows = db.prepare('SELECT c.*, (SELECT COUNT(*) FROM games g WHERE g.category=c.slug AND g.published=1) AS n FROM categories c ORDER BY c.sort, c.slug').all();
+  categoryCache = { at: Date.now(), rows };
+  return rows;
+}
+function invalidateCategoryCache() {
+  categoryCache = { at: 0, rows: [] };
+  categorySampleCache = { at: 0, map: {} };
+}
+
 function common(req, res, next) {
   const lang = req.lang;
   res.locals.path = req.path;
@@ -62,7 +77,7 @@ function common(req, res, next) {
     tagline: taglines[lang] || taglines.en,
     footerText: footerTexts[lang] || footerTexts.en
   };
-  const cats = db.prepare('SELECT c.*, (SELECT COUNT(*) FROM games g WHERE g.category=c.slug AND g.published=1) AS n FROM categories c ORDER BY c.sort, c.slug').all();
+  const cats = getCategoriesWithCount().map((c) => ({ ...c }));
   const samples = categorySamples();
   for (const c of cats) c.sample_thumb = (c.n > 0 && samples[c.slug]) ? samples[c.slug] : null;
   res.locals.categories = cats;
@@ -110,4 +125,5 @@ function common(req, res, next) {
   next();
 }
 
+common.invalidateCategoryCache = invalidateCategoryCache;
 module.exports = common;

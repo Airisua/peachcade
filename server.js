@@ -32,7 +32,9 @@ app.disable('x-powered-by');
 app.locals.assetV = ASSET_VERSION;
 
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
-app.use(morgan('tiny'));
+app.use(morgan('tiny', {
+  skip: (req) => req.url.startsWith('/thumb/') || req.url.startsWith('/img/') || req.url.startsWith('/css/') || req.url.startsWith('/js/')
+}));
 app.use(express.urlencoded({ extended: false, limit: '300kb' }));
 app.use(express.json({ limit: '300kb' }));
 app.use(cookieParser());
