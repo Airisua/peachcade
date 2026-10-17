@@ -4,6 +4,16 @@
 
 ---
 
+## [2026-10-17] 前台中文选项隐藏、纯国际化双语（EN/JA）与后台专属中文面板 (Public EN/JA & Admin-Only Chinese)
+
+### 1. 前台隐藏中文语言切换选项 (Hide Chinese on Public Frontend)
+- **强化海外门户定位**：前台顶栏语言切换下拉菜单（`.lang-dropdown`）与全站页脚语言栏（`.site-footer`）移除「中文」选项，公共前台仅展示「English」与「日本語」双语选择，符合 CrazyGames / Poki 纯海外小游戏平台的品牌调性。
+
+### 2. 后台管理页面专属强制中文 (Admin-Only Chinese Middleware)
+- **管理面板全流程中文沉浸**：在 `/wyj` 路由层新增管理员语言专属中间件，无论管理员在访问前台时选择何种语言（英文或日文），进入后台仪表盘、游戏管理、批量导入、评论审核、广告配置与站点设置时，界面一律强制渲染地道中文界面，操作体验更加清晰高效。
+
+---
+
 ## [2026-10-17] 2C2G 服务器全维高并发与低延迟性能调优 (Full-Stack 2C2G Performance Tuning)
 
 ### 1. SQLite 引擎与 I/O 深度调优 (better-sqlite3 PRAGMA)

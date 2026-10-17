@@ -7,7 +7,8 @@ const express = require('express');
 const router = express.Router();
 const { db, getSetting, setSetting, DATA_DIR } = require('../db');
 const { requireAdmin } = require('../auth');
-const { listGames } = require('../queries');
+const { listGames, gt, gd, gh } = require('../queries');
+const { makeT } = require('../i18n');
 const { isValid } = require('../csrf');
 const upload = require('../upload');
 const providers = require('../providers');
@@ -42,6 +43,18 @@ function bulkImportStatus() {
 }
 
 router.use(requireAdmin);
+router.use((req, res, next) => {
+  req.lang = 'zh';
+  res.locals.lang = 'zh';
+  res.locals.t = makeT('zh');
+  res.locals.gt = (g) => gt(g, 'zh');
+  res.locals.gd = (g) => gd(g, 'zh');
+  res.locals.gh = (g) => gh(g, 'zh');
+  res.locals.catName = (c) => (!c ? '' : (c.name_zh || c.name_en));
+  if (req.query.ok) res.locals.okMsg = res.locals.t('ok.' + req.query.ok);
+  if (req.query.err) res.locals.errMsg = res.locals.t('err.' + req.query.err);
+  next();
+});
 
 function csrfFail(req, res) {
   if (isValid(req)) return false;

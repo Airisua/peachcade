@@ -455,11 +455,11 @@ function client() {
   }
   const limiterA = await startLimiter();
   r = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: limiterA.url, num: 6, page: 4 });
-  ok(r.status === 200 && r.text.indexOf('Retry') >= 0 && r.text.indexOf('429') >= 0, 'rate-limited feed shows retry notice', r.status);
+  ok(r.status === 200 && (r.text.indexOf('Retry') >= 0 || r.text.indexOf('重试') >= 0) && r.text.indexOf('429') >= 0, 'rate-limited feed shows retry notice', r.status);
   limiterA.server.close();
   const limiterB = await startLimiter();
   r = await admin.post('/wyj/import/preview', { _csrf: admin.csrf(), provider: 'json', url: limiterB.url, num: 6, page: 4 });
-  ok(r.status === 200 && r.text.indexOf('Retry') >= 0, 'retry path renders notice again', r.status);
+  ok(r.status === 200 && (r.text.indexOf('Retry') >= 0 || r.text.indexOf('重试') >= 0), 'retry path renders notice again', r.status);
   limiterB.server.close();
   const slug = 'smoke-game-' + Date.now().toString().slice(-6);
   resp = await admin.post('/wyj/games', { _csrf: admin.csrf(), title_en: 'Smoke Game', slug: slug, category: 'puzzle', embed_url: '/games/2048/', published: 'on' });

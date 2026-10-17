@@ -34,11 +34,10 @@ function i18nMiddleware(req, res, next) {
   res.locals.lang = lang;
   res.locals.supportedLangs = [
     { code: 'en', label: 'English', short: 'EN' },
-    { code: 'zh', label: '中文', short: '中文' },
     { code: 'ja', label: '日本語', short: '日本語' }
   ];
   res.locals.currentLang = res.locals.supportedLangs.find((l) => l.code === lang) || res.locals.supportedLangs[0];
-  res.locals.otherLang = lang === 'en' ? 'zh' : (lang === 'zh' ? 'ja' : 'en');
+  res.locals.otherLang = lang === 'en' ? 'ja' : 'en';
   res.locals.t = makeT(lang);
   next();
 }
