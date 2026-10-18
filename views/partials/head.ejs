@@ -3,6 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<% if (typeof adminCss === 'undefined' || !adminCss) { %>
+<% if (typeof ezoicEnabled !== 'undefined' ? ezoicEnabled : true) { %>
+<!-- Ezoic Privacy Scripts (Consent Management) -->
+<script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js"></script>
+<script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js"></script>
+<!-- Ezoic Header Script -->
+<script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
+<script>
+    window.ezstandalone = window.ezstandalone || {};
+    ezstandalone.cmd = ezstandalone.cmd || [];
+</script>
+<script src="//ezoicanalytics.com/analytics.js"></script>
+<% } %>
+<% } %>
 <title><%= (typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle + ' · ' + site.name : site.name + ' · ' + site.tagline %></title>
 <meta name="description" content="<%= (typeof metaDesc !== 'undefined' && metaDesc) ? metaDesc : ((typeof ogDesc !== 'undefined' && ogDesc) ? ogDesc : site.tagline) %>">
 <link rel="icon" href="/favicon.svg">

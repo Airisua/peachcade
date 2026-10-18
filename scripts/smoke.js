@@ -65,6 +65,7 @@ function client() {
   let r = await user.get('/');
   ok(r.status === 200 && r.text.includes('/game/2048') && !r.text.includes('热门游戏'), 'home renders EN with games', r.status);
   ok(r.text.includes('Peachcade'), 'home renders new brand name Peachcade');
+  ok(r.text.includes('cmp.gatekeeperconsent.com') && r.text.includes('ezstandalone'), 'home includes Ezoic privacy & header scripts');
   r = await user.get('/lang/zh?next=/');
   ok(r.status === 302, 'lang switch to zh', r.status);
   r = await user.get('/');
@@ -555,6 +556,14 @@ function client() {
   ok(resp.status === 302, 'ads.txt saved via settings', resp.status);
   r = await user.get('/ads.txt');
   ok(r.status === 200 && r.text.includes('pub-2264028095354486') && r.text.includes('pub-5519830896693885'), 'ads.txt reflects admin content', JSON.stringify(r.text.slice(0, 60)));
+  // Ezoic ads.txt 301 redirect test
+  resp = await admin.post('/wyj/settings', Object.assign({}, baseSettings, { ads_enabled: 'on', ads_txt: smokeAdsTxt, ezoic_adstxt_redirect: 'on' }));
+  ok(resp.status === 302, 'enable ezoic ads.txt redirect', resp.status);
+  r = await user.get('/ads.txt');
+  ok(r.status === 301 && r.location.includes('srv.adstxtmanager.com/19390/'), 'ads.txt 301 redirects to Ezoic AdstxtManager', r.status + ' ' + r.location);
+  resp = await admin.post('/wyj/settings', Object.assign({}, baseSettings, { ads_enabled: 'on', ads_txt: smokeAdsTxt }));
+  r = await user.get('/ads.txt');
+  ok(r.status === 200 && r.text.includes('pub-2264028095354486'), 'ads.txt returns to standard content when redirect disabled', r.status);
   r = await user.get('/healthz');
   ok(r.status === 200 && r.text.indexOf('"ok":true') >= 0, 'healthz endpoint', r.status);
   r = await user.get('/nope-nope');

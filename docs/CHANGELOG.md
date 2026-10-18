@@ -4,6 +4,19 @@
 
 ---
 
+## [2026-10-18] Ezoic 官方广告引擎与 Ads.txt 托管集成 (Ezoic JavaScript & AdstxtManager Integration)
+
+### 1. Ezoic 官方 JavaScript 核心脚本部署 (Ezoic Header Scripts & CMP)
+- **用户隐私许可（CMP Privacy Scripts）**：在公共页面 `<head>` 顶层注入 Ezoic 官方隐私授权脚本（`cmp.gatekeeperconsent.com`），附带 `data-cfasync="false"` 声明，确保 Cloudflare 代理下隐私合规脚本顺序优先执行。
+- **广告引擎与统计初始化（Header Script & Analytics）**：异步加载 `//www.ezojs.com/ezoic/sa.min.js`，初始化 `window.ezstandalone` 命令队列，并引入 `//ezoicanalytics.com/analytics.js`。
+- **后台管理系统安全隔离**：管理员后台（`/wyj/*`）自动跳过 Ezoic 脚本注入，仅在玩家前台展示。
+
+### 2. Ezoic Ads.txt 托管管理与 301 重定向自适应 (AdstxtManager 301 Redirect)
+- **服务器端动态重定向**：支持在后台「站点设置」中一键开启 Ezoic Ads.txt 301 托管重定向，请求 `/ads.txt` 时自动按照 Ezoic 官方 Nginx 规范 301 重定向至 `https://srv.adstxtmanager.com/19390/:domain`，满足 Ezoic Step 1 自动化校验。
+- **双轨自由切换**：开关关闭时自动回退为本地静态 `ads.txt` 内容，确保 Google AdSense 与 GameMonetize 随时保持稳定有效。
+
+---
+
 ## [2026-10-18] CPAlead Postback (S2S) 回调接收端与实时转化持久化 (CPAlead Postback Integration)
 
 ### 1. 自动化 S2S Postback 接口 (/api/postback/cpalead)

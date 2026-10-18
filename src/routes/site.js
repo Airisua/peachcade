@@ -235,6 +235,10 @@ router.get('/healthz', (req, res) => {
 // publisher ads.txt (ad-network authorized sellers) - editable from admin settings
 router.get('/ads.txt', (req, res) => {
   const { getSetting } = require('../db');
+  if (getSetting('ezoic_adstxt_redirect', '0') === '1') {
+    const domain = (req.get('host') || 'peachcat.fun').split(':')[0];
+    return res.redirect(301, 'https://srv.adstxtmanager.com/19390/' + domain);
+  }
   const body = String(getSetting('ads_txt', '') || '').trim();
   res.type('text/plain');
   if (!body) return res.send('# no ads.txt configured\n');

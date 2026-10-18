@@ -305,7 +305,7 @@ router.post('/ads/:id/toggle', (req, res) => {
   res.redirect(ADMIN_BASE + '/ads?ok=updated');
 });
 
-const SETTING_KEYS = ['site_name', 'tagline_en', 'tagline_zh', 'tagline_ja', 'footer_text_en', 'footer_text_zh', 'footer_text_ja', 'ads_enabled', 'registration_open', 'ads_txt'];
+const SETTING_KEYS = ['site_name', 'tagline_en', 'tagline_zh', 'tagline_ja', 'footer_text_en', 'footer_text_zh', 'footer_text_ja', 'ads_enabled', 'registration_open', 'ads_txt', 'ezoic_enabled', 'ezoic_adstxt_redirect'];
 
 router.get('/settings', (req, res) => {
   const values = {};
@@ -318,7 +318,7 @@ router.post('/settings', (req, res) => {
   const b = req.body;
   for (const k of SETTING_KEYS) {
     if (k === 'ads_txt' && !('ads_txt' in b)) continue; // dedicated form on the same page
-    if (k === 'ads_enabled' || k === 'registration_open') setSetting(k, b[k] ? '1' : '0');
+    if (k === 'ads_enabled' || k === 'registration_open' || k === 'ezoic_enabled' || k === 'ezoic_adstxt_redirect') setSetting(k, b[k] ? '1' : '0');
     else setSetting(k, String(b[k] || '').slice(0, k === 'ads_txt' ? 20000 : 500));
   }
   res.redirect(ADMIN_BASE + '/settings?ok=saved');

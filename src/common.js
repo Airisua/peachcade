@@ -85,6 +85,7 @@ function common(req, res, next) {
   res.locals.popularTags = getPopularTags(18);
   res.locals.ratingFor = ratingFor;
   res.locals.adsEnabled = getSetting('ads_enabled', '1') === '1';
+  res.locals.ezoicEnabled = getSetting('ezoic_enabled', '1') === '1';
   res.locals.adFor = (slot) => (res.locals.adsEnabled ? db.prepare('SELECT * FROM ads WHERE slot=? AND enabled=1 ORDER BY sort, id LIMIT 1').get(slot) : null);
   res.locals.gt = (g) => gt(g, lang);
   res.locals.gd = (g) => gd(g, lang);

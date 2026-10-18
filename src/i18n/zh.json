@@ -195,6 +195,8 @@
   "admin.settings_footer_text_zh": "页脚文本（中文）",
   "admin.settings_ads_enabled": "启用广告",
   "admin.settings_registration_open": "开放注册",
+  "admin.settings_ezoic_enabled": "启用 Ezoic JavaScript 广告引擎（Header Scripts & CMP）",
+  "admin.settings_ezoic_adstxt_redirect": "将 /ads.txt 301 重定向至 Ezoic AdstxtManager (srv.adstxtmanager.com)",
   "admin.on": "开",
   "admin.off": "关",
   "admin.roleUser": "user",

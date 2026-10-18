@@ -13,6 +13,8 @@
   <div class="form-row">
     <label class="check"><input type="checkbox" name="ads_enabled" <%= values.ads_enabled === '1' ? 'checked' : '' %>><%= t('admin.settings_ads_enabled') %></label>
     <label class="check"><input type="checkbox" name="registration_open" <%= values.registration_open === '1' ? 'checked' : '' %>><%= t('admin.settings_registration_open') %></label>
+    <label class="check"><input type="checkbox" name="ezoic_enabled" <%= values.ezoic_enabled === '1' ? 'checked' : '' %>><%= t('admin.settings_ezoic_enabled') %></label>
+    <label class="check"><input type="checkbox" name="ezoic_adstxt_redirect" <%= values.ezoic_adstxt_redirect === '1' ? 'checked' : '' %>><%= t('admin.settings_ezoic_adstxt_redirect') %></label>
   </div>
   <div class="form-row"><button class="btn btn-primary" type="submit"><%= t('common.save') %></button></div>
 </form>
@@ -30,6 +32,8 @@
     <input type="hidden" name="footer_text_ja" value="<%= values.footer_text_ja %>">
     <% if (values.ads_enabled === '1') { %><input type="hidden" name="ads_enabled" value="on"><% } %>
     <% if (values.registration_open === '1') { %><input type="hidden" name="registration_open" value="on"><% } %>
+    <% if (values.ezoic_enabled === '1') { %><input type="hidden" name="ezoic_enabled" value="on"><% } %>
+    <% if (values.ezoic_adstxt_redirect === '1') { %><input type="hidden" name="ezoic_adstxt_redirect" value="on"><% } %>
     <div class="form-group">
       <textarea id="ads_txt" name="ads_txt" rows="7" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px"><%= values.ads_txt %></textarea>
     </div>

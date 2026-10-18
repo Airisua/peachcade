@@ -223,7 +223,9 @@ function seed() {
     footer_text_ja: '',
     ads_txt: 'google.com, pub-2264028095354486, DIRECT, f08c47fec0942fa0\n\n# GameMonetize publisher ads.txt\ngoogle.com, pub-5519830896693885, DIRECT, f08c47fec0942fa0\ngoogle.com, pub-4764333688337558, DIRECT, f08c47fec0942fa0',
     ads_enabled: '1',
-    registration_open: '1'
+    registration_open: '1',
+    ezoic_enabled: '1',
+    ezoic_adstxt_redirect: '0'
   };
   const insSet = db.prepare('INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)');
   for (const [k, v] of Object.entries(defaults)) insSet.run(k, v);
