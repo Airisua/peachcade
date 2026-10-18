@@ -251,13 +251,6 @@ function seed() {
     db.prepare('INSERT INTO users(username,email,password_hash,role) VALUES(?,?,?,?)').run(adminUser, adminEmail, bcrypt.hashSync(adminPass, 10), 'admin');
   }
 
-  // Auto-seed Japanese localizations for built-in seed games
-  db.prepare("UPDATE games SET title_ja='2048', desc_ja='同じ数字のタイルをスライドさせて合体し、2048とその先のハイスコアを目指そう。', howto_ja='矢印キー / WASDまたはスワイプでタイルを移動。同じ数字が重なると合体します。' WHERE slug='2048' AND (title_ja IS NULL OR title_ja='')").run();
-  db.prepare("UPDATE games SET title_ja='スネーク クラシック', desc_ja='リンゴを食べて成長しながら生き残れ！懐かしくも新しいレトロスネークゲーム。', howto_ja='矢印キーまたはWASDで方向転換（スマホはスワイプ）。壁や自分の体に衝突しないように注意。' WHERE slug='snake' AND (title_ja IS NULL OR title_ja='')").run();
-  db.prepare("UPDATE games SET title_ja='絵合わせ神経衰弱', desc_ja='カードをめくって同じ絵柄のペアを見つけよう。できるだけ少ない手数でクリアを目指せ。', howto_ja='クリックまたはタップでカードをめくり、同じ絵柄のペアを揃えて消去します。' WHERE slug='memory-match' AND (title_ja IS NULL OR title_ja='')").run();
-  db.prepare("UPDATE games SET title_ja='三目並べ (Tic-Tac-Toe)', desc_ja='3×3マスの王道頭脳対決。手強いAIに挑戦して勝利を掴もう。', howto_ja='マスをクリックして自分の「X」を配置。AIより先に縦・横・斜めのいずれかに3つ並べれば勝利。' WHERE slug='tic-tac-toe' AND (title_ja IS NULL OR title_ja='')").run();
-  db.prepare("UPDATE games SET title_ja='マインスイーパ', desc_ja='隠された地雷を避けながら、すべての安全なマスを開放しよう。', howto_ja='左クリックでマスを開き、右クリックで地雷フラグを設置。数字は周囲にある地雷の数を示します。' WHERE slug='minesweeper' AND (title_ja IS NULL OR title_ja='')").run();
-
   if (!db.prepare('SELECT COUNT(*) n FROM games').get().n) {
     const ins = db.prepare('INSERT INTO games(slug,title_en,title_zh,desc_en,desc_zh,howto_en,howto_zh,category,tags,thumb,embed_url,plays,likes,featured,published,created_at) VALUES(@slug,@title_en,@title_zh,@desc_en,@desc_zh,@howto_en,@howto_zh,@category,@tags,@thumb,@embed_url,@plays,@likes,@featured,1,@created_at)');
     const tx = db.transaction((rows) => { for (const r of rows) ins.run(r); });
@@ -267,6 +260,30 @@ function seed() {
       embed_url: '/games/' + g.slug + '/',
       created_at: isoDaysAgo(g.daysAgo)
     })));
+  }
+
+  // Auto-seed Japanese localizations for built-in seed games. This must run
+  // AFTER the insert above: on a brand new database the games do not exist yet
+  // when seed() starts, so updating them first silently matched zero rows.
+  db.prepare("UPDATE games SET title_ja='2048', desc_ja='同じ数字のタイルをスライドさせて合体し、2048とその先のハイスコアを目指そう。', howto_ja='矢印キー / WASDまたはスワイプでタイルを移動。同じ数字が重なると合体します。' WHERE slug='2048' AND (title_ja IS NULL OR title_ja='')").run();
+  db.prepare("UPDATE games SET title_ja='スネーク クラシック', desc_ja='リンゴを食べて成長しながら生き残れ！懐かしくも新しいレトロスネークゲーム。', howto_ja='矢印キーまたはWASDで方向転換（スマホはスワイプ）。壁や自分の体に衝突しないように注意。' WHERE slug='snake' AND (title_ja IS NULL OR title_ja='')").run();
+  db.prepare("UPDATE games SET title_ja='絵合わせ神経衰弱', desc_ja='カードをめくって同じ絵柄のペアを見つけよう。できるだけ少ない手数でクリアを目指せ。', howto_ja='クリックまたはタップでカードをめくり、同じ絵柄のペアを揃えて消去します。' WHERE slug='memory-match' AND (title_ja IS NULL OR title_ja='')").run();
+  db.prepare("UPDATE games SET title_ja='三目並べ (Tic-Tac-Toe)', desc_ja='3×3マスの王道頭脳対決。手強いAIに挑戦して勝利を掴もう。', howto_ja='マスをクリックして自分の「X」を配置。AIより先に縦・横・斜めのいずれかに3つ並べれば勝利。' WHERE slug='tic-tac-toe' AND (title_ja IS NULL OR title_ja='')").run();
+  db.prepare("UPDATE games SET title_ja='マインスイーパ', desc_ja='隠された地雷を避けながら、すべての安全なマスを開放しよう。', howto_ja='左クリックでマスを開き、右クリックで地雷フラグを設置。数字は周囲にある地雷の数を示します。' WHERE slug='minesweeper' AND (title_ja IS NULL OR title_ja='')").run();
+
+  // Optional filler catalogue: the smoke runner boots a throwaway database with
+  // SMOKE_SEED_GAMES=60 so paging/sorting suites have more than one page of games
+  // without writing fixtures into a real install.
+  const extraGames = parseInt(process.env.SMOKE_SEED_GAMES || '0', 10) || 0;
+  if (extraGames > 0) {
+    const insExtra = db.prepare("INSERT OR IGNORE INTO games(slug,title_en,category,thumb,embed_url,source,plays,likes,published) VALUES(?,?,?,?,?,?,?,?,1)");
+    const txExtra = db.transaction((n) => {
+      for (let i = 1; i <= n; i++) {
+        insExtra.run('smoke-seed-' + i, 'Smoke Seed ' + i, i % 2 ? 'puzzle' : 'arcade',
+          '/img/games/default.svg', '/games/2048/', 'smoke-seed', i * 10, i * 3);
+      }
+    });
+    txExtra(extraGames);
   }
 
   if (!db.prepare('SELECT COUNT(*) n FROM comments').get().n) {

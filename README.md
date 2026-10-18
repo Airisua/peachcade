@@ -40,9 +40,13 @@ Default accounts (created on first start, change them!):
 
 Useful scripts:
 
-    npm run smoke        # end-to-end HTTP test of the running site (97 checks)
+    npm run smoke        # every smoke suite against the running site
+    npm run smoke:quick  # health + read-only sanity, ~0.3s (safe on production)
+    npm run smoke:fresh   # throwaway sqlite + server, never touches ./data
+    npm run smoke:list    # list the suites (quick/i18n/core/games/user/ads/admin)
+    node scripts/smoke.js ads   # run only the suite you touched
     npm run check:games  # validate the 5 built-in games (syntax + jsdom boot)
-    npm run check:i18n   # verify all translation keys exist in EN and ZH
+    npm run check:i18n   # verify all translation keys exist in EN, ZH and JA
     npm run check:providers  # unit checks for the game feed parsers
     npm run reclassify   # dry run: re-sort imported games into the current categories
     npm run reset:db     # delete the SQLite database (re-seeded on next start)

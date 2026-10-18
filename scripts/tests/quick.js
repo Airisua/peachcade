@@ -1,0 +1,49 @@
+'use strict';
+// Fast, read-only safety net: run this after a CSS/copy tweak. It never writes
+// to the database, so it is safe against production.
+const { ctx } = require('./context');
+
+module.exports = {
+  title: 'Health & read-only sanity',
+  async run() {
+    const ok = ctx.ok;
+    const user = ctx.user;
+    let r;
+    r = await user.get('/healthz');
+    ok(r.status === 200 && r.text.indexOf('"ok":true') >= 0, 'healthz endpoint', r.status);
+    r = await user.get('/');
+    ok(r.status === 200, 'homepage responds', r.status);
+    ok(r.text.includes('Peachcade'), 'home renders new brand name Peachcade');
+    const slugMatch = r.text.match(/href="\/game\/([a-z0-9-]+)"/);
+    const slug = slugMatch ? slugMatch[1] : '';
+    ok(!!slug, 'home renders at least one game', slug);
+    r = await user.get('/game/' + slug);
+    ok(r.status === 200, 'game detail responds', r.status);
+    r = await user.get('/games');
+    ok(r.status === 200, 'games listing responds', r.status);
+    r = await user.get('/category/puzzle');
+    ok(r.status === 200, 'category page responds', r.status);
+    r = await user.get('/search?q=snake');
+    ok(r.status === 200, 'search responds', r.status);
+    r = await user.get('/about');
+    ok(r.status === 200, 'about page responds', r.status);
+    r = await user.get('/robots.txt');
+    ok(r.status === 200 && r.text.includes('Sitemap:'), 'robots.txt served', r.status);
+    r = await user.get('/manifest.webmanifest');
+    ok(r.status === 200 && r.text.includes('Peachcade'), 'manifest.webmanifest served as PWA app config', r.status);
+    r = await user.get('/css/style.css?v=smoke');
+    ok(r.status === 200, 'stylesheet served', r.status);
+    r = await user.get('/js/main.js?v=smoke');
+    ok(r.status === 200, 'app script served', r.status);
+    r = await user.get('/img/icons.svg?v=smoke');
+    ok(r.status === 200 && r.text.includes('<svg'), 'icon sprite served', r.status);
+    r = await user.get('/2771545fc9c14828b056ff3f18e9f50e.txt');
+    ok(r.status === 200 && r.text.includes('2771545fc9c14828b056ff3f18e9f50e'), 'IndexNow key file is served');
+    r = await user.get('/881a8f0468df8b90a945.txt');
+    ok(r.status === 200 && r.text.includes('c1d8ffff883b0dd31fc6'), 'HilltopAds key file is served');
+    r = await user.get('/');
+    ok(r.headers.get('referrer-policy') === 'no-referrer-when-downgrade', 'response header referrer-policy is no-referrer-when-downgrade');
+    r = await user.get('/nope-nope');
+    ok(r.status === 404, '404 page', r.status);
+  }
+};
