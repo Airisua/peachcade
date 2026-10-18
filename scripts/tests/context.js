@@ -75,6 +75,15 @@ function featuredSlugs(html) {
   return [...html.slice(start, end === -1 ? html.length : end).matchAll(/\/game\/([a-z0-9-]+)"/g)].map((m) => m[1]);
 }
 
+// src/queries.js opens the database at require time, so unloading only src/db
+// would leave the suites bound to the previous file. The runner calls this
+// after it changes DATA_DIR for --fresh.
+function reloadModules() {
+  for (const rel of ['../../src/db', '../../src/queries', '../../src/thumbs']) {
+    try { delete require.cache[require.resolve(rel)]; } catch (e) { /* not loaded */ }
+  }
+}
+
 const SETTING_KEYS = ['ads_enabled', 'ads_txt', 'ezoic_adstxt_redirect'];
 function snapshotSettings() {
   const rows = ctx.db.prepare("SELECT key, value FROM settings WHERE key IN ('ads_enabled','ads_txt','ezoic_adstxt_redirect')").all();
@@ -90,4 +99,4 @@ function restoreSettings(snapshot) {
   tx(snapshot);
 }
 
-module.exports = { ctx, client, extractId, ldBlocks, featuredSlugs, snapshotSettings, restoreSettings, SETTING_KEYS };
+module.exports = { ctx, client, extractId, ldBlocks, featuredSlugs, snapshotSettings, restoreSettings, reloadModules, SETTING_KEYS };

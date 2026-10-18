@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
-const { ctx, client } = require('./tests/context');
+const { ctx, client, reloadModules } = require('./tests/context');
 
 const SUITES = ['quick', 'i18n', 'core', 'games', 'user', 'ads', 'admin'];
 const MODULES = {
@@ -78,11 +78,10 @@ try {
 
 function initContext() {
   ctx.base = opts.base || ('http://localhost:' + (process.env.PORT || 3000));
-  // Re-read the db module so --fresh talks to the throwaway sqlite file too.
-  // Better-sqlite3 caches the file per module instance, not per DATA_DIR, so a
-  // plain require() would keep the parent on the real ./data/app.db.
-  const dbPath = require.resolve('../src/db');
-  delete require.cache[dbPath];
+  // Re-read the db module (and the query helpers that open it) so --fresh talks
+  // to the throwaway sqlite file too. A cached module would keep the parent on
+  // the real ./data/app.db while the child server uses the temp one.
+  reloadModules();
   ctx.db = require('../src/db').db;
   ctx.ok = ok;
   ctx.client = client;
