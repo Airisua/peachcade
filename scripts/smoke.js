@@ -49,7 +49,7 @@ function client() {
       if (i > 0) jar.set(kv.slice(0, i), kv.slice(i + 1));
     }
     const text = await r.text();
-    return { status: r.status, text, location: r.headers.get('location') || '' };
+    return { status: r.status, text, location: r.headers.get('location') || '', headers: r.headers };
   }
   return {
     req, jar,
@@ -182,6 +182,8 @@ function client() {
   ok(r.text.includes('cat-card'), 'home shows category strip');
   ok(r.text.includes('hreflang="en"') && r.text.includes('hreflang="zh"') && r.text.includes('hreflang="ja"'), 'head includes hreflang alternates');
   ok(r.text.includes('name="881a8f0468df8b90a945c1d8ffff883b0dd31fc6"'), 'home includes HilltopAds verification meta tag');
+  ok(r.text.includes('name="referrer" content="no-referrer-when-downgrade"'), 'head includes referrer-policy meta tag');
+  ok(r.headers.get('referrer-policy') === 'no-referrer-when-downgrade', 'response header referrer-policy is no-referrer-when-downgrade');
   // every static asset URL carries ?v=<hash> so a CDN / browser cache can never serve the
   // previous build after a release
   ok(/\/css\/style\.css\?v=[0-9a-f]{6,}/.test(r.text), 'stylesheet url is versioned');

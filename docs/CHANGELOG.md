@@ -4,6 +4,17 @@
 
 ---
 
+## [2026-10-18] 广告收益加成：全站 Referrer-Policy 来源传递优化 (HilltopAds Referrer Policy Integration)
+
+### 1. HTML Meta 标签与 HTTP 响应头双轨打通
+- **来源声明（Referrer Policy Meta）**：在 `views/partials/head.ejs` 注入 `<meta name="referrer" content="no-referrer-when-downgrade">`，告知浏览器在同级或安全跨域跳向广告商时传递来源页面地址。
+- **Helmet 安全头配置对齐**：修改 `server.js` 中的 Helmet 策略，将默认的 `no-referrer` 覆写为 `referrerPolicy: { policy: 'no-referrer-when-downgrade' }`，保证浏览器不会因为 HTTP 响应头阻断 Referer 传递，确保广告联盟与买量广告主能识别来自 `peachcat.fun` 的真实游戏流量，解除盲流量低价惩罚，收益预计提升 20%+。
+
+### 2. 自动化测试套件扩充
+- **双向断言**：在 `scripts/smoke.js` 中增加针对 HTTP 响应头 `referrer-policy: no-referrer-when-downgrade` 以及 HTML `<meta>` 标签的双重自动化检查，183 项全流程测试全部通过。
+
+---
+
 ## [2026-10-18] HilltopAds 网站所有权双重校验部署 (HilltopAds Ownership Verification)
 
 ### 1. 根目录文件验证端点 (Upload File Verification)

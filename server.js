@@ -31,7 +31,11 @@ app.disable('x-powered-by');
 // cache-busting token for /css + /js + the icon sprite (see src/assets.js)
 app.locals.assetV = ASSET_VERSION;
 
-app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  referrerPolicy: { policy: 'no-referrer-when-downgrade' }
+}));
 app.use(morgan('tiny', {
   skip: (req) => req.url.startsWith('/thumb/') || req.url.startsWith('/img/') || req.url.startsWith('/css/') || req.url.startsWith('/js/')
 }));
