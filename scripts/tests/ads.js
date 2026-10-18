@@ -36,7 +36,8 @@ module.exports = {
       }
       r = await user.get('/');
       ok(!r.text.includes('SMOKE-AD-123'), 'ad removed from homepage', r.status);
-      const setAds = (extra) => admin.post('/wyj/settings', Object.assign({ _csrf: admin.csrf() }, extra));
+      const baseSettings = { site_name: 'Peachcade', tagline_en: 'Free Online Browser Games — Play Instantly' };
+      const setAds = (extra) => admin.post('/wyj/settings', Object.assign({ _csrf: admin.csrf() }, baseSettings, extra));
       const originalAdsTxt = settingsBefore.get('ads_txt');
       resp = await setAds({ ads_enabled: 'on', ads_txt: originalAdsTxt });
       ok(resp.status === 302, 'settings save (ads on)', resp.status);

@@ -316,10 +316,23 @@ router.get('/settings', (req, res) => {
 router.post('/settings', (req, res) => {
   if (csrfFail(req, res)) return;
   const b = req.body;
+  const isAdsTxtForm = ('ads_txt' in b && !('site_name' in b));
+  if (isAdsTxtForm) {
+    setSetting('ads_txt', String(b.ads_txt || '').slice(0, 20000));
+    return res.redirect(ADMIN_BASE + '/settings?ok=saved');
+  }
   for (const k of SETTING_KEYS) {
-    if (k === 'ads_txt' && !('ads_txt' in b)) continue; // dedicated form on the same page
-    if (k === 'ads_enabled' || k === 'registration_open' || k === 'ezoic_enabled' || k === 'ezoic_adstxt_redirect') setSetting(k, b[k] ? '1' : '0');
-    else setSetting(k, String(b[k] || '').slice(0, k === 'ads_txt' ? 20000 : 500));
+    if (k === 'ads_txt') continue;
+    if (k === 'ads_enabled' || k === 'registration_open' || k === 'ezoic_enabled' || k === 'ezoic_adstxt_redirect') {
+      setSetting(k, b[k] ? '1' : '0');
+      continue;
+    }
+    if (k === 'site_name') {
+      const val = String(b.site_name || '').trim();
+      setSetting('site_name', val || 'Peachcade');
+      continue;
+    }
+    if (k in b) setSetting(k, String(b[k] || '').slice(0, 500));
   }
   res.redirect(ADMIN_BASE + '/settings?ok=saved');
 });

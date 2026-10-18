@@ -63,9 +63,9 @@ function common(req, res, next) {
   res.locals.year = new Date().getFullYear();
   res.locals.siteUrl = String(process.env.SITE_URL || (req.protocol + '://' + (req.get('host') || 'localhost'))).replace(/\/+$/, '');
   const taglines = {
-    zh: getSetting('tagline_zh', '免费免下载在线小游戏 · 即点即玩'),
-    ja: getSetting('tagline_ja', '無料・ダウンロード不要のオンラインブラウザゲーム · 今すぐ遊べる'),
-    en: getSetting('tagline_en', 'Free Online Browser Games — Play Instantly')
+    zh: getSetting('tagline_zh') || '免费免下载在线小游戏 · 即点即玩',
+    ja: getSetting('tagline_ja') || '無料・ダウンロード不要のオンラインブラウザゲーム · 今すぐ遊べる',
+    en: getSetting('tagline_en') || 'Free Online Browser Games — Play Instantly'
   };
   const footerTexts = {
     zh: getSetting('footer_text_zh', ''),
@@ -73,7 +73,7 @@ function common(req, res, next) {
     en: getSetting('footer_text_en', '')
   };
   res.locals.site = {
-    name: getSetting('site_name', 'Peachcade'),
+    name: getSetting('site_name') || 'Peachcade',
     tagline: taglines[lang] || taglines.en,
     footerText: footerTexts[lang] || footerTexts.en
   };
