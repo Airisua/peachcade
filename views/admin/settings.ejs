@@ -11,6 +11,10 @@
     <label><%= t('admin.settings_footer_text_ja') %><input name="footer_text_ja" value="<%= values.footer_text_ja %>"></label>
   </div>
   <div class="form-row">
+    <input type="hidden" name="ads_enabled" value="0">
+    <input type="hidden" name="registration_open" value="0">
+    <input type="hidden" name="ezoic_enabled" value="0">
+    <input type="hidden" name="ezoic_adstxt_redirect" value="0">
     <label class="check"><input type="checkbox" name="ads_enabled" <%= values.ads_enabled === '1' ? 'checked' : '' %>><%= t('admin.settings_ads_enabled') %></label>
     <label class="check"><input type="checkbox" name="registration_open" <%= values.registration_open === '1' ? 'checked' : '' %>><%= t('admin.settings_registration_open') %></label>
     <label class="check"><input type="checkbox" name="ezoic_enabled" <%= values.ezoic_enabled === '1' ? 'checked' : '' %>><%= t('admin.settings_ezoic_enabled') %></label>

@@ -83,7 +83,7 @@
         <div class="mini-list">
           <% related.forEach(function (g) { %>
           <a class="mini-card" href="/game/<%= g.slug %>">
-            <img src="<%= thumb(g, 'card') %>" alt="<%= gt(g) %>" loading="lazy" decoding="async">
+            <img src="<%= thumb(g, 'card') %>" alt="<%= gt(g) %>" width="84" height="47" loading="lazy" decoding="async">
             <span class="mini-meta"><b><%= gt(g) %></b><small class="muted"><%= fmt(g.plays) %> <%= t('game.plays') %></small></span>
           </a>
           <% }); %>

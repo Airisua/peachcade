@@ -50,7 +50,7 @@ module.exports = {
       r = await user.get('/ads.txt');
       ok(r.status === 200 && r.text.includes('pub-2264028095354486'), 'ads.txt served with google adsense snippet', r.status);
       const smokeAdsTxt = 'google.com, pub-2264028095354486, DIRECT, f08c47fec0942fa0\n\n#GameMonetize.com\ngoogle.com, pub-5519830896693885, DIRECT, f08c47fec0942fa0\ngoogle.com, pub-4764333688337558, DIRECT, f08c47fec0942fa0';
-      resp = await setAds({ ads_enabled: 'on', ads_txt: smokeAdsTxt });
+      resp = await setAds({ ads_enabled: 'on', ads_txt: smokeAdsTxt, ezoic_adstxt_redirect: '0' });
       ok(resp.status === 302, 'ads.txt saved via settings', resp.status);
       r = await user.get('/ads.txt');
       ok(r.status === 200 && r.text.includes('pub-2264028095354486') && r.text.includes('pub-5519830896693885'), 'ads.txt reflects admin content', JSON.stringify(r.text.slice(0, 60)));
@@ -58,7 +58,7 @@ module.exports = {
       ok(resp.status === 302, 'enable ezoic ads.txt redirect', resp.status);
       r = await user.get('/ads.txt');
       ok(r.status === 301 && r.location.includes('srv.adstxtmanager.com/19390/'), 'ads.txt 301 redirects to Ezoic AdstxtManager', r.status + ' ' + r.location);
-      resp = await setAds({ ads_enabled: 'on', ads_txt: smokeAdsTxt });
+      resp = await setAds({ ads_enabled: 'on', ads_txt: smokeAdsTxt, ezoic_adstxt_redirect: '0' });
       r = await user.get('/ads.txt');
       ok(r.status === 200 && r.text.includes('pub-2264028095354486'), 'ads.txt returns to standard content when redirect disabled', r.status);
     } finally {

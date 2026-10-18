@@ -3,8 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<% if (typeof preloadImage !== 'undefined' && preloadImage) { %><link rel="preload" as="image" href="<%= preloadImage %>" fetchpriority="high">
+<% } %>
 <% if (typeof adminCss === 'undefined' || !adminCss) { %>
 <% if (typeof ezoicEnabled !== 'undefined' ? ezoicEnabled : true) { %>
+<link rel="preconnect" href="https://cmp.gatekeeperconsent.com" crossorigin>
+<link rel="preconnect" href="https://www.ezojs.com" crossorigin>
 <!-- Ezoic Privacy Scripts (Consent Management) -->
 <script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js"></script>
 <script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js"></script>

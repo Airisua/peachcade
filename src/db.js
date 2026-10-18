@@ -12,6 +12,8 @@ db.pragma('synchronous = NORMAL');
 db.pragma('temp_store = MEMORY');
 db.pragma('cache_size = -64000');
 db.pragma('mmap_size = 268435456');
+// keep the WAL from growing without bound on a busy crawl
+db.pragma('wal_autocheckpoint = 256');
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
@@ -51,7 +53,8 @@ CREATE TABLE IF NOT EXISTS games (
   likes INTEGER NOT NULL DEFAULT 0,
   featured INTEGER NOT NULL DEFAULT 0,
   published INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE TABLE IF NOT EXISTS likes (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -135,6 +138,11 @@ if (!gameCols.some((c) => c.name === 'desc_ja')) {
 if (!gameCols.some((c) => c.name === 'howto_ja')) {
   db.exec('ALTER TABLE games ADD COLUMN howto_ja TEXT NOT NULL DEFAULT ""');
 }
+if (!gameCols.some((c) => c.name === 'updated_at')) {
+  db.exec('ALTER TABLE games ADD COLUMN updated_at TEXT NOT NULL DEFAULT ""');
+}
+// backfill once: sitemap lastmod must always have a value
+db.exec("UPDATE games SET updated_at = created_at WHERE updated_at = ''");
 
 function getSetting(key, def = '') {
   const row = db.prepare('SELECT value FROM settings WHERE key=?').get(key);

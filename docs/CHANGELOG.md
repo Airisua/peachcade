@@ -4,6 +4,36 @@
 
 ---
 
+## [2026-10-19] SEO 与服务器性能专项优化 (SEO & Server Performance Pass)
+
+### 1. 抓取效率：站点地图全面 CDN 可缓存
+- `/sitemap.xml`、`/sitemap-main.xml`、`/sitemap-tags.xml`、`/sitemap-games-N.xml` 统一返回 `Cache-Control: public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400`，配合 Cloudflare Cache Rule 后 Google 抓取 8 个 38,000+ URL 分片不再逐次回源。
+- `/robots.txt` 与 `/ads.txt` 同样加入 1 小时缓存。
+
+### 2. 站点地图 `lastmod` 使用真实更新时间
+- `games` 表新增 `updated_at` 字段（老库自动迁移并以 `created_at` 回填）；后台新增/编辑/批量发布/隐藏/精选都会刷新该字段。
+- 游戏分片 sitemap 的 `<lastmod>` 改为 `COALESCE(updated_at, created_at)`，Google 能正确识别内容变化，而不是永远显示导入日期。
+
+### 3. Core Web Vitals：LCP 与 CLS
+- 首页把 Hero 图地址传入 `<head>`，输出 `<link rel="preload" as="image" fetchpriority="high">`，Hero `<img>` 增加 `fetchpriority="high"`、`width/height`。
+- 游戏卡片、分类卡片、相关游戏缩略图补齐 `width` / `height`，减少布局偏移；分类卡片图片补上可读 `alt`。
+- Ezoic CMP 与广告脚本域名新增 `preconnect`，提前建立 TLS 连接。
+
+### 4. 索引质量：低质量标签页自动 noindex
+- 标签页游戏数少于 5 款时输出 `<meta name="robots" content="noindex">`，保留站内链接与爬虫通路，避免成千上万个薄内容页面稀释整站质量；达到阈值的标签页继续保持可索引。
+- 分页 canonical 复查：列表页 canonical 基于 `req.path`，已天然指向不带 `?page=` / `?sort=` 的干净地址，无需额外修改。
+
+### 5. 服务器与带宽
+- 静态资源（CSS/JS/SVG/图片/字体清单）缓存从 1 天提升到 **1 年 + immutable**，配合既有的 `?v=<hash>` 版本号，发布后自动失效。
+- `/thumb/:key` 本地内置图 302 跳转也标记为 1 年 immutable；缩略图构建结果继续使用 immutable。
+- SQLite 增加 `PRAGMA wal_autocheckpoint = 256`，避免长时间运行后 WAL 文件无界增长。
+- **HTML 页面刻意不做 CDN 缓存**：页面内嵌每位访客独立的 CSRF token 与登录态，边缘缓存会造成串号与表单失败；这类页面继续走 Express 的 ETag/304 协商缓存。
+
+### 6. 后台设置安全性（顺带修复）
+- 设置表单的四个开关增加隐藏 `0` 字段，服务端仅在字段真实提交时更新布尔设置；局部 AJAX/测试提交不再把 `registration_open`、`ezoic_enabled` 等开关意外清零。
+
+---
+
 ## [2026-10-18] 测试流程重构：模块化冒烟套件与一次性数据库隔离 (Split Smoke Suites)
 
 ### 1. 全量测试拆分为 7 个可按需执行的套件

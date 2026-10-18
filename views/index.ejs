@@ -1,4 +1,4 @@
-<%- include('partials/head', { pageTitle: null }) %>
+<%- include('partials/head', { pageTitle: null, preloadImage: hero ? thumb(hero, 'hero') : '' }) %>
 <%- include('partials/header') %>
 <%- include('partials/ad', { slot: 'header' }) %>
 <main class="container">
@@ -14,7 +14,7 @@
       </div>
       <div class="muted small"><%= fmt(hero.plays) %> <%= t('game.plays') %> · <%= total %> <%= t('home.totalGames') %></div>
     </div>
-    <a class="hero-art" href="/game/<%= hero.slug %>"><img src="<%= thumb(hero, 'hero') %>" alt="<%= gt(hero) %>" decoding="async"></a>
+    <a class="hero-art" href="/game/<%= hero.slug %>"><img src="<%= thumb(hero, 'hero') %>" alt="<%= gt(hero) %>" width="640" height="360" fetchpriority="high" decoding="async"></a>
   </section>
   <% } %>
   <% if (navCategories.length) { %>
@@ -25,7 +25,7 @@
       <a class="cat-card" href="/category/<%= c.slug %>">
         <span class="cat-visual">
           <% if (c.sample_thumb) { %>
-          <img class="cat-thumb" src="<%= thumb(c.sample_thumb, 'cat') %>" alt="" loading="lazy" decoding="async">
+          <img class="cat-thumb" src="<%= thumb(c.sample_thumb, 'cat') %>" alt="<%= catName(c) %>" width="54" height="42" loading="lazy" decoding="async">
           <% } else { %>
           <svg class="ic cat-icon"><use href="<%= catIcon(c) %>"></use></svg>
           <% } %>

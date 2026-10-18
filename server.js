@@ -58,8 +58,10 @@ app.use(ADMIN_BASE, adminRouter);
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '1h',
   setHeaders: (res, filePath) => {
-    if (/\.(svg|css|js|webmanifest|png|jpg|ico)$/i.test(filePath)) {
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+    // Every /css + /js + sprite URL carries ?v=<asset hash>, so a one-year
+    // immutable cache is safe and removes the daily revalidation traffic.
+    if (/\.(svg|css|js|webmanifest|png|jpg|jpeg|webp|ico)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     }
   }
 }));

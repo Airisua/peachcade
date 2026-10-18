@@ -1,6 +1,6 @@
 <a class="card" href="/game/<%= g.slug %>">
   <div class="thumb">
-    <img src="<%= thumb(g, 'card') %>" alt="<%= gt(g) %>" loading="lazy" decoding="async">
+    <img src="<%= thumb(g, 'card') %>" alt="<%= gt(g) %>" width="384" height="216" loading="lazy" decoding="async">
     <% if (g.cat_en) { %><span class="chip chip-abs"><%= catName({ name_en: g.cat_en, name_zh: g.cat_zh, name_ja: g.cat_ja }) %></span><% } %>
     <span class="play-badge"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-play"></use></svg></span>
   </div>

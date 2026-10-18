@@ -28,6 +28,7 @@ module.exports = {
   // resize proxy (or fall back to the original url when the provider is unreachable)
   r = await user.get('/thumb/2048.card.jpg');
   ok(r.status === 302 && r.location.indexOf('/img/games/2048.svg') >= 0, 'local thumbnail redirects to the asset', r.status + ' ' + r.location);
+  ok((r.headers.get('cache-control') || '').includes('immutable'), 'local thumbnail redirect is immutable-cacheable', r.headers.get('cache-control'));
   r = await user.get('/thumb/does-not-exist.card.jpg');
   ok(r.status === 404, 'unknown thumbnail slug is a 404', r.status);
   r = await user.get('/thumb/2048.bogus.jpg');

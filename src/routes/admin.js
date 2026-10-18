@@ -146,10 +146,10 @@ function saveGame(req, res, id) {
   };
   try {
     if (id) {
-      db.prepare('UPDATE games SET slug=@slug,title_en=@title_en,title_zh=@title_zh,title_ja=@title_ja,desc_en=@desc_en,desc_zh=@desc_zh,desc_ja=@desc_ja,howto_en=@howto_en,howto_zh=@howto_zh,howto_ja=@howto_ja,category=@category,tags=@tags,thumb=@thumb,embed_url=@embed_url,featured=@featured,published=@published WHERE id=@id').run(Object.assign({}, data, { id }));
+      db.prepare('UPDATE games SET slug=@slug,title_en=@title_en,title_zh=@title_zh,title_ja=@title_ja,desc_en=@desc_en,desc_zh=@desc_zh,desc_ja=@desc_ja,howto_en=@howto_en,howto_zh=@howto_zh,howto_ja=@howto_ja,category=@category,tags=@tags,thumb=@thumb,embed_url=@embed_url,featured=@featured,published=@published,updated_at=datetime(\'now\') WHERE id=@id').run(Object.assign({}, data, { id }));
       res.redirect(ADMIN_BASE + '/games/' + id + '/edit?ok=updated');
     } else {
-      const info = db.prepare('INSERT INTO games(slug,title_en,title_zh,title_ja,desc_en,desc_zh,desc_ja,howto_en,howto_zh,howto_ja,category,tags,thumb,embed_url,featured,published) VALUES(@slug,@title_en,@title_zh,@title_ja,@desc_en,@desc_zh,@desc_ja,@howto_en,@howto_zh,@howto_ja,@category,@tags,@thumb,@embed_url,@featured,@published)').run(data);
+      const info = db.prepare('INSERT INTO games(slug,title_en,title_zh,title_ja,desc_en,desc_zh,desc_ja,howto_en,howto_zh,howto_ja,category,tags,thumb,embed_url,featured,published,updated_at) VALUES(@slug,@title_en,@title_zh,@title_ja,@desc_en,@desc_zh,@desc_ja,@howto_en,@howto_zh,@howto_ja,@category,@tags,@thumb,@embed_url,@featured,@published,datetime(\'now\'))').run(data);
       res.redirect(ADMIN_BASE + '/games/' + info.lastInsertRowid + '/edit?ok=created');
     }
   } catch (e) {
@@ -177,10 +177,10 @@ router.post('/games/bulk', (req, res) => {
   const uniq = Array.from(new Set(ids));
   const marks = uniq.map(() => '?').join(',');
   const tx = db.transaction(() => {
-    if (action === 'publish') return db.prepare('UPDATE games SET published=1 WHERE id IN (' + marks + ')').run(uniq).changes;
-    if (action === 'unpublish') return db.prepare('UPDATE games SET published=0 WHERE id IN (' + marks + ')').run(uniq).changes;
-    if (action === 'feature') return db.prepare('UPDATE games SET featured=1 WHERE id IN (' + marks + ')').run(uniq).changes;
-    if (action === 'unfeature') return db.prepare('UPDATE games SET featured=0 WHERE id IN (' + marks + ')').run(uniq).changes;
+    if (action === 'publish') return db.prepare("UPDATE games SET published=1, updated_at=datetime('now') WHERE id IN (" + marks + ')').run(uniq).changes;
+    if (action === 'unpublish') return db.prepare("UPDATE games SET published=0, updated_at=datetime('now') WHERE id IN (" + marks + ')').run(uniq).changes;
+    if (action === 'feature') return db.prepare("UPDATE games SET featured=1, updated_at=datetime('now') WHERE id IN (" + marks + ')').run(uniq).changes;
+    if (action === 'unfeature') return db.prepare("UPDATE games SET featured=0, updated_at=datetime('now') WHERE id IN (" + marks + ')').run(uniq).changes;
     if (action === 'delete') return db.prepare('DELETE FROM games WHERE id IN (' + marks + ')').run(uniq).changes;
     return null;
   });
@@ -203,14 +203,14 @@ router.post('/games/:id/delete', (req, res) => {
 router.post('/games/:id/toggle', (req, res) => {
   if (csrfFail(req, res)) return;
   const id = parseInt(req.params.id, 10) || 0;
-  db.prepare('UPDATE games SET published=1-published WHERE id=?').run(id);
+  db.prepare("UPDATE games SET published=1-published, updated_at=datetime('now') WHERE id=?").run(id);
   res.redirect(ADMIN_BASE + '/games?ok=updated');
 });
 
 router.post('/games/:id/feature', (req, res) => {
   if (csrfFail(req, res)) return;
   const id = parseInt(req.params.id, 10) || 0;
-  db.prepare('UPDATE games SET featured=1-featured WHERE id=?').run(id);
+  db.prepare("UPDATE games SET featured=1-featured, updated_at=datetime('now') WHERE id=?").run(id);
   res.redirect(ADMIN_BASE + '/games?ok=updated');
 });
 
@@ -316,15 +316,16 @@ router.get('/settings', (req, res) => {
 router.post('/settings', (req, res) => {
   if (csrfFail(req, res)) return;
   const b = req.body;
+  const isOn = (v) => Array.isArray(v) ? v.some(isOn) : (v === 'on' || v === '1' || v === true || v === 1);
   const isAdsTxtForm = ('ads_txt' in b && !('site_name' in b));
+  if ('ads_txt' in b) setSetting('ads_txt', String(b.ads_txt || '').slice(0, 20000));
   if (isAdsTxtForm) {
-    setSetting('ads_txt', String(b.ads_txt || '').slice(0, 20000));
     return res.redirect(ADMIN_BASE + '/settings?ok=saved');
   }
   for (const k of SETTING_KEYS) {
     if (k === 'ads_txt') continue;
     if (k === 'ads_enabled' || k === 'registration_open' || k === 'ezoic_enabled' || k === 'ezoic_adstxt_redirect') {
-      setSetting(k, b[k] ? '1' : '0');
+      if (k in b) setSetting(k, isOn(b[k]) ? '1' : '0');
       continue;
     }
     if (k === 'site_name') {
@@ -499,7 +500,7 @@ router.post('/import/confirm', (req, res) => {
   const publish = entry.publish || !!req.body.publish;
   let done = 0;
   let skipped = 0;
-  const ins = db.prepare('INSERT INTO games(slug,title_en,title_zh,desc_en,desc_zh,howto_en,howto_zh,category,tags,thumb,embed_url,source,featured,published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,0,?)');
+  const ins = db.prepare("INSERT INTO games(slug,title_en,title_zh,desc_en,desc_zh,howto_en,howto_zh,category,tags,thumb,embed_url,source,featured,published,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,0,?,datetime('now'))");
   const check = db.prepare('SELECT 1 FROM games WHERE slug=? OR embed_url=?');
   const tx = db.transaction(() => {
     entry.items.forEach((it, i) => {

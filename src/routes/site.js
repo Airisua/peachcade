@@ -93,12 +93,16 @@ router.get('/tag/:tag', (req, res, next) => {
   const heading = res.locals.t('seo.tagHeading', { tag: tagDisplay });
   const metaDesc = res.locals.t('seo.tagDesc', { tag: tagDisplay, site: res.locals.site.name });
   const canonPath = '/tag/' + encodeURIComponent(rawTag);
+  // Thin tag pages (a couple of games) add little value and compete with the
+  // category pages in the index - keep the links, drop them from the index.
+  const thinTag = data.total < 5;
   res.render('list', {
     pageTitle: heading,
     heading,
     games: data.games, page: data.page, pages: data.pages,
     basePath: canonPath + '?', sort, totalGames: data.total,
     metaDesc,
+    noindex: thinTag,
     schema: [
       schemaLd.collectionPage({
         name: heading, siteName: res.locals.site.name, siteUrl: res.locals.siteUrl, path: canonPath,
@@ -140,13 +144,18 @@ router.get('/thumb/:key', async (req, res) => {
   const game = db.prepare('SELECT slug, thumb FROM games WHERE slug=?').get(m[1]);
   if (!game) return res.status(404).end();
   const source = String(game.thumb || '');
-  if (!/^https?:\/\//i.test(source)) return res.redirect(302, source || '/img/games/default.svg');
+  if (!/^https?:\/\//i.test(source)) {
+    // local built-in art never changes: let browsers/CDN keep the redirect forever
+    res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    return res.redirect(302, source || '/img/games/default.svg');
+  }
   try {
     const out = await thumbs.build(source, size);
     res.set('cache-control', 'public, max-age=31536000, immutable');
     res.type('image/jpeg');
     return res.sendFile(out.file);
   } catch (e) {
+    res.set('Cache-Control', 'public, max-age=3600');
     return res.redirect(302, source);
   }
 });
@@ -240,6 +249,7 @@ router.get('/ads.txt', (req, res) => {
     return res.redirect(301, 'https://srv.adstxtmanager.com/19390/' + domain);
   }
   const body = String(getSetting('ads_txt', '') || '').trim();
+  res.set('Cache-Control', 'public, max-age=3600');
   res.type('text/plain');
   if (!body) return res.send('# no ads.txt configured\n');
   res.send(body + '\n');
@@ -247,6 +257,7 @@ router.get('/ads.txt', (req, res) => {
 
 router.get('/robots.txt', (req, res) => {
   const adminBase = process.env.ADMIN_BASE || '/wyj';
+  res.set('Cache-Control', 'public, max-age=3600');
   res.type('text/plain').send('User-agent: *\nAllow: /\nDisallow: ' + adminBase + '/\nDisallow: /api/\nSitemap: ' + res.locals.siteUrl + '/sitemap.xml\n');
 });
 
@@ -271,11 +282,17 @@ let sitemapMainCache = { body: '', at: 0 };
 let sitemapTagsCache = { body: '', at: 0 };
 const sitemapGamesCache = new Map();
 
+// Sitemaps are stable for an hour and Google fetches tens of them: let the CDN
+// answer for us instead of every crawl hitting the origin container.
+function sendSitemap(res, body) {
+  res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
+  res.type('application/xml').send(body);
+}
+
 router.get('/sitemap.xml', (req, res) => {
   const now = Date.now();
   if (sitemapIndexCache.body && (now - sitemapIndexCache.at < 3600000)) {
-    res.type('application/xml');
-    return res.send(sitemapIndexCache.body);
+    return sendSitemap(res, sitemapIndexCache.body);
   }
   const total = db.prepare('SELECT COUNT(*) n FROM games WHERE published=1').get().n;
   const chunks = Math.max(1, Math.ceil(total / SITEMAP_CHUNK_SIZE));
@@ -290,14 +307,13 @@ router.get('/sitemap.xml', (req, res) => {
   const body = '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     sitemaps.join('\n') + '\n</sitemapindex>\n';
   sitemapIndexCache = { body, at: now };
-  res.type('application/xml').send(body);
+  sendSitemap(res, body);
 });
 
 router.get('/sitemap-main.xml', (req, res) => {
   const now = Date.now();
   if (sitemapMainCache.body && (now - sitemapMainCache.at < 3600000)) {
-    res.type('application/xml');
-    return res.send(sitemapMainCache.body);
+    return sendSitemap(res, sitemapMainCache.body);
   }
   const cats = db.prepare('SELECT slug FROM categories ORDER BY sort').all();
   const urls = [
@@ -309,14 +325,13 @@ router.get('/sitemap-main.xml', (req, res) => {
     urls.map((u) => '  <url><loc>' + res.locals.siteUrl + u.loc + '</loc><changefreq>' + u.cf + '</changefreq><priority>' + u.pri + '</priority></url>').join('\n') +
     '\n</urlset>\n';
   sitemapMainCache = { body, at: now };
-  res.type('application/xml').send(body);
+  sendSitemap(res, body);
 });
 
 router.get('/sitemap-tags.xml', (req, res) => {
   const now = Date.now();
   if (sitemapTagsCache.body && (now - sitemapTagsCache.at < 3600000)) {
-    res.type('application/xml');
-    return res.send(sitemapTagsCache.body);
+    return sendSitemap(res, sitemapTagsCache.body);
   }
   const tags = getPopularTags(250);
   const today = new Date().toISOString().slice(0, 10);
@@ -324,7 +339,7 @@ router.get('/sitemap-tags.xml', (req, res) => {
     tags.map((t) => '  <url><loc>' + res.locals.siteUrl + '/tag/' + encodeURIComponent(t.slug) + '</loc><lastmod>' + today + '</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>').join('\n') +
     '\n</urlset>\n';
   sitemapTagsCache = { body, at: now };
-  res.type('application/xml').send(body);
+  sendSitemap(res, body);
 });
 
 router.get('/sitemap-games-:chunk.xml', (req, res, next) => {
@@ -333,19 +348,18 @@ router.get('/sitemap-games-:chunk.xml', (req, res, next) => {
   const now = Date.now();
   const cached = sitemapGamesCache.get(chunk);
   if (cached && (now - cached.at < 3600000)) {
-    res.type('application/xml');
-    return res.send(cached.body);
+    return sendSitemap(res, cached.body);
   }
   const offset = (chunk - 1) * SITEMAP_CHUNK_SIZE;
-  const games = db.prepare('SELECT slug, created_at FROM games WHERE published=1 ORDER BY id ASC LIMIT ? OFFSET ?').all(SITEMAP_CHUNK_SIZE, offset);
+  const games = db.prepare("SELECT slug, COALESCE(NULLIF(updated_at,''), created_at) AS last_change FROM games WHERE published=1 ORDER BY id ASC LIMIT ? OFFSET ?").all(SITEMAP_CHUNK_SIZE, offset);
   if (!games.length && chunk > 1) return next();
   const body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     games.map((g) => {
-      const last = String(g.created_at || '').slice(0, 10);
+      const last = String(g.last_change || '').slice(0, 10);
       return '  <url><loc>' + res.locals.siteUrl + '/game/' + g.slug + '</loc>' + (last ? '<lastmod>' + last + '</lastmod>' : '') + '<changefreq>weekly</changefreq><priority>0.8</priority></url>';
     }).join('\n') + '\n</urlset>\n';
   sitemapGamesCache.set(chunk, { body, at: now });
-  res.type('application/xml').send(body);
+  sendSitemap(res, body);
 });
 
 module.exports = router;

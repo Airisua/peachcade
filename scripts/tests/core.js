@@ -67,15 +67,31 @@ module.exports = {
   r = await user.get('/search?q=snake');
     let rMain = await user.get('/sitemap-main.xml');
     ok(rMain.status === 200 && rMain.text.includes('<urlset') && rMain.text.includes('/category/puzzle'), 'sitemap-main.xml lists main pages and categories');
+    ok((rMain.headers.get('cache-control') || '').includes('max-age=3600'), 'sitemap responses are CDN cacheable', rMain.headers.get('cache-control'));
     let rTags = await user.get('/sitemap-tags.xml');
     ok(rTags.status === 200 && rTags.text.includes('<urlset') && rTags.text.includes('/tag/'), 'sitemap-tags.xml lists popular tag URLs');
     let rGames1 = await user.get('/sitemap-games-1.xml');
     ok(rGames1.status === 200 && rGames1.text.includes('<urlset') && rGames1.text.includes('/game/2048'), 'sitemap-games-1.xml lists game URLs');
+    ok(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(rGames1.text), 'sitemap game entries carry a lastmod date');
     let rTagPage = await user.get('/tag/puzzle');
-    ok(rTagPage.status === 200 && rTagPage.text.includes('/game/2048') && !rTagPage.text.includes('noindex'), 'tag landing page /tag/puzzle is indexable and lists games');
+    ok(rTagPage.status === 200 && rTagPage.text.includes('/game/2048'), 'tag landing page /tag/puzzle lists games');
     ok(rTagPage.text.includes('BreadcrumbList') && rTagPage.text.includes('CollectionPage'), 'tag landing page has collection and breadcrumbs schema');
+    // thin tags stay crawlable but do not enter the index; a tag with enough games does
+    ok(rTagPage.text.includes('name="robots" content="noindex"'), 'thin tag pages are noindex');
+    const tagFixtureIds = [];
+    const insTag = db.prepare("INSERT INTO games(slug,title_en,category,thumb,embed_url,source,tags,published,updated_at) VALUES(?,?,?,?,?,?,?,1,datetime('now'))");
+    for (let i = 1; i <= 5; i++) {
+      tagFixtureIds.push(insTag.run('seo-tag-fixture-' + i, 'SEO Tag Fixture ' + i, 'puzzle', '/img/games/default.svg', '/games/2048/', 'smoke', 'seo-fixture-tag').lastInsertRowid);
+    }
+    try {
+      const rRichTag = await user.get('/tag/seo-fixture-tag');
+      ok(rRichTag.status === 200 && !rRichTag.text.includes('name="robots" content="noindex"'), 'tag pages with enough games stay indexable');
+    } finally {
+      for (const id of tagFixtureIds) db.prepare('DELETE FROM games WHERE id=?').run(id);
+    }
     r = await user.get('/');
     ok(r.text.includes('cat-card'), 'home shows category strip');
+    ok(r.text.includes('rel="preload" as="image"') && r.text.includes('fetchpriority="high"'), 'homepage preloads the hero image for LCP');
     ok(r.text.includes('name="881a8f0468df8b90a945c1d8ffff883b0dd31fc6"'), 'home includes HilltopAds verification meta tag');
     ok(r.text.includes('name="referrer" content="no-referrer-when-downgrade"'), 'head includes referrer-policy meta tag');
     ok(/\/css\/style\.css\?v=[0-9a-f]{6,}/.test(r.text), 'stylesheet url is versioned');

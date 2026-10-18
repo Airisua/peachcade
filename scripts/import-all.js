@@ -81,7 +81,7 @@ async function loadPage(page) {
 async function main() {
   const cats = db.prepare('SELECT * FROM categories ORDER BY sort').all();
   const check = db.prepare('SELECT 1 FROM games WHERE slug=? OR embed_url=?');
-  const ins = db.prepare('INSERT INTO games(slug,title_en,title_zh,desc_en,desc_zh,howto_en,howto_zh,category,tags,thumb,embed_url,source,featured,published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,0,?)');
+  const ins = db.prepare("INSERT INTO games(slug,title_en,title_zh,desc_en,desc_zh,howto_en,howto_zh,category,tags,thumb,embed_url,source,featured,published,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,0,?,datetime('now'))");
   const totalRow = db.prepare('SELECT COUNT(*) n FROM games').get();
 
   log('bulk import start: page ' + START + (PAGES ? ' for ' + PAGES + ' page(s)' : ' until the feed runs dry') +
