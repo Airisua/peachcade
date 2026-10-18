@@ -251,10 +251,16 @@ router.get('/robots.txt', (req, res) => {
 });
 
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '2771545fc9c14828b056ff3f18e9f50e';
+const HILLTOPADS_KEY = '881a8f0468df8b90a945';
+const HILLTOPADS_TOKEN = 'c1d8ffff883b0dd31fc6';
 router.get('/:key.txt', (req, res, next) => {
   if (req.params.key === INDEXNOW_KEY) {
     res.type('text/plain');
     return res.send(INDEXNOW_KEY + '\n');
+  }
+  if (req.params.key === HILLTOPADS_KEY) {
+    res.type('text/plain');
+    return res.send(HILLTOPADS_TOKEN + '\n');
   }
   next();
 });

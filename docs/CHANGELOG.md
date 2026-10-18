@@ -4,6 +4,19 @@
 
 ---
 
+## [2026-10-18] HilltopAds 网站所有权双重校验部署 (HilltopAds Ownership Verification)
+
+### 1. 根目录文件验证端点 (Upload File Verification)
+- **文件物理落地与路由双保**：将官方校验文件 `881a8f0468df8b90a945.txt`（包含授权 Hash `c1d8ffff883b0dd31fc6`）部署至 `public/` 静态资源目录，同时在 `src/routes/site.js` 的 `/:key.txt` 路由层增加明确匹配与 `text/plain` 响应，无论静态中间件或动态路由均可秒级响应 HilltopAds 爬虫。
+
+### 2. 首页 HTML Meta 元标签集成 (HTML Meta Tag Verification)
+- **全站公共 Head 注入**：在 `views/partials/head.ejs` 注入 `<meta name="881a8f0468df8b90a945c1d8ffff883b0dd31fc6" content="881a8f0468df8b90a945c1d8ffff883b0dd31fc6">`，与文件校验构成双保险，免去 DNS 传播等待。
+
+### 3. 自动化测试套件扩充 (Smoke Tests)
+- **冒烟覆盖**：`scripts/smoke.js` 新增针对 `/881a8f0468df8b90a945.txt` 与 `<head>` 元标签的断言，自动化测试增至 181/181 全部通过。
+
+---
+
 ## [2026-10-18] Ezoic 官方广告引擎与 Ads.txt 托管集成 (Ezoic JavaScript & AdstxtManager Integration)
 
 ### 1. Ezoic 官方 JavaScript 核心脚本部署 (Ezoic Header Scripts & CMP)

@@ -171,6 +171,9 @@ function client() {
   // IndexNow verification key endpoint
   let rIndexNow = await user.get('/2771545fc9c14828b056ff3f18e9f50e.txt');
   ok(rIndexNow.status === 200 && rIndexNow.text.includes('2771545fc9c14828b056ff3f18e9f50e'), 'IndexNow key file is served');
+  // HilltopAds verification key endpoint
+  let rHilltop = await user.get('/881a8f0468df8b90a945.txt');
+  ok(rHilltop.status === 200 && rHilltop.text.includes('c1d8ffff883b0dd31fc6'), 'HilltopAds key file is served');
   r = await user.get('/robots.txt');
   ok(r.status === 200 && r.text.includes('Sitemap:') && r.text.includes('Disallow: /wyj/'), 'robots.txt guards admin and references sitemap', r.status);
   r = await user.get('/manifest.webmanifest');
@@ -178,6 +181,7 @@ function client() {
   r = await user.get('/');
   ok(r.text.includes('cat-card'), 'home shows category strip');
   ok(r.text.includes('hreflang="en"') && r.text.includes('hreflang="zh"') && r.text.includes('hreflang="ja"'), 'head includes hreflang alternates');
+  ok(r.text.includes('name="881a8f0468df8b90a945c1d8ffff883b0dd31fc6"'), 'home includes HilltopAds verification meta tag');
   // every static asset URL carries ?v=<hash> so a CDN / browser cache can never serve the
   // previous build after a release
   ok(/\/css\/style\.css\?v=[0-9a-f]{6,}/.test(r.text), 'stylesheet url is versioned');
