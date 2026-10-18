@@ -15,7 +15,9 @@
     </div>
     <div>
       <h4><%= t('footer.categories') %></h4>
+      <div class="footer-categories">
       <% navCategories.forEach(function (c) { %><a href="/category/<%= c.slug %>"><%= catName(c) %></a><% }); %>
+      </div>
     </div>
     <div>
       <h4><%= t('nav.language') %></h4>

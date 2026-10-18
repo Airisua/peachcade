@@ -291,6 +291,7 @@ function client() {
   ok(r.status === 200 && r.text.includes('wyjv58787@gmail.com'), 'about page displays official contact email');
   r = await user.get('/');
   ok(r.status === 200 && r.text.includes('wyjv58787@gmail.com'), 'footer displays contact email');
+  ok(r.status === 200 && r.text.includes('footer-categories'), 'footer renders dual-column categories grid');
   r = await user.post('/api/like/1', null, { headers: { 'x-csrf-token': user.csrf() } });
   j = JSON.parse(r.text);
   ok(r.status === 200 && j.liked === true && typeof j.likes === 'number', 'like on', r.status + ' ' + r.text.slice(0, 80));

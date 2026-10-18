@@ -4,6 +4,18 @@
 
 ---
 
+## [2026-10-18] 页脚分类栏排版重构：双列紧凑自适应网格 (Footer Categories 2-Column Grid)
+
+### 1. 消除页面底部纵向留白与视觉失衡
+- **双列响应式子网格（2-Column Subgrid）**：将页脚 `CATEGORIES` 栏由原先 14 个分类纵向单列单排展示改为双列自适应网格（`.footer-categories`，`repeat(2, minmax(0, 1fr))`）。
+- **网格比例优化**：将 `.footer-grid` 桌面端四列比例从 `1.4fr 1fr 1fr 1fr` 微调为 `1.3fr 1fr 1.8fr 0.8fr`，7 行高度与左侧 `QUICK LINKS`（5 行）及品牌区域高度平齐对齐，彻底消除底部两侧的巨幅空白，整体视觉紧凑协调。
+- **移动端空间优化**：在平板与手机端同样保持双列布局，大幅压缩垂直滚动距离。
+
+### 2. 自动化测试套件扩充
+- `scripts/smoke.js` 新增对页脚双列分类网格容器的断言，184 项全流程测试全部通过。
+
+---
+
 ## [2026-10-18] 广告收益加成：全站 Referrer-Policy 来源传递优化 (HilltopAds Referrer Policy Integration)
 
 ### 1. HTML Meta 标签与 HTTP 响应头双轨打通

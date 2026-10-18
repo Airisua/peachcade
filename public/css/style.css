@@ -312,11 +312,12 @@ textarea {
 
 /* footer */
 .site-footer{border-top:1px solid var(--line);margin-top:46px;background:rgba(10,10,16,.6)}
-.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:22px;padding:34px 18px 12px}
-.footer-grid h4{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
-.footer-grid a{display:block;padding:3px 0;color:var(--muted);font-size:14px}
+.footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1.8fr .8fr;gap:26px;padding:34px 18px 12px}
+.footer-grid h4{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.footer-grid a{display:block;padding:3px 0;color:var(--muted);font-size:14px;transition:color .15s}
 .footer-grid a:hover{color:#fff}
 .footer-grid .logo{margin-bottom:8px;font-size:17px}
+.footer-categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:2px}
 .footer-bottom{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px 22px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
 
 /* toast */
