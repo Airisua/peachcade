@@ -17,6 +17,7 @@
 ### 3. Core Web Vitals：LCP 与 CLS
 - 首页把 Hero 图地址传入 `<head>`，输出 `<link rel="preload" as="image" fetchpriority="high">`，Hero `<img>` 增加 `fetchpriority="high"`、`width/height`。
 - 游戏卡片、分类卡片、相关游戏缩略图补齐 `width` / `height`，减少布局偏移；分类卡片图片补上可读 `alt`。
+- 列表页首屏前 4 张卡片改为 `loading="eager"` + `fetchpriority="high"`，其余继续懒加载。
 - Ezoic CMP 与广告脚本域名新增 `preconnect`，提前建立 TLS 连接。
 
 ### 4. 索引质量：低质量标签页自动 noindex
@@ -24,10 +25,10 @@
 - 分页 canonical 复查：列表页 canonical 基于 `req.path`，已天然指向不带 `?page=` / `?sort=` 的干净地址，无需额外修改。
 
 ### 5. 服务器与带宽
-- 静态资源（CSS/JS/SVG/图片/字体清单）缓存从 1 天提升到 **1 年 + immutable**，配合既有的 `?v=<hash>` 版本号，发布后自动失效。
+- 带 `?v=<hash>` 的静态资源与 `uploads/` 时间戳文件改为 **1 年 + immutable**；favicon、内置 SVG、manifest 等无版本号文件保持 1 天，避免改图后被钉死一年。
 - `/thumb/:key` 本地内置图 302 跳转也标记为 1 年 immutable；缩略图构建结果继续使用 immutable。
 - SQLite 增加 `PRAGMA wal_autocheckpoint = 256`，避免长时间运行后 WAL 文件无界增长。
-- **HTML 页面刻意不做 CDN 缓存**：页面内嵌每位访客独立的 CSRF token 与登录态，边缘缓存会造成串号与表单失败；这类页面继续走 Express 的 ETag/304 协商缓存。
+- **HTML 页面刻意不做 CDN 缓存**：统一返回 `Cache-Control: private, no-cache`，页面内嵌每位访客独立的 CSRF token 与登录态，边缘缓存会造成串号与表单失败；这类页面继续走 Express 的 ETag/304 协商缓存。
 
 ### 6. 后台设置安全性（顺带修复）
 - 设置表单的四个开关增加隐藏 `0` 字段，服务端仅在字段真实提交时更新布尔设置；局部 AJAX/测试提交不再把 `registration_open`、`ezoic_enabled` 等开关意外清零。

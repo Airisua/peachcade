@@ -59,6 +59,10 @@ function invalidateCategoryCache() {
 function common(req, res, next) {
   const lang = req.lang;
   res.locals.path = req.path;
+  // Pages embed a per-visitor CSRF token and login state: never let a shared
+  // cache (CDN, corporate proxy) store them. Routes that are safe to cache
+  // (sitemaps, robots.txt, thumbs, static files) override this header later.
+  res.set('Cache-Control', 'private, no-cache');
   res.locals.assetV = ASSET_VERSION;
   res.locals.year = new Date().getFullYear();
   res.locals.siteUrl = String(process.env.SITE_URL || (req.protocol + '://' + (req.get('host') || 'localhost'))).replace(/\/+$/, '');

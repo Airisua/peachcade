@@ -58,10 +58,16 @@ app.use(ADMIN_BASE, adminRouter);
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '1h',
   setHeaders: (res, filePath) => {
-    // Every /css + /js + sprite URL carries ?v=<asset hash>, so a one-year
-    // immutable cache is safe and removes the daily revalidation traffic.
-    if (/\.(svg|css|js|webmanifest|png|jpg|jpeg|webp|ico)$/i.test(filePath)) {
+    const versioned = /[?&]v=/.test(res.req.url || '');
+    const uploaded = /[\\/]uploads[\\/]/.test(filePath);
+    // Versioned assets (?v=<hash>) and uploads (timestamped filenames) never
+    // change under the same URL, so they can be cached for a year.
+    if (versioned || uploaded) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    } else if (/\.(svg|css|js|webmanifest|png|jpg|jpeg|webp|ico)$/i.test(filePath)) {
+      // favicon / built-in art / manifest: still cacheable, but a change should
+      // reach visitors within a day rather than being pinned for a year.
+      res.setHeader('Cache-Control', 'public, max-age=86400');
     }
   }
 }));

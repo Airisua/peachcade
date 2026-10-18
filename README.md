@@ -172,6 +172,15 @@ The admin panel includes a feed importer at /wyj/import:
   serving the previous one for up to an hour. HTML is never cached, so it always
   points at the current hash.
 - Override the token with `ASSET_VERSION=...` if you want to bust caches by hand.
+- CSS / JS / SVG / thumbnails are served with `Cache-Control: immutable` for one
+  year; the `?v=<hash>` token makes a deploy invalidate them automatically.
+- Sitemaps and `robots.txt` are sent with a one-hour `s-maxage`. To let
+  Cloudflare answer crawlers from the edge, add a Cache Rule:
+  `URI Path matches /sitemap` -> Cache eligibility: Eligible, Edge TTL: 1 hour
+  (optionally also `/robots.txt` and `/ads.txt`). Without that rule Cloudflare
+  keeps treating them as dynamic, which is safe but slower for Googlebot.
+- HTML is intentionally **not** edge-cached: every page embeds a per-visitor
+  CSRF token and login state, so caching it would leak forms between visitors.
 
 ---
 

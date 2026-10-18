@@ -13,6 +13,7 @@ module.exports = {
     ok(r.status === 200 && r.text.indexOf('"ok":true') >= 0, 'healthz endpoint', r.status);
     r = await user.get('/');
     ok(r.status === 200, 'homepage responds', r.status);
+    ok((r.headers.get('cache-control') || '').includes('private'), 'HTML stays out of shared caches', r.headers.get('cache-control'));
     ok(r.text.includes('Peachcade'), 'home renders new brand name Peachcade');
     const slugMatch = r.text.match(/href="\/game\/([a-z0-9-]+)"/);
     const slug = slugMatch ? slugMatch[1] : '';

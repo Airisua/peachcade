@@ -13,7 +13,7 @@
     <% }); %>
   </div>
   <% if (games.length) { %>
-  <div class="grid-cards"><% games.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
+  <div class="grid-cards"><% games.forEach(function (g, i) { %><%- include('partials/gamecard', { g: g, eager: i < 4 }) %><% }); %></div>
   <%- include('partials/pagination', { page: page, pages: pages, base: basePath + 'sort=' + sort + '&' }) %>
   <% } else { %>
   <p class="empty"><%= t('list.noResults') %></p>
