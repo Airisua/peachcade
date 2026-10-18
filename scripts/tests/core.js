@@ -123,5 +123,5 @@ module.exports = {
   } finally {
     for (const id of originalFeatured) db.prepare('UPDATE games SET featured=1 WHERE id=?').run(id);
   }
-  }
+}
 };
