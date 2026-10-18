@@ -59,6 +59,9 @@ function client() {
   };
 }
 (async function () {
+  db.prepare("UPDATE games SET published=1 WHERE slug IN ('2048', 'snake', 'memory-match', 'tic-tac-toe', 'minesweeper')").run();
+  db.prepare("UPDATE settings SET value='1' WHERE key='ezoic_enabled'").run();
+  db.prepare("DELETE FROM ads WHERE title='Smoke Ad'").run();
   const user = client();
   ok(gt({ title_en: 'CatchFish &mdash; Fishing Master' }) === 'CatchFish — Fishing Master', 'entity decoding decodes named mdash entity');
   ok(gt({ title_en: 'Double &amp;mdash; test &#8212;' }) === 'Double — test —', 'entity decoding decodes double-encoded and numeric entities');
@@ -533,14 +536,15 @@ function client() {
   r = await user.get('/');
   ok(r.text.includes('SMOKE-AD-123'), 'ad renders on homepage', r.status);
   r = await admin.get('/wyj/ads');
-  const adId = extractId(r.text, '/wyj/ads/');
+  const smokeAdRow = db.prepare("SELECT id FROM ads WHERE title='Smoke Ad'").get();
+  const adId = smokeAdRow ? String(smokeAdRow.id) : extractId(r.text, '/wyj/ads/');
   if (adId) {
     resp = await admin.post('/wyj/ads/' + adId + '/delete', { _csrf: admin.csrf() });
     ok(resp.status === 302, 'ad deleted', resp.status);
   } else ok(false, 'ad id found');
   r = await user.get('/');
   ok(!r.text.includes('SMOKE-AD-123'), 'ad removed from homepage', r.status);
-  const baseSettings = { _csrf: admin.csrf(), site_name: 'Peachcade', tagline_en: 'Free Online Browser Games — Play Instantly', tagline_zh: '免费免下载在线小游戏 · 即点即玩', footer_text_en: '', footer_text_zh: '', registration_open: 'on' };
+  const baseSettings = { _csrf: admin.csrf(), site_name: 'Peachcade', tagline_en: 'Free Online Browser Games — Play Instantly', tagline_zh: '免费免下载在线小游戏 · 即点即玩', footer_text_en: '', footer_text_zh: '', registration_open: 'on', ezoic_enabled: 'on' };
   resp = await admin.post('/wyj/settings', Object.assign({}, baseSettings, { ads_enabled: 'on' }));
   ok(resp.status === 302, 'settings save (ads on)', resp.status);
   resp = await admin.post('/wyj/settings', baseSettings);
@@ -571,6 +575,8 @@ function client() {
   resp = await user.post('/logout', { _csrf: user.csrf() });
   r = await user.get('/profile');
   ok(r.status === 302 && r.location.indexOf('/login') >= 0, 'logout works', r.status + ' ' + r.location);
+  db.prepare("UPDATE games SET published=1 WHERE slug IN ('2048', 'snake', 'memory-match', 'tic-tac-toe', 'minesweeper')").run();
+  db.prepare("UPDATE settings SET value='1' WHERE key='ezoic_enabled'").run();
   console.log('');
   console.log('RESULT: pass=' + pass + ' fail=' + fail);
   if (fail) { console.log('FAILURES: ' + failures.join(' | ')); process.exitCode = 1; }
