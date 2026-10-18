@@ -1,6 +1,5 @@
 'use strict';
 const { ctx, ldBlocks, featuredSlugs } = require('./context');
-const { featuredRotation } = require('../../src/queries');
 
 module.exports = {
   title: 'SEO, structured data, pager, sitemaps, featured',
@@ -8,6 +7,8 @@ module.exports = {
     const ok = ctx.ok;
     const user = ctx.user;
     const db = ctx.db;
+    // required inside run(): the runner may have swapped DATA_DIR for --fresh
+    const { featuredRotation } = require('../../src/queries');
     let r;
     await user.get('/lang/en?next=/');
   // pager: sliding window of page numbers plus first/last shortcuts (one partial shared by

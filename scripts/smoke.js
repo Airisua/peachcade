@@ -83,6 +83,11 @@ function initContext() {
   // the real ./data/app.db while the child server uses the temp one.
   reloadModules();
   ctx.db = require('../src/db').db;
+  if (process.env.SMOKE_DEBUG) {
+    let file = '';
+    try { file = ctx.db.prepare('PRAGMA database_list').get().file; } catch (e) {}
+    console.log('[debug] base=' + ctx.base + ' DATA_DIR=' + (process.env.DATA_DIR || '(unset)') + ' db=' + file + ' games=' + (ctx.db.prepare('SELECT COUNT(*) n FROM games').get().n));
+  }
   ctx.ok = ok;
   ctx.client = client;
   ctx.user = client();

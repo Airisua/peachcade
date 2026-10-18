@@ -1,12 +1,13 @@
 'use strict';
 const { ctx } = require('./context');
-const gt = require('../../src/queries').gt;
 
 module.exports = {
   title: 'Internationalization & language switching',
   async run() {
     const ok = ctx.ok;
     const user = ctx.user;
+    // required inside run(): the runner may have swapped DATA_DIR for --fresh
+    const gt = require('../../src/queries').gt;
     await user.get('/lang/en?next=/');
   ok(gt({ title_en: 'CatchFish &mdash; Fishing Master' }) === 'CatchFish — Fishing Master', 'entity decoding decodes named mdash entity');
   ok(gt({ title_en: 'Double &amp;mdash; test &#8212;' }) === 'Double — test —', 'entity decoding decodes double-encoded and numeric entities');
