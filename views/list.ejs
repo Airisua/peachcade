@@ -5,7 +5,7 @@
   <% var countLabel = totalGames === 1 ? t('home.totalGamesOne') : t('home.totalGames'); %>
   <div class="list-head">
     <h1><%= heading %></h1>
-    <div class="muted small"><%= totalGames %> <%= countLabel %></div>
+    <div class="muted small"><%= fmt(totalGames) %> <%= countLabel %></div>
   </div>
   <div class="filterbar">
     <span class="muted small"><%= t('list.sort') %></span>

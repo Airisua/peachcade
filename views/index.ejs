@@ -14,7 +14,7 @@
         <a class="btn btn-primary btn-lg" href="/game/<%= hero.slug %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-play"></use></svg><%= t('home.playNow') %></a>
         <a class="btn btn-ghost btn-lg" href="/random"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-dice"></use></svg><%= t('home.random') %></a>
       </div>
-      <div class="muted small"><%= fmt(hero.plays) %> <%= t('game.plays') %> · <%= total %> <%= t('home.totalGames') %></div>
+      <div class="muted small"><%= fmt(hero.plays) %> <%= t('game.plays') %> · <%= fmt(total) %> <%= t('home.totalGames') %></div>
       <% } else { %>
       <div class="hero-actions">
         <a class="btn btn-primary btn-lg" href="/games"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-gamepad"></use></svg><%= t('common.allGames') %></a>

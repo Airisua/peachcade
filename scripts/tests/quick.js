@@ -34,6 +34,8 @@ module.exports = {
     ok(r.status === 200 && r.text.includes('Terms of Use'), 'terms page responds', r.status);
     r = await user.get('/robots.txt');
     ok(r.status === 200 && r.text.includes('Sitemap:'), 'robots.txt served', r.status);
+    r = await user.get('/feed.xml');
+    ok(r.status === 200 && r.text.includes('<rss') && r.text.includes('<item>'), 'rss feed served', r.status);
     r = await user.get('/manifest.webmanifest');
     ok(r.status === 200 && r.text.includes('Peachcade'), 'manifest.webmanifest served as PWA app config', r.status);
     r = await user.get('/css/style.css?v=smoke');

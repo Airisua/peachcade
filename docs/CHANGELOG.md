@@ -4,6 +4,16 @@
 
 ---
 
+## [2026-10-21] 新增 /feed.xml RSS 订阅源
+
+- 新增 `src/feed.js` 与 `/feed.xml` 路由：输出最新 50 款已发布游戏的 RSS 2.0 源（标题、链接、简介、分类、封面、发布时间）；
+- `<head>` 增加 `rel="alternate" type="application/rss+xml"` 自动发现标签，阅读器与聚合站可直接订阅；
+- 响应标记 `public, max-age=1800`，进程内缓存 30 分钟，冷启动约 5ms；
+- 生成结果经 jsdom XML 解析验证无语法错误；
+- `quick` 套件新增 feed 断言。
+
+---
+
 ## [2026-10-21] 结构化数据补全与抓取卫生
 
 - `/tags` 目录页补齐 `CollectionPage` + `BreadcrumbList`，此前该页是唯一没有结构化数据的主要落地页；

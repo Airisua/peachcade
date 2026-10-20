@@ -9,6 +9,7 @@ const schemaLd = require('../schema');
 const thumbs = require('../thumbs');
 const categoryContent = require('../category_content');
 const tagHubs = require('../tags');
+const feed = require('../feed');
 
 const GAMES_PER_PAGE = 48;
 
@@ -24,7 +25,9 @@ router.get('/', (req, res) => {
   // random rotation: admin-picked featured games when any are published, otherwise a
   // random mix of the most popular / best rated games
   const featured = featuredRotation(8);
-  const hero = featured[0] || popular[0] || null;
+  // The rail rotates per visit, but the hero should never be a game with a
+  // handful of plays: pick the strongest of the current rotation instead.
+  const hero = featured.slice().sort((a, b) => (Number(b.plays) || 0) - (Number(a.plays) || 0))[0] || popular[0] || null;
   let continueList = [];
   if (req.user) {
     continueList = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja, MAX(p.created_at) AS last_play FROM plays_log p JOIN games g ON g.id=p.game_id LEFT JOIN categories c ON c.slug=g.category WHERE p.user_id=? GROUP BY g.id ORDER BY last_play DESC LIMIT 4').all(req.user.id);
@@ -348,6 +351,28 @@ router.get('/rewards', (req, res) => {
     pageTitle: res.locals.t('rewards.title'),
     metaDesc: res.locals.t('rewards.desc')
   });
+});
+
+// Newest-games RSS feed. Cached at the edge like the sitemaps.
+let feedCache = { body: '', at: 0, lang: '' };
+router.get('/feed.xml', (req, res) => {
+  const now = Date.now();
+  const lang = res.locals.lang === 'ja' ? 'ja' : 'en';
+  if (feedCache.body && feedCache.lang === lang && now - feedCache.at < 1800000) {
+    res.set('Cache-Control', 'public, max-age=1800, s-maxage=1800');
+    res.type('application/rss+xml');
+    return res.send(feedCache.body);
+  }
+  let body;
+  try {
+    body = feed.build(res.locals.siteUrl, res.locals.site.name, lang);
+  } catch (e) {
+    return res.status(503).type('text/plain').send('feed unavailable');
+  }
+  feedCache = { body, at: now, lang };
+  res.set('Cache-Control', 'public, max-age=1800, s-maxage=1800');
+  res.type('application/rss+xml');
+  res.send(body);
 });
 
 router.get('/healthz', (req, res) => {
