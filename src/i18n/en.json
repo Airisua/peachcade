@@ -375,5 +375,6 @@
   "game.specPlayed": "Times played",
   "seo.home": "Play {count}+ free online browser games on {site} — action, puzzle, racing, shooting, sports, board and more. Instant play, no download, no sign-up.",
   "seo.allGamesTitle": "All {count} Free Online Games",
-  "game.h1Type": "Free online {category} game"
+  "game.h1Type": "Free online {category} game",
+  "about.pageTitle": "About"
 }

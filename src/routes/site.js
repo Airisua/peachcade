@@ -324,7 +324,8 @@ router.get('/lang/:code', (req, res) => {
 });
 
 router.get('/about', (req, res) => {
-  res.render('about', { pageTitle: res.locals.t('about.title') });
+  // the <title> already appends the site name, so keep this one short
+  res.render('about', { pageTitle: res.locals.t('about.pageTitle') });
 });
 
 // Legal pages: Google and ad networks expect clearly reachable privacy/terms

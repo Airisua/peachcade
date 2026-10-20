@@ -375,5 +375,6 @@
   "game.specPlayed": "プレイ回数",
   "seo.home": "{site} で遊べる無料ブラウザゲーム{count}本以上。アクション、パズル、レーシング、シューティング、スポーツ、ボードなど充実のラインナップ。ダウンロードも登録も不要です。",
   "seo.allGamesTitle": "全{count}本の無料オンラインゲーム",
-  "game.h1Type": "無料オンライン{category}ゲーム"
+  "game.h1Type": "無料オンライン{category}ゲーム",
+  "about.pageTitle": "このサイトについて"
 }

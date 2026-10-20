@@ -375,5 +375,6 @@
   "game.specPlayed": "游玩次数",
   "seo.home": "{site} 收录 {count}+ 款免费在线小游戏——动作、益智、赛车、射击、体育、棋牌等全品类覆盖，打开浏览器即点即玩，免下载免注册。",
   "seo.allGamesTitle": "全部 {count} 款免费在线游戏",
-  "game.h1Type": "免费在线{category}游戏"
+  "game.h1Type": "免费在线{category}游戏",
+  "about.pageTitle": "关于"
 }
