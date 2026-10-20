@@ -2,6 +2,11 @@
 
 本文档面向把 Peachcade 部署到服务器的场景，推荐使用 Docker 一键部署。
 
+> 生产环境当前是「nginx 网关 + 两个容器」的结构：网关占用 3000 端口（Cloudflare
+> Tunnel 的目标），游戏站以 `127.0.0.1:3001` 映射并加入 `edge` 网络，同一域名下的
+> `/gcli2api` 由网关分发。首次部署前需执行 `docker network create edge`。
+> 详见 [GCLI2API.md](./GCLI2API.md)。
+
 ## 1. 服务器准备
 
 - 一台可访问外网的 Linux 服务器（Ubuntu/Debian/CentOS 均可），已安装 Docker 与 Docker Compose 插件。

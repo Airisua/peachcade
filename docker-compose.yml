@@ -2,8 +2,11 @@ services:
   gamehub:
     build: .
     container_name: pixelplay
+    # Production runs a gateway container on :3000 (the Cloudflare Tunnel
+    # target) and this app joins the shared `edge` network as `pixelplay`.
+    # Create the network once:  docker network create edge
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3001:3000"
     environment:
       - PORT=3000
       - JWT_SECRET=${JWT_SECRET:-change-me-please}
@@ -18,10 +21,17 @@ services:
     volumes:
       - ./data:/app/data
       - ./public/uploads:/app/public/uploads
+    networks:
+      - default
+      - edge
     logging:
       driver: "json-file"
       options:
         max-size: "20m"
         max-file: "3"
     restart: unless-stopped
+
+networks:
+  edge:
+    external: true
 
