@@ -47,6 +47,7 @@ router.get('/games', (req, res) => {
     games: data.games, page: data.page, pages: data.pages,
     basePath: '/games?', sort, totalGames: data.total,
     metaDesc: res.locals.t('seo.allGames', { site: res.locals.site.name }),
+    noindex: data.page > 1,
     schema: [
       schemaLd.collectionPage({
         name: heading, siteName: res.locals.site.name, siteUrl: res.locals.siteUrl, path: '/games',
@@ -126,7 +127,7 @@ router.get('/tag/:tag', (req, res, next) => {
     games: data.games, page: data.page, pages: data.pages,
     basePath: canonPath + '?', sort, totalGames: data.total,
     metaDesc,
-    noindex: thinTag,
+    noindex: thinTag || data.page > 1,
     tagHub: {
       slug: hub.slug,
       display: tagDisplay,
@@ -377,6 +378,38 @@ function sendSitemap(res, body) {
   res.type('application/xml').send(body);
 }
 
+// Real "when did this collection last change" dates. Listing 38k games on every
+// sitemap request would be wasteful, so the map is built once an hour and covers
+// both category pages and tag hubs (aliases folded onto their canonical slug).
+let collectionDatesCache = { at: 0, categories: {}, tags: {} };
+function collectionDates() {
+  if (collectionDatesCache.at && Date.now() - collectionDatesCache.at < 3600000) {
+    return collectionDatesCache;
+  }
+  const categories = {};
+  const tags = {};
+  const day = (v) => String(v || '').slice(0, 10);
+  try {
+    for (const row of db.prepare("SELECT category, MAX(COALESCE(NULLIF(updated_at,''), created_at)) AS last FROM games WHERE published=1 GROUP BY category").all()) {
+      if (row.category) categories[row.category] = day(row.last);
+    }
+    for (const row of db.prepare("SELECT tags, COALESCE(NULLIF(updated_at,''), created_at) AS last FROM games WHERE published=1 AND length(tags) > 0").all()) {
+      const d = day(row.last);
+      if (!d) continue;
+      for (let token of String(row.tags).split(',')) {
+        const hub = tagHubs.resolve(token);
+        if (!hub.valid || hub.blocked) continue;
+        if (!tags[hub.slug] || tags[hub.slug] < d) tags[hub.slug] = d;
+      }
+    }
+  } catch (e) {
+    collectionDatesCache = { at: Date.now(), categories: {}, tags: {} };
+    return collectionDatesCache;
+  }
+  collectionDatesCache = { at: Date.now(), categories, tags };
+  return collectionDatesCache;
+}
+
 router.get('/sitemap.xml', (req, res) => {
   const now = Date.now();
   if (sitemapIndexCache.body && (now - sitemapIndexCache.at < 3600000)) {
@@ -404,16 +437,18 @@ router.get('/sitemap-main.xml', (req, res) => {
     return sendSitemap(res, sitemapMainCache.body);
   }
   const cats = db.prepare('SELECT slug FROM categories ORDER BY sort').all();
+  const dates = collectionDates();
+  const globalLast = Object.values(dates.categories).sort().pop() || new Date().toISOString().slice(0, 10);
   const urls = [
-    { loc: '/', pri: '1.0', cf: 'daily' },
-    { loc: '/games', pri: '0.9', cf: 'daily' },
-    { loc: '/tags', pri: '0.6', cf: 'weekly' },
+    { loc: '/', pri: '1.0', cf: 'daily', last: globalLast },
+    { loc: '/games', pri: '0.9', cf: 'daily', last: globalLast },
+    { loc: '/tags', pri: '0.6', cf: 'weekly', last: globalLast },
     { loc: '/about', pri: '0.3', cf: 'monthly' },
     { loc: '/privacy', pri: '0.2', cf: 'yearly' },
     { loc: '/terms', pri: '0.2', cf: 'yearly' }
-  ].concat(cats.map((c) => ({ loc: '/category/' + c.slug, pri: '0.7', cf: 'daily' })));
+  ].concat(cats.map((c) => ({ loc: '/category/' + c.slug, pri: '0.7', cf: 'daily', last: dates.categories[c.slug] })));
   const body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    urls.map((u) => '  <url><loc>' + res.locals.siteUrl + u.loc + '</loc><changefreq>' + u.cf + '</changefreq><priority>' + u.pri + '</priority></url>').join('\n') +
+    urls.map((u) => '  <url><loc>' + res.locals.siteUrl + u.loc + '</loc>' + (u.last ? '<lastmod>' + u.last + '</lastmod>' : '') + '<changefreq>' + u.cf + '</changefreq><priority>' + u.pri + '</priority></url>').join('\n') +
     '\n</urlset>\n';
   sitemapMainCache = { body, at: now };
   sendSitemap(res, body);
@@ -439,9 +474,10 @@ router.get('/sitemap-tags.xml', (req, res) => {
       return acc;
     }, []);
   }
+  const dates = collectionDates();
   const today = new Date().toISOString().slice(0, 10);
   const body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    tags.map((t) => '  <url><loc>' + res.locals.siteUrl + '/tag/' + encodeURIComponent(t.slug) + '</loc><lastmod>' + today + '</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>').join('\n') +
+    tags.map((t) => '  <url><loc>' + res.locals.siteUrl + '/tag/' + encodeURIComponent(t.slug) + '</loc><lastmod>' + (dates.tags[t.slug] || today) + '</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>').join('\n') +
     '\n</urlset>\n';
   sitemapTagsCache = { body, at: now };
   sendSitemap(res, body);

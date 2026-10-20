@@ -26,7 +26,9 @@ module.exports = {
     ok(/class="pg pg-edge"/.test(r.text), 'pager has first/last shortcuts');
     r = await user.get('/games?page=2');
     ok(r.status === 200 && r.text.includes('aria-current="page">2<'), 'pager marks the current page', r.status);
+    ok(r.text.includes('name="robots" content="noindex"'), 'paginated game listings are noindex,follow', 'page2 should be noindex');
     ok(/href="\/games\?[^"]*page=1"/.test(r.text), 'pager links back to page one');
+    ok(r.text.includes('name="robots" content="noindex"'), 'all-games page one is indexable', 'page1 should not be noindex');
     r = await user.get('/category/puzzle');
     ok(r.text.includes('class="pagination"'), 'category listing uses the same pager', r.status);
     r = await user.get('/lang/zh?next=/games');
@@ -75,9 +77,11 @@ module.exports = {
   r = await user.get('/search?q=snake');
     let rMain = await user.get('/sitemap-main.xml');
     ok(rMain.status === 200 && rMain.text.includes('<urlset') && rMain.text.includes('/category/puzzle'), 'sitemap-main.xml lists main pages and categories');
+    ok(/<loc>[^<]*\/category\/puzzle<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(rMain.text), 'category sitemap entries carry a real lastmod', (rMain.text.match(/category\/puzzle<\/loc>[^<]*<lastmod>[^<]*/) || [])[0]);
     ok((rMain.headers.get('cache-control') || '').includes('max-age=3600'), 'sitemap responses are CDN cacheable', rMain.headers.get('cache-control'));
     let rTags = await user.get('/sitemap-tags.xml');
     ok(rTags.status === 200 && rTags.text.includes('<urlset') && rTags.text.includes('/tag/'), 'sitemap-tags.xml lists popular tag URLs');
+    ok(/<loc>[^<]*\/tag\/[^<]+<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(rTags.text), 'tag sitemap entries carry a lastmod', (rTags.text.match(/tag\/[^<]*<\/loc><lastmod>[^<]*/) || [])[0]);
     let rGames1 = await user.get('/sitemap-games-1.xml');
     ok(rGames1.status === 200 && rGames1.text.includes('<urlset') && rGames1.text.includes('/game/2048'), 'sitemap-games-1.xml lists game URLs');
     ok(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(rGames1.text), 'sitemap game entries carry a lastmod date');
