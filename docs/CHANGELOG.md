@@ -6,6 +6,11 @@
 
 ## [2026-10-20] 内链矩阵与标签聚合中枢 (Tag Hub Matrix)
 
+### 0. 唯一化 Meta Description 与 IndexNow 覆盖
+- 323 个标签页与 14 个分类页的 description 全部注入真实游戏数量（如 “4,474 free Car games on Peachcade…”），避免 Google 判定重复描述后自行改写标题与摘要；
+- `scripts/indexnow.js` 推送范围扩展到 `/tags`、`/privacy`、`/terms` 与全部规范化标签中枢。
+
+
 ### 0. 去重修补
 - `related()` 先归并别名再输出，相关标签不再出现当前页自身（如 `/tag/car` 里重复的 “Car”）；
 - 页脚热门标签云同样折叠别名并累加计数，不再同时出现 `3d` / `3d-games`、`boy` / `boys`、`car` / `cars`；

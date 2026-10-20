@@ -64,7 +64,7 @@ router.get('/category/:slug', (req, res, next) => {
   const sort = safeSort(req.query.sort);
   const data = listGames({ sort, category: cat.slug, page: page(req.query.page), per: GAMES_PER_PAGE });
   const catLabel = res.locals.catName(cat);
-  const catDesc = res.locals.t('seo.category', { name: catLabel });
+  const catDesc = res.locals.t('seo.category', { name: catLabel, count: data.total });
   const catContent = categoryContent.get(cat.slug, res.locals.lang);
   const schemas = [
     schemaLd.collectionPage({
@@ -112,7 +112,7 @@ router.get('/tag/:tag', (req, res, next) => {
   }
   const tagDisplay = hub.display;
   const heading = res.locals.t('seo.tagHeading', { tag: tagDisplay });
-  const metaDesc = res.locals.t('seo.tagDesc', { tag: tagDisplay, site: res.locals.site.name });
+  const metaDesc = res.locals.t('seo.tagDesc', { tag: tagDisplay, site: res.locals.site.name, count: data.total });
   const canonPath = '/tag/' + encodeURIComponent(hub.slug);
   // Thin tag pages (a couple of games) add little value and compete with the
   // category pages in the index - keep the links, drop them from the index.

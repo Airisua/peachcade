@@ -66,7 +66,7 @@ module.exports = {
   r = await user.get('/category/puzzle');
   const catLd = ldBlocks(r.text);
   ok(catLd.every(Boolean) && catLd.some((b) => b['@type'] === 'CollectionPage' && b.mainEntity && b.mainEntity.numberOfItems >= 1), 'category page has a CollectionPage ItemList');
-  ok(/<meta name="description" content="Free Puzzle games/.test(r.text), 'category page has its own meta description', (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1]);
+  ok(/<meta name="description" content="[^"]*free Puzzle games/.test(r.text) && /\d+ free Puzzle games/.test(r.text), 'category page has its own meta description with its game count', (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1]);
   r = await user.get('/search?q=snake');
     let rMain = await user.get('/sitemap-main.xml');
     ok(rMain.status === 200 && rMain.text.includes('<urlset') && rMain.text.includes('/category/puzzle'), 'sitemap-main.xml lists main pages and categories');

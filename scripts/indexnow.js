@@ -24,11 +24,16 @@ async function main() {
   const cats = db.prepare('SELECT slug FROM categories ORDER BY sort').all();
   const games = db.prepare('SELECT slug FROM games WHERE published=1 ORDER BY plays DESC, id DESC LIMIT ?').all(LIMIT);
 
+  const tagHubs = require('../src/tags');
   const urlList = [
     BASE_URL + '/',
     BASE_URL + '/games',
-    BASE_URL + '/about'
+    BASE_URL + '/tags',
+    BASE_URL + '/about',
+    BASE_URL + '/privacy',
+    BASE_URL + '/terms'
   ].concat(cats.map((c) => BASE_URL + '/category/' + c.slug))
+   .concat(tagHubs.all().map((t) => BASE_URL + '/tag/' + encodeURIComponent(t.slug)))
    .concat(games.map((g) => BASE_URL + '/game/' + g.slug));
 
   const payload = {
