@@ -4,6 +4,13 @@
 
 ---
 
+## [2026-10-20] 柠盟 (ning.net) 媒体所有权验证文件部署
+
+- 将平台下发的 `verify.peachcat.fun.txt`（内容 `069a4a36deaf4fa3a8f84e5eb3801e9b`）放入 `public/` 根目录，公网可通过 `https://peachcat.fun/verify.peachcat.fun.txt` 直接访问。
+- `quick` 冒烟套件新增该文件的 HTTP 200 与内容断言，防止后续部署误删。
+
+---
+
 ## [2026-10-19] SEO 与服务器性能专项优化 (SEO & Server Performance Pass)
 
 ### 1. 抓取效率：站点地图全面 CDN 可缓存

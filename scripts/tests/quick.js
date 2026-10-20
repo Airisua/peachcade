@@ -42,6 +42,8 @@ module.exports = {
     ok(r.status === 200 && r.text.includes('2771545fc9c14828b056ff3f18e9f50e'), 'IndexNow key file is served');
     r = await user.get('/881a8f0468df8b90a945.txt');
     ok(r.status === 200 && r.text.includes('c1d8ffff883b0dd31fc6'), 'HilltopAds key file is served');
+    r = await user.get('/verify.peachcat.fun.txt');
+    ok(r.status === 200 && r.text.includes('069a4a36deaf4fa3a8f84e5eb3801e9b'), 'Ning media verification file is served');
     r = await user.get('/');
     ok(r.headers.get('referrer-policy') === 'no-referrer-when-downgrade', 'response header referrer-policy is no-referrer-when-downgrade');
     r = await user.get('/nope-nope');
