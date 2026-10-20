@@ -8,6 +8,7 @@
 
 - 将平台下发的 `verify.peachcat.fun.txt`（内容 `069a4a36deaf4fa3a8f84e5eb3801e9b`）放入 `public/` 根目录，公网可通过 `https://peachcat.fun/verify.peachcat.fun.txt` 直接访问。
 - `quick` 冒烟套件新增该文件的 HTTP 200 与内容断言，防止后续部署误删。
+- 前端增加空广告位看门狗：10 秒后仍未填充内容的 `.ad-slot` 自动隐藏，避免被浏览器拦截或未填充的第三方广告留下空白与 “Advertisement” 标签。
 
 ---
 

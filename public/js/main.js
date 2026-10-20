@@ -244,4 +244,24 @@
       $$('details.dropdown[open]').forEach(function (d) { d.removeAttribute('open'); });
     }
   });
+
+  // Third-party ad scripts can be blocked (mixed content, ad blockers) or simply
+  // not fill. Hide slots that stayed empty so the page keeps no gap with just
+  // the "Advertisement" label.
+  (function () {
+    var slots = $$('.ad-slot');
+    if (!slots.length) return;
+    setTimeout(function () {
+      slots.forEach(function (slot) {
+        var filled = false;
+        Array.prototype.forEach.call(slot.children, function (child) {
+          if (child.classList && child.classList.contains('ad-label')) return;
+          var cs = window.getComputedStyle(child);
+          if (cs.display === 'none' || cs.visibility === 'hidden') return;
+          if (child.getBoundingClientRect().height > 8) filled = true;
+        });
+        if (!filled) slot.style.display = 'none';
+      });
+    }, 10000);
+  })();
 })();
