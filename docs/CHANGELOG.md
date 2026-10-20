@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-10-21] 多语言 canonical 修正
+
+- 修复一个会直接压掉日文索引的 bug：此前所有页面的 `rel="canonical"` 一律指向英文 URL，与 `hreflang="ja"` 自相矛盾，Google 会判定日文版“非规范页”而拒绝收录；
+- 现在 `?lang=ja` 页面 canonical 自引用、`og:url` 同步为日文地址，`hreflang` 只声明 `en` / `ja` / `x-default`；
+- 中文版仍可通过 `?lang=zh` 访问（后台与历史链接），但 canonical 归并到英文 URL，不会成为被索引的重复页面。
+- 冒烟新增三条断言：英文 canonical 保持干净、日文 canonical 自引用、hreflang 不再声明中文。
+
+---
+
 ## [2026-10-21] 抓取调度精度与分页索引收敛
 
 - `sitemap-main.xml` 与 `sitemap-tags.xml` 的 `<lastmod>` 改为**该分类 / 该标签下最新一款游戏的更新时间**，不再对所有 URL 一律写当天；Google 才能按真实变化排抓取优先级。

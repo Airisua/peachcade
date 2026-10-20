@@ -10,6 +10,13 @@ module.exports = {
     let j = null;
   r = await user.get('/game/2048');
   ok(r.text.includes('og:title') && r.text.includes('rel="canonical"'), 'game page has OG tags + canonical');
+  const canon = (r.text.match(/rel="canonical" href="([^"]*)"/) || [])[1] || '';
+  ok(/\/game\/2048$/.test(canon), 'english canonical stays clean', canon);
+  const jaClient = ctx.client();
+  const rJaCanon = await jaClient.get('/game/2048?lang=ja');
+  const jaCanon = (rJaCanon.text.match(/rel="canonical" href="([^"]*)"/) || [])[1] || '';
+  ok(/\/game\/2048\?lang=ja$/.test(jaCanon), 'japanese canonical self-references the ja URL', jaCanon);
+  ok(/hreflang="ja" href="[^"]*\?lang=ja"/.test(rJaCanon.text) && !/hreflang="zh"/.test(rJaCanon.text), 'hreflang advertises en + ja only');
   r = await user.get('/game/2048');
   ok(r.status === 200 && r.text.includes('/games/2048/'), 'game page embeds iframe', r.status);
   ok(r.text.includes('rating-pill') && r.text.includes('ic-gold'), 'game page has visual rating badge');
