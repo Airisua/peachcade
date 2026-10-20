@@ -64,7 +64,7 @@ router.get('/category/:slug', (req, res, next) => {
   const sort = safeSort(req.query.sort);
   const data = listGames({ sort, category: cat.slug, page: page(req.query.page), per: GAMES_PER_PAGE });
   const catLabel = res.locals.catName(cat);
-  const catDesc = res.locals.t('seo.category', { name: catLabel, count: data.total });
+  const catDesc = res.locals.t('seo.category', { name: catLabel, count: data.total, site: res.locals.site.name });
   const catContent = categoryContent.get(cat.slug, res.locals.lang);
   const schemas = [
     schemaLd.collectionPage({
