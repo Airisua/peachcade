@@ -108,6 +108,12 @@ module.exports = {
     ok(rHub.text.includes('tag-hub') && rHub.text.includes('free Puzzle game'), 'tag hub renders a data-driven intro', rHub.status);
     const rRelated = await user.get('/tag/matrix-tag-a');
     ok(rRelated.text.includes('tag-hub') && rRelated.text.includes('/tag/matrix-tag-b'), 'tag hub links related tags', rRelated.status);
+    const selfLinks = (rRelated.text.match(/href="\/tag\/matrix-tag-a"/g) || []).length;
+    ok(selfLinks <= 1, 'related tags never repeat the current hub', selfLinks);
+    const tagHubs = require('../../src/tags');
+    ok(tagHubs.resolve('cars').redirect === 'car' && tagHubs.resolve('boy').slug === 'boys', 'tag aliases resolve to one canonical hub');
+    ok(tagHubs.resolve('3d-games').redirect === '3d' && tagHubs.resolve('pointandclick').slug === 'point-and-click', 'spelling variants normalise to the canonical slug');
+    ok(tagHubs.resolve('html5').blocked === true && tagHubs.resolve('fun').blocked === true, 'generic tags are flagged as blocked');
     const rDir = await user.get('/tags');
     ok(rDir.status === 200 && rDir.text.includes('/tag/') && rDir.text.includes('tagcloud'), 'tag directory lists tag hubs', rDir.status);
     const rCatTag = await user.get('/category/puzzle');

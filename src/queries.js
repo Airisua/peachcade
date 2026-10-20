@@ -128,13 +128,18 @@ function getPopularTags(limit = 40) {
         }
       }
     }
-    const list = Object.entries(counts)
-      .filter(([tag, c]) => c >= 1 && !tagHubs.BLOCKED.has(tag))
-      .sort((a, b) => b[1] - a[1])
-      .map(([tag, count]) => {
-        const hub = tagHubs.resolve(tag);
-        return { tag, count, slug: hub.slug, display: hub.display };
-      });
+    // Fold provider spellings ("cars" -> "car", "3d-games" -> "3d") and sum the
+    // counts, otherwise the footer lists the same hub two or three times.
+    const merged = new Map();
+    for (const [tag, count] of Object.entries(counts)) {
+      if (tagHubs.BLOCKED.has(tag)) continue;
+      const hub = tagHubs.resolve(tag);
+      if (hub.blocked) continue;
+      const cur = merged.get(hub.slug);
+      if (cur) cur.count += count;
+      else merged.set(hub.slug, { tag: hub.tag, slug: hub.slug, display: hub.display, count });
+    }
+    const list = [...merged.values()].sort((a, b) => b.count - a.count || a.slug.localeCompare(b.slug));
     popularTagsCache = { at: Date.now(), tags: list };
     return list.slice(0, want);
   } catch (e) {

@@ -215,15 +215,22 @@ function related(slug, limit) {
         counts.set(t, (counts.get(t) || 0) + 1);
       }
     }
-    const list = [...counts.entries()]
+    // Fold provider spellings into their canonical hub, drop the page itself and
+    // anything that would 301 straight back here.
+    const merged = new Map();
+    for (const [tag, count] of counts) {
+      const r = resolve(tag);
+      if (r.slug === slug || r.blocked) continue;
+      merged.set(r.slug, (merged.get(r.slug) || 0) + count);
+    }
+    const list = [...merged.entries()]
       .filter(([, c]) => c >= 2)
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .slice(0, want)
-      .map(([tag, count]) => {
-        const r = resolve(tag);
+      .map(([canonical, count]) => {
+        const r = resolve(canonical);
         return { slug: r.slug, display: r.display, count };
-      })
-      .filter((t) => !t.slug.startsWith(slug + '-games'));
+      });
     if (list.length) cache.related.set(key, { at: Date.now(), list });
     return list;
   } catch (e) {

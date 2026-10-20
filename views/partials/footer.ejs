@@ -35,7 +35,7 @@
     <span class="footer-tags-label muted small"><%= t('nav.popularTags') %>:</span>
     <div class="footer-tags-list">
       <% popularTags.forEach(function (pt) { %>
-      <a class="chip chip-sm" href="/tag/<%= pt.slug %>"><%= pt.tag %></a>
+      <a class="chip chip-sm" href="/tag/<%= pt.slug %>"><%= pt.display || pt.tag %></a>
       <% }); %>
     </div>
   </div>
