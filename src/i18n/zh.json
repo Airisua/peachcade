@@ -369,5 +369,8 @@
   "tags.aboutTitle": "关于 {name}",
   "tags.relatedTitle": "相关标签",
   "home.totalGamesOne": "款游戏在线",
-  "game.similar": "猜你喜欢"
+  "game.similar": "猜你喜欢",
+  "game.noDesc": "《{title}》是 Peachcade 上的一款免费{category}在线小游戏，打开浏览器即可直接游玩，无需下载、无需安装、无需注册。可使用上方按钮点赞、收藏或切换到全屏模式。",
+  "game.specReleased": "上架时间",
+  "game.specPlayed": "游玩次数"
 }

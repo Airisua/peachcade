@@ -369,5 +369,8 @@
   "tags.aboutTitle": "{name}について",
   "tags.relatedTitle": "関連タグ",
   "home.totalGamesOne": "本のゲームが配信中",
-  "game.similar": "おすすめゲーム"
+  "game.similar": "おすすめゲーム",
+  "game.noDesc": "『{title}』は Peachcade で遊べる無料の{category}ゲームです。ブラウザですぐにプレイでき、ダウンロードもインストールも登録も不要。上のボタンからいいね・お気に入り登録・全画面表示ができます。",
+  "game.specReleased": "公開日",
+  "game.specPlayed": "プレイ回数"
 }

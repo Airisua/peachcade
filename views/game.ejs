@@ -38,13 +38,15 @@
   <%- include('partials/ad', { slot: 'game-under' }) %>
   <div class="game-cols">
     <div class="game-main">
+      <% if (gh(game)) { %>
       <section class="panel">
         <h2><%= t('game.howto') %></h2>
-        <p><%= gh(game) || '—' %></p>
+        <p><%= gh(game) %></p>
       </section>
+      <% } %>
       <section class="panel">
         <h2><%= t('game.about') %></h2>
-        <p><%= gd(game) %></p>
+        <p><%= gd(game) || t('game.noDesc', { title: gt(game), category: catLabel }) %></p>
         <% if (game.tags) { %>
         <div class="tags"><% game.tags.split(',').forEach(function (tag) { var tt = tag.trim(); if (tt && !['gamemonetize', 'ext', 'rss', 'json', 'mapi-games'].includes(tt.toLowerCase())) { %><a class="chip" href="/tag/<%= encodeURIComponent(tt.toLowerCase().replace(/\s+/g, '-')) %>"><%= tt %></a><% } }); %></div>
         <% } %>
@@ -57,6 +59,8 @@
           <div class="specs-row"><span class="specs-key"><%= t('game.specGenre') %></span><span class="specs-val"><a href="/category/<%= game.category %>"><%= catLabel %></a></span></div>
           <div class="specs-row"><span class="specs-key"><%= t('game.specControls') %></span><span class="specs-val"><%= t('game.specControlsVal') %></span></div>
           <div class="specs-row"><span class="specs-key"><%= t('game.specPrice') %></span><span class="specs-val"><%= t('game.specPriceVal') %></span></div>
+          <% if (game.created_at) { %><div class="specs-row"><span class="specs-key"><%= t('game.specReleased') %></span><span class="specs-val"><%= String(game.created_at).slice(0, 10) %></span></div><% } %>
+          <div class="specs-row"><span class="specs-key"><%= t('game.specPlayed') %></span><span class="specs-val"><%= fmt(game.plays) %> <%= t('game.plays') %></span></div>
           <div class="specs-row"><span class="specs-key"><%= t('game.specRating') %></span><span class="specs-val">⭐ <%= rating.score %> / 5.0 (<%= fmt(rating.votes) %> <%= t('game.votes') %>)</span></div>
         </div>
       </section>

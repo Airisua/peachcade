@@ -369,5 +369,8 @@
   "tags.aboutTitle": "About {name}",
   "tags.relatedTitle": "Related tags",
   "home.totalGamesOne": "game available",
-  "game.similar": "You may also like"
+  "game.similar": "You may also like",
+  "game.noDesc": "{title} is a free online {category} game on Peachcade. Play it instantly in your browser — no download, no install, no sign-up. Use the buttons above to like, favorite, or switch to fullscreen.",
+  "game.specReleased": "Added",
+  "game.specPlayed": "Times played"
 }
