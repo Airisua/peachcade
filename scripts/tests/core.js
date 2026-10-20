@@ -61,6 +61,7 @@ module.exports = {
   r = await user.get('/');
   const homeLd = ldBlocks(r.text);
   ok(homeLd.length > 0 && homeLd.every(Boolean) && homeLd.some((b) => b['@type'] === 'WebSite' && b.potentialAction && b.alternateName && b.alternateName.includes('PeachCat Games')), 'home has WebSite + SearchAction + alternateName JSON-LD', JSON.stringify(homeLd.map((b) => b && b['@type'])));
+  ok(homeLd.some((b) => b['@type'] === 'ItemList' && b.itemListElement && b.itemListElement.length > 0), 'home links an ItemList of its popular rail', JSON.stringify(homeLd.map((b) => b && b['@type'])));
   r = await user.get('/game/2048');
   const gameLd = ldBlocks(r.text);
   ok(gameLd.length > 0 && gameLd.every(Boolean) && gameLd.some((b) => b['@type'] === 'VideoGame' && b.name === '2048' && b.offers), 'game page has valid VideoGame JSON-LD');
@@ -125,6 +126,7 @@ module.exports = {
     ok(tagHubs.resolve('html5').blocked === true && tagHubs.resolve('fun').blocked === true, 'generic tags are flagged as blocked');
     const rDir = await user.get('/tags');
     ok(rDir.status === 200 && rDir.text.includes('/tag/') && rDir.text.includes('tagcloud'), 'tag directory lists tag hubs', rDir.status);
+    ok(rDir.text.includes('BreadcrumbList') && rDir.text.includes('CollectionPage'), 'tag directory carries collection + breadcrumb schema');
     const rCatTag = await user.get('/category/puzzle');
     ok(rCatTag.text.includes('tag-strip') && rCatTag.text.includes('/tags'), 'category page links its own tag hubs', rCatTag.status);
     } finally {

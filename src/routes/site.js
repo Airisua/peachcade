@@ -32,7 +32,13 @@ router.get('/', (req, res) => {
   const total = db.prepare('SELECT COUNT(*) n FROM games WHERE published=1').get().n;
   res.render('index', {
     pageTitle: null, hero, featured, popular, newest, topRated, continueList, total,
-    schema: [schemaLd.website(res.locals.site, res.locals.siteUrl)]
+    schema: [
+      schemaLd.website(res.locals.site, res.locals.siteUrl),
+      Object.assign(
+        schemaLd.itemList(popular, { siteUrl: res.locals.siteUrl, total: popular.length, titleFor: res.locals.gt }),
+        { '@context': 'https://schema.org', name: res.locals.t('home.popular') }
+      )
+    ]
   });
 });
 
@@ -173,13 +179,30 @@ router.get('/tags', (req, res) => {
     const letter = item.slug.charAt(0).toUpperCase();
     (groups[letter] = groups[letter] || []).push(item);
   }
+  const tagsDesc = res.locals.t('seo.tagsDesc', { count: list.length, site: res.locals.site.name });
   res.render('tags', {
     pageTitle: res.locals.t('seo.tagsTitle', { site: res.locals.site.name }),
     heading: res.locals.t('seo.tagsHeading'),
-    metaDesc: res.locals.t('seo.tagsDesc', { count: list.length, site: res.locals.site.name }),
+    metaDesc: tagsDesc,
     top,
     groups,
-    totalTags: list.length
+    totalTags: list.length,
+    schema: [
+      schemaLd.collectionPage({
+        name: res.locals.t('seo.tagsHeading'),
+        siteName: res.locals.site.name,
+        siteUrl: res.locals.siteUrl,
+        path: '/tags',
+        description: tagsDesc,
+        games: [],
+        total: 0,
+        titleFor: res.locals.gt
+      }),
+      schemaLd.breadcrumbs([
+        { name: res.locals.t('nav.home'), url: '/' },
+        { name: res.locals.t('tags.all'), url: '/tags' }
+      ], res.locals.siteUrl)
+    ]
   });
 });
 
@@ -348,7 +371,7 @@ router.get('/ads.txt', (req, res) => {
 router.get('/robots.txt', (req, res) => {
   const adminBase = process.env.ADMIN_BASE || '/wyj';
   res.set('Cache-Control', 'public, max-age=3600');
-  res.type('text/plain').send('User-agent: *\nAllow: /\nDisallow: ' + adminBase + '/\nDisallow: /api/\nSitemap: ' + res.locals.siteUrl + '/sitemap.xml\n');
+  res.type('text/plain').send('User-agent: *\nAllow: /\nDisallow: ' + adminBase + '/\nDisallow: /api/\nDisallow: /lang/\nSitemap: ' + res.locals.siteUrl + '/sitemap.xml\n');
 });
 
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '2771545fc9c14828b056ff3f18e9f50e';
