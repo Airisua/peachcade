@@ -1,0 +1,19 @@
+<%- include('partials/head', { pageTitle: pageTitle, metaDesc: metaDesc }) %>
+<%- include('partials/header') %>
+<main class="container narrow pad-y">
+  <article class="panel about-card legal-card">
+    <h1><%= pageTitle %></h1>
+    <p class="muted small legal-updated"><%= t('legal.updated') %></p>
+    <p class="about-lead"><%= t(key + '.intro') %></p>
+    <% var PARA = { a: 1, b: 3, c: 4, d: 5, e: 6 }; %>
+    <% sections.forEach(function (s) { %>
+    <h2><%= t(key + '.h2' + s) %></h2>
+    <p><%= t(key + '.p' + PARA[s]) %></p>
+    <% }); %>
+    <% if (key === 'privacy') { %>
+    <h2><%= t('privacy.h2f') %></h2>
+    <p><%= t('privacy.p7') %></p>
+    <% } %>
+  </article>
+</main>
+<%- include('partials/footer') %>

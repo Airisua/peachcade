@@ -244,6 +244,27 @@ router.get('/about', (req, res) => {
   res.render('about', { pageTitle: res.locals.t('about.title') });
 });
 
+// Legal pages: Google and ad networks expect clearly reachable privacy/terms
+// documents; they are real content pages, not placeholders.
+const LEGAL_SECTIONS = ['a', 'b', 'c', 'd', 'e'];
+router.get('/privacy', (req, res) => {
+  res.render('legal', {
+    key: 'privacy',
+    sections: LEGAL_SECTIONS,
+    pageTitle: res.locals.t('privacy.title'),
+    metaDesc: res.locals.t('privacy.intro')
+  });
+});
+
+router.get('/terms', (req, res) => {
+  res.render('legal', {
+    key: 'terms',
+    sections: LEGAL_SECTIONS,
+    pageTitle: res.locals.t('terms.title'),
+    metaDesc: res.locals.t('terms.intro')
+  });
+});
+
 router.get('/rewards', (req, res) => {
   res.render('rewards', { 
     pageTitle: res.locals.t('rewards.title'),
@@ -333,7 +354,9 @@ router.get('/sitemap-main.xml', (req, res) => {
   const urls = [
     { loc: '/', pri: '1.0', cf: 'daily' },
     { loc: '/games', pri: '0.9', cf: 'daily' },
-    { loc: '/about', pri: '0.3', cf: 'monthly' }
+    { loc: '/about', pri: '0.3', cf: 'monthly' },
+    { loc: '/privacy', pri: '0.2', cf: 'yearly' },
+    { loc: '/terms', pri: '0.2', cf: 'yearly' }
   ].concat(cats.map((c) => ({ loc: '/category/' + c.slug, pri: '0.7', cf: 'daily' })));
   const body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     urls.map((u) => '  <url><loc>' + res.locals.siteUrl + u.loc + '</loc><changefreq>' + u.cf + '</changefreq><priority>' + u.pri + '</priority></url>').join('\n') +

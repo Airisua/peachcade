@@ -28,6 +28,10 @@ module.exports = {
     ok(r.status === 200, 'search responds', r.status);
     r = await user.get('/about');
     ok(r.status === 200, 'about page responds', r.status);
+    r = await user.get('/privacy');
+    ok(r.status === 200 && r.text.includes('Privacy Policy'), 'privacy page responds', r.status);
+    r = await user.get('/terms');
+    ok(r.status === 200 && r.text.includes('Terms of Use'), 'terms page responds', r.status);
     r = await user.get('/robots.txt');
     ok(r.status === 200 && r.text.includes('Sitemap:'), 'robots.txt served', r.status);
     r = await user.get('/manifest.webmanifest');
