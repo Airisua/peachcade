@@ -12,7 +12,7 @@ const { loadUser } = require('./src/auth');
 const { csrfMiddleware, csrfGuard } = require('./src/csrf');
 const common = require('./src/common');
 const { ASSET_VERSION } = require('./src/assets');
-const { redirectTarget } = require('./src/host');
+const { redirectTarget, pathTarget } = require('./src/host');
 
 const siteRouter = require('./src/routes/site');
 const authRouter = require('./src/routes/auth');
@@ -38,10 +38,11 @@ app.locals.assetV = ASSET_VERSION;
 const CANONICAL_HOST = String(process.env.CANONICAL_HOST || '').trim();
 const REDIRECT_WWW = process.env.REDIRECT_WWW !== '0';
 app.use((req, res, next) => {
-  if (!REDIRECT_WWW) return next();
-  const target = redirectTarget(req.headers.host, CANONICAL_HOST);
-  if (!target) return next();
-  return res.redirect(301, 'https://' + target + (req.originalUrl || '/'));
+  const hostTarget = REDIRECT_WWW ? redirectTarget(req.headers.host, CANONICAL_HOST) : '';
+  const pathT = pathTarget(req.originalUrl, ADMIN_BASE);
+  if (!hostTarget && !pathT) return next();
+  const host = hostTarget || String(req.headers.host || '').toLowerCase();
+  return res.redirect(301, 'https://' + host + (pathT || req.originalUrl || '/'));
 });
 
 app.use(helmet({

@@ -23,4 +23,31 @@ function redirectTarget(rawHost, canonicalHost) {
   return host.startsWith('www.') ? host.slice(4) : '';
 }
 
-module.exports = { redirectTarget };
+// Paths that must be served verbatim: uploaded files, the admin panel and the
+// static asset roots are either case-sensitive on disk or intentionally odd.
+const RAW_PREFIXES = ['/api/', '/thumb/', '/img/', '/css/', '/js/', '/uploads/'];
+
+// Returns the canonical path (with query) to 301 to, or '' when the requested
+// URL is already canonical. Express matches routes case-insensitively, so
+// /GAMES, /games/ and /tag/Car all answered 200 with a self-canonical URL and
+// competed with their lowercase twins.
+function pathTarget(originalUrl, adminBase) {
+  const raw = String(originalUrl || '/');
+  const qIndex = raw.indexOf('?');
+  const path = qIndex >= 0 ? raw.slice(0, qIndex) : raw;
+  const query = qIndex >= 0 ? raw.slice(qIndex) : '';
+  if (!path.startsWith('/')) return '';
+  const admin = String(adminBase || '/wyj');
+  for (const prefix of RAW_PREFIXES.concat([admin])) {
+    if (path === prefix || path.startsWith(prefix.endsWith('/') ? prefix : prefix + '/')) return '';
+  }
+  const segments = path.split('/');
+  const last = segments[segments.length - 1] || '';
+  if (last.indexOf('.') >= 0) return ''; // files keep their exact name
+  let next = path.toLowerCase();
+  if (next.length > 1) next = next.replace(/\/{2,}/g, '/').replace(/\/+$/, '');
+  if (next === path) return '';
+  return next + query;
+}
+
+module.exports = { redirectTarget, pathTarget };

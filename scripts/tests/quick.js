@@ -42,6 +42,13 @@ module.exports = {
     ok(host.redirectTarget('preview.example.com', 'peachcat.fun') === '', 'unrelated hosts are left alone');
     ok(host.redirectTarget('www.peachcat.fun', '') === 'peachcat.fun', 'www folds even without CANONICAL_HOST');
     ok(host.redirectTarget('peachcat.fun', '') === '', 'apex is untouched without CANONICAL_HOST');
+    ok(host.pathTarget('/GAMES', '/wyj') === '/games', 'uppercase paths fold to lowercase');
+    ok(host.pathTarget('/games/', '/wyj') === '/games', 'trailing slashes are dropped');
+    ok(host.pathTarget('/Tag/Car?sort=new', '/wyj') === '/tag/car?sort=new', 'query strings survive path folding');
+    ok(host.pathTarget('/games', '/wyj') === '', 'canonical paths are left alone');
+    ok(host.pathTarget('/index.html', '/wyj') === '', 'file-looking paths keep their case');
+    ok(host.pathTarget('/wyj/Games', '/wyj') === '', 'the admin prefix is exempt');
+    ok(host.pathTarget('/uploads/AbC.png', '/wyj') === '', 'uploads keep their exact name');
     r = await user.get('/feed.xml');
     ok(r.status === 200 && r.text.includes('<rss') && r.text.includes('<item>'), 'rss feed served', r.status);
     r = await user.get('/manifest.webmanifest');

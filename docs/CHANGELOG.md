@@ -4,6 +4,17 @@
 
 ---
 
+## [2026-10-21] URL 大小写与尾斜杠规范化
+
+- Express 路由大小写不敏感，导致 `/GAMES`、`/games/`、`/tag/Car` 都能返回 200 且 canonical 自指，与规范地址抢排名；
+- 新增 `pathTarget()`：大小写统一小写、折叠重复斜杠、去掉尾斜杠，并保留完整 query（`/Tag/Car?sort=new` → `/tag/car?sort=new`）；
+- 与前面的域名折叠合并为**单跳 301**：`https://www.peachcat.fun/GAMES` 直接跳到 `https://peachcat.fun/games`，不产生重定向链；
+- 静态资源（`/css`、`/js`、`/img`、`/uploads`、`/thumb`）、`/api/`、后台前缀以及任何带扩展名的路径全部豁免，避免破坏 Linux 上的大小写敏感文件；
+- 顺带把 `/Category/Puzzle` 这类原本 404 的地址变成 301 到正确页面；
+- 冒烟新增 7 条路径规范化断言。
+
+---
+
 ## [2026-10-21] 修复 www 与裸域双份收录（本轮最高影响）
 
 - **问题**：`https://www.peachcat.fun` 与 `https://peachcat.fun` 同时返回 200，且各自的 canonical 都指向自己，sitemap 也会随请求 Host 变化——等于 38,223 个页面在两个域名上各存在一份，权重被直接对半劈开；
