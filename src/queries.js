@@ -147,4 +147,29 @@ function getPopularTags(limit = 40) {
   }
 }
 
-module.exports = { gt, gd, gh, listGames, featuredRotation, shuffle, SORTS, getPopularTags };
+// Games that share a tag with this one but live in a different category. The
+// same-category rails already exist; this is what stops the link graph from
+// splitting into 14 closed silos.
+const IGNORE_TAGS = new Set(['gamemonetize', 'ext', 'rss', 'json', 'mapi-games', 'free', 'online', 'game', 'games']);
+function similarByTags(game, limit) {
+  const want = Math.min(12, Math.max(1, parseInt(limit, 10) || 6));
+  if (!game || !game.tags) return [];
+  const tokens = [];
+  for (let t of String(game.tags).split(',')) {
+    t = t.trim().toLowerCase();
+    if (t.length >= 3 && t.length <= 30 && !IGNORE_TAGS.has(t) && tokens.indexOf(t) < 0) tokens.push(t);
+    if (tokens.length >= 3) break;
+  }
+  if (!tokens.length) return [];
+  const clauses = tokens.map(() => '(g.tags LIKE ? OR instr(lower(g.tags), ?) > 0)').join(' OR ');
+  const args = [game.category || ''];
+  for (const t of tokens) args.push('%' + t + '%', t);
+  try {
+    return db.prepare(GAME_SELECT + 'WHERE g.published=1 AND g.category != ? AND (' + clauses + ') ORDER BY g.plays DESC, g.id ASC LIMIT ?')
+      .all(...args, want);
+  } catch (e) {
+    return [];
+  }
+}
+
+module.exports = { gt, gd, gh, listGames, featuredRotation, shuffle, SORTS, getPopularTags, similarByTags };

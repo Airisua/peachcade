@@ -368,5 +368,6 @@
   "tags.all": "All tags",
   "tags.aboutTitle": "About {name}",
   "tags.relatedTitle": "Related tags",
-  "home.totalGamesOne": "game available"
+  "home.totalGamesOne": "game available",
+  "game.similar": "You may also like"
 }

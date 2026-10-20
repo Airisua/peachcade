@@ -25,6 +25,19 @@ module.exports = {
   ok(r.text.includes('AggregateRating'), 'game page includes aggregateRating schema for Google stars');
   ok(r.text.includes('game-specs') && r.text.includes('Game Specifications'), 'game page shows visible game specifications', r.status);
   ok(r.text.includes('game-faq') && r.text.includes('Can I play 2048 on mobile and tablet?'), 'game page renders the game FAQ visibly', r.status);
+  // cross-category rails need a game outside the category that shares a tag
+  const { db } = require('../../src/db');
+  const simIds = [];
+  const insSim = db.prepare("INSERT INTO games(slug,title_en,category,thumb,embed_url,source,tags,published,updated_at) VALUES(?,?,?,?,?,?,?,1,datetime('now'))");
+  for (let i = 1; i <= 3; i++) {
+    simIds.push(insSim.run('sim-fixture-' + i, 'Similar Fixture ' + i, 'arcade', '/img/games/default.svg', '/games/snake/', 'smoke', 'number,merge').lastInsertRowid);
+  }
+  try {
+    const rSim = await user.get('/game/2048');
+    ok(rSim.text.includes('You may also like') && /href="\/game\/sim-fixture-/.test(rSim.text), 'game page links cross-category similar games');
+  } finally {
+    for (const id of simIds) db.prepare('DELETE FROM games WHERE id=?').run(id);
+  }
   ok(r.text.includes('back-to-top'), 'page includes back-to-top button');
   ok(r.text.includes('mobile-bottom-nav') && r.text.includes('mobile-nav-item'), 'page includes mobile bottom navigation bar');
   for (const slug of ['2048', 'snake', 'memory-match', 'tic-tac-toe', 'minesweeper']) {

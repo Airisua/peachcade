@@ -113,6 +113,19 @@
           <% }); %>
         </div>
       </section>
+      <% if (typeof similar !== 'undefined' && similar && similar.length) { %>
+      <section class="panel">
+        <h2><%= t('game.similar') %></h2>
+        <div class="mini-list">
+          <% similar.forEach(function (g) { %>
+          <a class="mini-card" href="/game/<%= g.slug %>">
+            <img src="<%= thumb(g, 'card') %>" alt="<%= gt(g) %>" width="84" height="47" loading="lazy" decoding="async">
+            <span class="mini-meta"><b><%= gt(g) %></b><small class="muted"><%= catName({ name_en: g.cat_en, name_zh: g.cat_zh, name_ja: g.cat_ja }) || g.category %></small></span>
+          </a>
+          <% }); %>
+        </div>
+      </section>
+      <% } %>
       <%- include('partials/ad', { slot: 'sidebar' }) %>
     </aside>
   </div>

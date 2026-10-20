@@ -368,5 +368,6 @@
   "tags.all": "全部标签",
   "tags.aboutTitle": "关于 {name}",
   "tags.relatedTitle": "相关标签",
-  "home.totalGamesOne": "款游戏在线"
+  "home.totalGamesOne": "款游戏在线",
+  "game.similar": "猜你喜欢"
 }

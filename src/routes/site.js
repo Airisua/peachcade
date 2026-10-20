@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../db');
-const { listGames, featuredRotation, getPopularTags } = require('../queries');
+const { listGames, featuredRotation, getPopularTags, similarByTags } = require('../queries');
 const { requireLogin } = require('../auth');
 const { rateLimit } = require('../ratelimit');
 const schemaLd = require('../schema');
@@ -233,6 +233,7 @@ router.get('/game/:slug', (req, res, next) => {
   db.prepare('UPDATE games SET plays=plays+1 WHERE id=?').run(game.id);
   if (req.user) db.prepare('INSERT INTO plays_log(user_id,game_id) VALUES(?,?)').run(req.user.id, game.id);
   const related = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.published=1 AND g.category=? AND g.id!=? ORDER BY g.plays DESC LIMIT 14').all(game.category, game.id);
+  const similar = similarByTags(game, 8);
   const comments = db.prepare('SELECT cm.*, u.username, u.role FROM comments cm JOIN users u ON u.id=cm.user_id WHERE cm.game_id=? AND cm.hidden=0 ORDER BY cm.created_at DESC LIMIT 50').all(game.id);
   const liked = req.user ? !!db.prepare('SELECT 1 FROM likes WHERE user_id=? AND game_id=?').get(req.user.id, game.id) : false;
   const favorited = req.user ? !!db.prepare('SELECT 1 FROM favorites WHERE user_id=? AND game_id=?').get(req.user.id, game.id) : false;
@@ -258,7 +259,7 @@ router.get('/game/:slug', (req, res, next) => {
     schemaLd.faqPageFromItems(gameFaqs)
   ];
   res.render('game', {
-    pageTitle: seoTitle, game, related, comments, liked, favorited, rating,
+    pageTitle: seoTitle, game, related, similar, comments, liked, favorited, rating,
     metaDesc: metaDesc.slice(0, 300),
     catLabel,
     gameFaqs,

@@ -368,5 +368,6 @@
   "tags.all": "すべてのタグ",
   "tags.aboutTitle": "{name}について",
   "tags.relatedTitle": "関連タグ",
-  "home.totalGamesOne": "本のゲームが配信中"
+  "home.totalGamesOne": "本のゲームが配信中",
+  "game.similar": "おすすめゲーム"
 }
