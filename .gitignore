@@ -9,3 +9,6 @@ npm-debug.log*
 scripts/tmp/
 logs-server*.txt
 .playwright-mcp/
+/*.png
+/*.jpg
+/*.jpeg
