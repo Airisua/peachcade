@@ -4,6 +4,31 @@
 
 ---
 
+## [2026-10-20] 内容深度 SEO：分类落地页、游戏规格与可见 FAQ
+
+### 1. 分类落地页从“空目录”升级为专题页
+- 新增 `src/category_content.js`：为 14 个分类提供英 / 中 / 日三语编辑型介绍（about）、亮点（highlights）与 2~3 条品类专属 FAQ。
+- `/category/:slug` 第 1 页在分页下方渲染 `cat-editorial` 专题卡片，FAQ 使用原生 `<details>` 折叠面板，正文可见。
+- 同步为该页注入 `FAQPage` JSON-LD（与页面可见问答逐字一致），并保留原有 `CollectionPage` + `BreadcrumbList`。
+
+### 2. 游戏详情页消除 Thin Content
+- 新增 **Game Specifications** 规格表：平台、技术、类型、操作方式、价格、玩家评分。
+- FAQ 由 2 条扩展到 3~4 条（玩法、免费、移动端、所属分类），并在正文以可见折叠面板渲染；`<head>` 里的 `FAQPage` 与正文同源（`getGameFaqs()`），满足 Google 结构化数据“内容必须对用户可见”的要求。
+- 相关游戏推荐从 8 款增加到 14 款，强化 38,000+ 游戏之间的内链蜘蛛通路。
+
+### 3. 首页与标题
+- 首页新增全站唯一 `<h1>`（“Free Online Browser Games”），精选游戏标题降为 `<h2>`；即使没有任何已发布游戏，H1 也始终存在。
+- 首页底部新增 2 段编辑型介绍（`home.aboutP1/P2`），说明游戏库规模、品类与免下载特性。
+- 分类页标题改为 “Free {name} Games - Play Online”，第 2 页起追加 “ — Page N” 并标记 `noindex, follow`，避免分页与首页抢排名。
+- 分类页第 2 页起不再重复渲染专题卡片，减少重复内容。
+
+### 4. 测试
+- `core` 套件新增：分类专题正文、可见 FAQ、分类 FAQPage schema 断言。
+- `games` 套件新增：可见 Game Specifications、可见 FAQ 问答断言。
+- `check:i18n` 覆盖全部新增键（en/zh/ja 同步）。
+
+---
+
 ## [2026-10-20] 柠盟 (ning.net) 媒体所有权验证文件部署
 
 - 将平台下发的 `verify.peachcat.fun.txt`（内容 `069a4a36deaf4fa3a8f84e5eb3801e9b`）放入 `public/` 根目录，公网可通过 `https://peachcat.fun/verify.peachcat.fun.txt` 直接访问。

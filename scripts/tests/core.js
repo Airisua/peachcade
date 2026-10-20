@@ -43,6 +43,9 @@ module.exports = {
   ok(r.status === 200 && r.text.includes('Snake Classic'), 'search page', r.status);
   r = await user.get('/category/puzzle');
   ok(r.status === 200 && r.text.includes('Minesweeper'), 'category page', r.status);
+  ok(r.text.includes('cat-editorial') && r.text.includes('Dive into our collection of free online Puzzle Games'), 'category page renders editorial content', r.status);
+  ok(r.text.includes('faq-item') && r.text.includes('Player favorites include 2048'), 'category page renders its FAQ visibly', r.status);
+  ok(r.text.includes('FAQPage'), 'category page includes FAQPage schema', r.status);
   for (const slug of ['racing', 'shooting', 'sports', 'platform', 'adventure', 'simulation', 'clicker', 'girls']) {
     r = await user.get('/category/' + slug);
     ok(r.status === 200, 'category page ' + slug, r.status);

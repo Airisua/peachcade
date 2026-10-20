@@ -7,6 +7,7 @@ const { requireLogin } = require('../auth');
 const { rateLimit } = require('../ratelimit');
 const schemaLd = require('../schema');
 const thumbs = require('../thumbs');
+const categoryContent = require('../category_content');
 
 const GAMES_PER_PAGE = 48;
 
@@ -38,8 +39,9 @@ router.get('/games', (req, res) => {
   const sort = safeSort(req.query.sort);
   const data = listGames({ sort, page: page(req.query.page), per: GAMES_PER_PAGE });
   const heading = res.locals.t('common.allGames');
+  const suffix = data.page > 1 ? ' — ' + res.locals.t('pager.pageN', { n: data.page }) : '';
   res.render('list', {
-    pageTitle: heading,
+    pageTitle: heading + suffix,
     heading,
     games: data.games, page: data.page, pages: data.pages,
     basePath: '/games?', sort, totalGames: data.total,
@@ -62,20 +64,29 @@ router.get('/category/:slug', (req, res, next) => {
   const data = listGames({ sort, category: cat.slug, page: page(req.query.page), per: GAMES_PER_PAGE });
   const catLabel = res.locals.catName(cat);
   const catDesc = res.locals.t('seo.category', { name: catLabel });
+  const catContent = categoryContent.get(cat.slug, res.locals.lang);
+  const schemas = [
+    schemaLd.collectionPage({
+      name: catLabel, siteName: res.locals.site.name, siteUrl: res.locals.siteUrl,
+      path: '/category/' + cat.slug, description: catDesc,
+      games: data.games, total: data.total, titleFor: res.locals.gt
+    }),
+    schemaLd.breadcrumbs([{ name: res.locals.t('nav.home'), url: '/' }, { name: catLabel, url: '/category/' + cat.slug }], res.locals.siteUrl)
+  ];
+  if (catContent && catContent.faqs && catContent.faqs.length) {
+    schemas.push(schemaLd.faqPageFromItems(catContent.faqs));
+  }
+  const catTitle = res.locals.t('seo.categoryTitle', { name: catLabel });
+  const catSuffix = data.page > 1 ? ' — ' + res.locals.t('pager.pageN', { n: data.page }) : '';
   res.render('list', {
-    pageTitle: catLabel,
+    pageTitle: catTitle + catSuffix,
     heading: catLabel,
     games: data.games, page: data.page, pages: data.pages,
     basePath: '/category/' + cat.slug + '?', sort, totalGames: data.total,
     metaDesc: catDesc,
-    schema: [
-      schemaLd.collectionPage({
-        name: catLabel, siteName: res.locals.site.name, siteUrl: res.locals.siteUrl,
-        path: '/category/' + cat.slug, description: catDesc,
-        games: data.games, total: data.total, titleFor: res.locals.gt
-      }),
-      schemaLd.breadcrumbs([{ name: res.locals.t('nav.home'), url: '/' }, { name: catLabel, url: '/category/' + cat.slug }], res.locals.siteUrl)
-    ]
+    catContent: data.page === 1 ? catContent : null,
+    noindex: data.page > 1,
+    schema: data.page === 1 ? schemas : [schemas[0], schemas[1]]
   });
 });
 
@@ -167,7 +178,7 @@ router.get('/game/:slug', (req, res, next) => {
   if (!game.published && !isAdmin) return next();
   db.prepare('UPDATE games SET plays=plays+1 WHERE id=?').run(game.id);
   if (req.user) db.prepare('INSERT INTO plays_log(user_id,game_id) VALUES(?,?)').run(req.user.id, game.id);
-  const related = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.published=1 AND g.category=? AND g.id!=? ORDER BY g.plays DESC LIMIT 8').all(game.category, game.id);
+  const related = db.prepare('SELECT g.*, c.name_en AS cat_en, c.name_zh AS cat_zh, c.name_ja AS cat_ja FROM games g LEFT JOIN categories c ON c.slug=g.category WHERE g.published=1 AND g.category=? AND g.id!=? ORDER BY g.plays DESC LIMIT 14').all(game.category, game.id);
   const comments = db.prepare('SELECT cm.*, u.username, u.role FROM comments cm JOIN users u ON u.id=cm.user_id WHERE cm.game_id=? AND cm.hidden=0 ORDER BY cm.created_at DESC LIMIT 50').all(game.id);
   const liked = req.user ? !!db.prepare('SELECT 1 FROM likes WHERE user_id=? AND game_id=?').get(req.user.id, game.id) : false;
   const favorited = req.user ? !!db.prepare('SELECT 1 FROM favorites WHERE user_id=? AND game_id=?').get(req.user.id, game.id) : false;
@@ -181,19 +192,22 @@ router.get('/game/:slug', (req, res, next) => {
   const cta = res.locals.t('seo.gameCta', { title, site: res.locals.site.name });
   const metaDesc = descBase ? (descBase.slice(0, 180) + ' — ' + cta) : cta;
   const rating = res.locals.ratingFor(game);
+  const gameFaqs = schemaLd.getGameFaqs(game, {
+    title, howto: res.locals.gh(game), lang: res.locals.lang, catLabel
+  });
   const schemas = [
     schemaLd.videoGame(game, {
       siteUrl: res.locals.siteUrl, title, description: descBase.slice(0, 500) || cta,
       genre: catLabel, lang: res.locals.lang, rating
     }),
     schemaLd.breadcrumbs(crumbs, res.locals.siteUrl),
-    schemaLd.faqPage(game, {
-      title, howto: res.locals.gh(game), lang: res.locals.lang
-    })
+    schemaLd.faqPageFromItems(gameFaqs)
   ];
   res.render('game', {
     pageTitle: seoTitle, game, related, comments, liked, favorited, rating,
     metaDesc: metaDesc.slice(0, 300),
+    catLabel,
+    gameFaqs,
     schema: schemas
   });
 });

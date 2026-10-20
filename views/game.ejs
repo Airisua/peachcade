@@ -49,6 +49,30 @@
         <div class="tags"><% game.tags.split(',').forEach(function (tag) { var tt = tag.trim(); if (tt && !['gamemonetize', 'ext', 'rss', 'json', 'mapi-games'].includes(tt.toLowerCase())) { %><a class="chip" href="/tag/<%= encodeURIComponent(tt.toLowerCase().replace(/\s+/g, '-')) %>"><%= tt %></a><% } }); %></div>
         <% } %>
       </section>
+      <section class="panel game-specs">
+        <h2><%= t('game.specsTitle') %></h2>
+        <div class="specs-grid">
+          <div class="specs-row"><span class="specs-key"><%= t('game.specPlatform') %></span><span class="specs-val">Web Browser (Desktop, Mobile, Tablet)</span></div>
+          <div class="specs-row"><span class="specs-key"><%= t('game.specTech') %></span><span class="specs-val">HTML5 / WebGL</span></div>
+          <div class="specs-row"><span class="specs-key"><%= t('game.specGenre') %></span><span class="specs-val"><a href="/category/<%= game.category %>"><%= catLabel %></a></span></div>
+          <div class="specs-row"><span class="specs-key"><%= t('game.specControls') %></span><span class="specs-val"><%= t('game.specControlsVal') %></span></div>
+          <div class="specs-row"><span class="specs-key"><%= t('game.specPrice') %></span><span class="specs-val"><%= t('game.specPriceVal') %></span></div>
+          <div class="specs-row"><span class="specs-key"><%= t('game.specRating') %></span><span class="specs-val">⭐ <%= rating.score %> / 5.0 (<%= fmt(rating.votes) %> <%= t('game.votes') %>)</span></div>
+        </div>
+      </section>
+      <% if (typeof gameFaqs !== 'undefined' && gameFaqs && gameFaqs.length) { %>
+      <section class="panel game-faq">
+        <h2><%= t('game.faqTitle') %></h2>
+        <div class="faq-list">
+          <% gameFaqs.forEach(function (faq) { %>
+          <details class="faq-item" open>
+            <summary class="faq-q"><b><%= faq.q %></b></summary>
+            <div class="faq-a"><p><%= faq.a %></p></div>
+          </details>
+          <% }); %>
+        </div>
+      </section>
+      <% } %>
       <section class="panel" id="comments">
         <h2><%= t('game.comments') %></h2>
         <% if (user) { %>

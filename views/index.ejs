@@ -2,21 +2,30 @@
 <%- include('partials/header') %>
 <%- include('partials/ad', { slot: 'header' }) %>
 <main class="container">
-  <% if (hero) { %>
-  <section class="hero">
+  <section class="hero <%= hero ? '' : 'hero-solo' %>">
     <div class="hero-text">
+      <h1 class="hero-h1"><%= t('home.h1') %></h1>
+      <p class="hero-sub"><%= t('home.h1sub') %></p>
+      <% if (hero) { %>
       <span class="chip chip-hot"><%= t('home.featured') %></span>
-      <h1><%= gt(hero) %></h1>
+      <h2 class="hero-game"><%= gt(hero) %></h2>
       <p><%= gd(hero) %></p>
       <div class="hero-actions">
         <a class="btn btn-primary btn-lg" href="/game/<%= hero.slug %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-play"></use></svg><%= t('home.playNow') %></a>
         <a class="btn btn-ghost btn-lg" href="/random"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-dice"></use></svg><%= t('home.random') %></a>
       </div>
       <div class="muted small"><%= fmt(hero.plays) %> <%= t('game.plays') %> · <%= total %> <%= t('home.totalGames') %></div>
+      <% } else { %>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="/games"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-gamepad"></use></svg><%= t('common.allGames') %></a>
+        <a class="btn btn-ghost btn-lg" href="/random"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-dice"></use></svg><%= t('home.random') %></a>
+      </div>
+      <% } %>
     </div>
+    <% if (hero) { %>
     <a class="hero-art" href="/game/<%= hero.slug %>"><img src="<%= thumb(hero, 'hero') %>" alt="<%= gt(hero) %>" width="640" height="360" fetchpriority="high" decoding="async"></a>
+    <% } %>
   </section>
-  <% } %>
   <% if (navCategories.length) { %>
   <section class="section">
     <div class="section-head"><h2><%= t('home.browseByCategory') %></h2></div>
@@ -64,6 +73,13 @@
   <section class="section">
     <div class="section-head"><h2><%= t('home.topRated') %></h2><a class="see-all" href="/games?sort=likes"><%= t('common.viewAll') %></a></div>
     <div class="grid-cards"><% topRated.forEach(function (g) { %><%- include('partials/gamecard', { g: g }) %><% }); %></div>
+  </section>
+  <section class="section">
+    <div class="panel editorial-panel">
+      <h2><%= t('home.aboutTitle') %></h2>
+      <p><%= t('home.aboutP1') %></p>
+      <p><%= t('home.aboutP2') %></p>
+    </div>
   </section>
 </main>
 <%- include('partials/footer') %>

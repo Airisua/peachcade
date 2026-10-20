@@ -109,11 +109,28 @@ function collectionPage(opt) {
   return block;
 }
 
-function faqPage(game, opt) {
+function faqPageFromItems(items) {
+  if (!items || !items.length) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((it) => ({
+      '@type': 'Question',
+      name: it.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: it.a
+      }
+    }))
+  };
+}
+
+function getGameFaqs(game, opt) {
   const o = opt || {};
   const title = o.title || game.title_en;
   const howto = o.howto || '';
   const lang = o.lang || 'en';
+  const catLabel = o.catLabel || '';
 
   const q1 = lang === 'zh' ? ('如何玩《' + title + '》？') : (lang === 'ja' ? ('『' + title + '』の操作方法・遊び方は？') : ('How do you play ' + title + '?'));
   const q2 = lang === 'zh' ? ('《' + title + '》是免费的吗？需要下载吗？') : (lang === 'ja' ? ('『' + title + '』は無料で遊べますか？ダウンロードは必要ですか？') : ('Is ' + title + ' free to play online?'));
@@ -123,29 +140,30 @@ function faqPage(game, opt) {
 
   const items = [];
   if (howto) {
-    items.push({
-      '@type': 'Question',
-      name: q1,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: howto
-      }
-    });
+    items.push({ q: q1, a: howto });
   }
-  items.push({
-    '@type': 'Question',
-    name: q2,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: a2
-    }
-  });
+  items.push({ q: q2, a: a2 });
 
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: items
-  };
+  const q3 = lang === 'zh' ? ('《' + title + '》可以在手机上玩吗？') : (lang === 'ja' ? ('『' + title + '』はスマホやタブレットでもプレイできますか？') : ('Can I play ' + title + ' on mobile and tablet?'));
+  const a3 = lang === 'zh' ? ('可以，《' + title + '》完美适配 iPhone、iPad 以及各类安卓手机平板浏览器，支持流畅的触屏操作。')
+    : (lang === 'ja' ? ('はい、『' + title + '』はiPhone、iPad、Androidスマートフォンの各種ブラウザに対応しており、タッチ操作で快適に遊べます。')
+    : ('Yes, ' + title + ' is fully optimized for touch controls on iPhone, iPad, and Android mobile devices, as well as desktop computers.'));
+  items.push({ q: q3, a: a3 });
+
+  if (catLabel) {
+    const q4 = lang === 'zh' ? ('《' + title + '》属于什么类型的游戏？') : (lang === 'ja' ? ('『' + title + '』のゲームジャンルは何ですか？') : ('What genre of game is ' + title + '?'));
+    const a4 = lang === 'zh' ? ('《' + title + '》属于 Peachcade 上的 ' + catLabel + ' 分类。')
+      : (lang === 'ja' ? ('『' + title + '』はPeachcadeの' + catLabel + 'ジャンルに属しています。')
+      : (title + ' belongs to the ' + catLabel + ' category on Peachcade.'));
+    items.push({ q: q4, a: a4 });
+  }
+
+  return items;
 }
 
-module.exports = { website, breadcrumbs, videoGame, collectionPage, itemList, faqPage };
+function faqPage(game, opt) {
+  const items = getGameFaqs(game, opt);
+  return faqPageFromItems(items);
+}
+
+module.exports = { website, breadcrumbs, videoGame, collectionPage, itemList, faqPage, faqPageFromItems, getGameFaqs };

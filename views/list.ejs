@@ -18,5 +18,26 @@
   <% } else { %>
   <p class="empty"><%= t('list.noResults') %></p>
   <% } %>
+  <% if (typeof catContent !== 'undefined' && catContent) { %>
+  <section class="panel cat-editorial">
+    <h2><%= t('category.aboutTitle', { name: heading }) %></h2>
+    <p><%= catContent.about %></p>
+    <% if (catContent.highlights) { %>
+    <h3><%= t('category.highlightsTitle') %></h3>
+    <p><%= catContent.highlights %></p>
+    <% } %>
+    <% if (catContent.faqs && catContent.faqs.length) { %>
+    <h3><%= t('category.faqTitle', { name: heading }) %></h3>
+    <div class="faq-list">
+      <% catContent.faqs.forEach(function (faq) { %>
+      <details class="faq-item" open>
+        <summary class="faq-q"><b><%= faq.q %></b></summary>
+        <div class="faq-a"><p><%= faq.a %></p></div>
+      </details>
+      <% }); %>
+    </div>
+    <% } %>
+  </section>
+  <% } %>
 </main>
 <%- include('partials/footer') %>

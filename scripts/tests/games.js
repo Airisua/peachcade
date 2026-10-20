@@ -16,6 +16,8 @@ module.exports = {
   ok(r.text.includes('data-theater') && r.text.includes('i-theater'), 'game page has theater mode button');
   ok(r.text.includes('FAQPage'), 'game page includes FAQPage rich schema');
   ok(r.text.includes('AggregateRating'), 'game page includes aggregateRating schema for Google stars');
+  ok(r.text.includes('game-specs') && r.text.includes('Game Specifications'), 'game page shows visible game specifications', r.status);
+  ok(r.text.includes('game-faq') && r.text.includes('Can I play 2048 on mobile and tablet?'), 'game page renders the game FAQ visibly', r.status);
   ok(r.text.includes('back-to-top'), 'page includes back-to-top button');
   ok(r.text.includes('mobile-bottom-nav') && r.text.includes('mobile-nav-item'), 'page includes mobile bottom navigation bar');
   for (const slug of ['2048', 'snake', 'memory-match', 'tic-tac-toe', 'minesweeper']) {
