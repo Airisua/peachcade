@@ -8,6 +8,7 @@ const { rateLimit } = require('../ratelimit');
 const schemaLd = require('../schema');
 const thumbs = require('../thumbs');
 const categoryContent = require('../category_content');
+const tagHubs = require('../tags');
 
 const GAMES_PER_PAGE = 48;
 
@@ -85,6 +86,7 @@ router.get('/category/:slug', (req, res, next) => {
     basePath: '/category/' + cat.slug + '?', sort, totalGames: data.total,
     metaDesc: catDesc,
     catContent: data.page === 1 ? catContent : null,
+    categoryTags: data.page === 1 ? tagHubs.forCategory(cat.slug, 12) : [],
     noindex: data.page > 1,
     schema: data.page === 1 ? schemas : [schemas[0], schemas[1]]
   });
@@ -94,19 +96,30 @@ router.get('/category/:slug', (req, res, next) => {
 router.get('/tag/:tag', (req, res, next) => {
   const rawTag = String(req.params.tag || '').trim().slice(0, 40);
   if (!rawTag) return next();
-  const cleanTag = rawTag.toLowerCase().replace(/[-_]+/g, ' ').trim();
-  const sort = safeSort(req.query.sort);
-  let data = listGames({ tag: cleanTag, sort, page: page(req.query.page), per: GAMES_PER_PAGE });
-  if (!data.total && cleanTag !== rawTag.toLowerCase()) {
-    data = listGames({ tag: rawTag.toLowerCase(), sort, page: page(req.query.page), per: GAMES_PER_PAGE });
+  const hub = tagHubs.resolve(rawTag);
+  if (!hub.valid) return next();
+  // Provider spelling variants ("cars", "3d-games") collapse onto one URL so the
+  // two spellings never compete for the same query.
+  if (hub.redirect) {
+    const kept = String(req.query.sort || '');
+    return res.redirect(301, '/tag/' + encodeURIComponent(hub.redirect) + (kept ? '?sort=' + encodeURIComponent(kept) : ''));
   }
-  const tagDisplay = cleanTag.split(/\s+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  const sort = safeSort(req.query.sort);
+  const cleanTag = hub.tag;
+  let data = listGames({ tag: cleanTag, sort, page: page(req.query.page), per: GAMES_PER_PAGE });
+  if (!data.total && cleanTag !== hub.slug) {
+    data = listGames({ tag: hub.slug, sort, page: page(req.query.page), per: GAMES_PER_PAGE });
+  }
+  const tagDisplay = hub.display;
   const heading = res.locals.t('seo.tagHeading', { tag: tagDisplay });
   const metaDesc = res.locals.t('seo.tagDesc', { tag: tagDisplay, site: res.locals.site.name });
-  const canonPath = '/tag/' + encodeURIComponent(rawTag);
+  const canonPath = '/tag/' + encodeURIComponent(hub.slug);
   // Thin tag pages (a couple of games) add little value and compete with the
   // category pages in the index - keep the links, drop them from the index.
-  const thinTag = data.total < 5;
+  // Generic tags ("game", "fun", "html5") describe the whole catalog, so they
+  // are never indexed either.
+  const thinTag = data.total < 5 || hub.blocked;
+  const tops = data.games.slice(0, 3).map((g) => res.locals.gt(g));
   res.render('list', {
     pageTitle: heading,
     heading,
@@ -114,6 +127,14 @@ router.get('/tag/:tag', (req, res, next) => {
     basePath: canonPath + '?', sort, totalGames: data.total,
     metaDesc,
     noindex: thinTag,
+    tagHub: {
+      slug: hub.slug,
+      display: tagDisplay,
+      blocked: hub.blocked,
+      count: data.total,
+      intro: data.total ? tagHubs.intro(res.locals.lang, { display: tagDisplay, count: data.total, tops }) : '',
+      related: data.page === 1 ? tagHubs.related(hub.slug, 14) : []
+    },
     schema: [
       schemaLd.collectionPage({
         name: heading, siteName: res.locals.site.name, siteUrl: res.locals.siteUrl, path: canonPath,
@@ -126,6 +147,38 @@ router.get('/tag/:tag', (req, res, next) => {
         { name: tagDisplay, url: canonPath }
       ], res.locals.siteUrl)
     ]
+  });
+});
+
+// Human-readable tag directory: the crawl entry point that makes 500 tag hubs
+// reachable within two clicks of the homepage.
+router.get('/tags', (req, res) => {
+  // Fall back to the raw popularity list on a brand-new catalog where no tag has
+  // five games yet, so the directory is never an empty page.
+  let list = tagHubs.all();
+  if (!list.length) {
+    const seen = new Set();
+    list = getPopularTags(250).reduce((acc, t) => {
+      const hub = tagHubs.resolve(t.slug);
+      if (!hub.valid || hub.blocked || seen.has(hub.slug)) return acc;
+      seen.add(hub.slug);
+      acc.push({ slug: hub.slug, display: hub.display, tag: hub.tag, count: t.count });
+      return acc;
+    }, []);
+  }
+  const top = list.slice(0, 36);
+  const groups = {};
+  for (const item of list) {
+    const letter = item.slug.charAt(0).toUpperCase();
+    (groups[letter] = groups[letter] || []).push(item);
+  }
+  res.render('tags', {
+    pageTitle: res.locals.t('seo.tagsTitle', { site: res.locals.site.name }),
+    heading: res.locals.t('seo.tagsHeading'),
+    metaDesc: res.locals.t('seo.tagsDesc', { count: list.length, site: res.locals.site.name }),
+    top,
+    groups,
+    totalTags: list.length
   });
 });
 
@@ -354,6 +407,7 @@ router.get('/sitemap-main.xml', (req, res) => {
   const urls = [
     { loc: '/', pri: '1.0', cf: 'daily' },
     { loc: '/games', pri: '0.9', cf: 'daily' },
+    { loc: '/tags', pri: '0.6', cf: 'weekly' },
     { loc: '/about', pri: '0.3', cf: 'monthly' },
     { loc: '/privacy', pri: '0.2', cf: 'yearly' },
     { loc: '/terms', pri: '0.2', cf: 'yearly' }
@@ -370,7 +424,21 @@ router.get('/sitemap-tags.xml', (req, res) => {
   if (sitemapTagsCache.body && (now - sitemapTagsCache.at < 3600000)) {
     return sendSitemap(res, sitemapTagsCache.body);
   }
-  const tags = getPopularTags(250);
+  // Only canonical, indexable tags belong here: aliases would submit duplicate
+  // URLs and blocked generic tags are noindexed.
+  // A brand-new install may not have five games under any single tag yet; fall
+  // back to the raw popularity list so the sitemap is never an empty urlset.
+  let tags = tagHubs.all();
+  if (!tags.length) {
+    const seen = new Set();
+    tags = getPopularTags(250).reduce((acc, t) => {
+      const hub = tagHubs.resolve(t.slug);
+      if (!hub.valid || hub.blocked || seen.has(hub.slug)) return acc;
+      seen.add(hub.slug);
+      acc.push({ slug: hub.slug, count: t.count });
+      return acc;
+    }, []);
+  }
   const today = new Date().toISOString().slice(0, 10);
   const body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     tags.map((t) => '  <url><loc>' + res.locals.siteUrl + '/tag/' + encodeURIComponent(t.slug) + '</loc><lastmod>' + today + '</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>').join('\n') +

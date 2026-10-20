@@ -1,0 +1,31 @@
+<%- include('partials/head', { pageTitle: pageTitle }) %>
+<%- include('partials/header') %>
+<%- include('partials/ad', { slot: 'list-top' }) %>
+<main class="container">
+  <div class="list-head">
+    <h1><%= heading %></h1>
+    <div class="muted small"><%= t('tags.countLabel', { count: totalTags }) %></div>
+  </div>
+  <p class="tags-intro muted"><%= t('seo.tagsIntro', { site: site.name }) %></p>
+
+  <section class="panel">
+    <h2><%= t('tags.popularTitle') %></h2>
+    <div class="tagcloud">
+      <% top.forEach(function (item) { %>
+      <a class="chip" href="/tag/<%= encodeURIComponent(item.slug) %>"><%= item.display %> <span class="chip-n"><%= fmt(item.count) %></span></a>
+      <% }); %>
+    </div>
+  </section>
+
+  <% Object.keys(groups).sort().forEach(function (letter) { %>
+  <section class="panel tag-letter">
+    <h2><%= letter %></h2>
+    <div class="tagcloud">
+      <% groups[letter].forEach(function (item) { %>
+      <a class="chip chip-sm" href="/tag/<%= encodeURIComponent(item.slug) %>"><%= item.display %> <span class="chip-n"><%= fmt(item.count) %></span></a>
+      <% }); %>
+    </div>
+  </section>
+  <% }); %>
+</main>
+<%- include('partials/footer') %>

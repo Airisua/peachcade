@@ -357,5 +357,16 @@
   "terms.h2e": "5. Disclaimer",
   "terms.p5": "The service is provided \"as is\" without warranties of any kind. To the maximum extent permitted by law, Peachcade is not liable for indirect or consequential damages arising from use of the site.",
   "terms.h2f": "6. Changes",
-  "terms.p6": "We may update these terms from time to time. Continued use after changes are posted constitutes acceptance of the revised terms."
+  "terms.p6": "We may update these terms from time to time. Continued use after changes are posted constitutes acceptance of the revised terms.",
+  "seo.tagsTitle": "Browse All Game Tags & Genres",
+  "seo.tagsHeading": "Browse all game tags",
+  "seo.tagsDesc": "Browse {count} game tags on {site} — car games, puzzle games, 3D games, io games, escape games and hundreds more, all free to play in your browser.",
+  "seo.tagsIntro": "Every tag below is a live collection on {site}. Hand-picked slices of the catalog: pick a genre, a mechanic or a mood, and jump straight into something playable.",
+  "tags.countLabel": "{count} tags",
+  "tags.popularTitle": "Most popular tags",
+  "tags.popularInCategory": "Popular {name} tags",
+  "tags.all": "All tags",
+  "tags.aboutTitle": "About {name}",
+  "tags.relatedTitle": "Related tags",
+  "home.totalGamesOne": "game available"
 }

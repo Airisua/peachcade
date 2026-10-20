@@ -2,9 +2,10 @@
 <%- include('partials/header') %>
 <%- include('partials/ad', { slot: 'list-top' }) %>
 <main class="container">
+  <% var countLabel = totalGames === 1 ? t('home.totalGamesOne') : t('home.totalGames'); %>
   <div class="list-head">
     <h1><%= heading %></h1>
-    <div class="muted small"><%= totalGames %> <%= t('home.totalGames') %></div>
+    <div class="muted small"><%= totalGames %> <%= countLabel %></div>
   </div>
   <div class="filterbar">
     <span class="muted small"><%= t('list.sort') %></span>
@@ -12,11 +13,37 @@
     <a class="chip <%= sort === s[0] ? 'chip-active' : '' %>" href="<%= basePath %>sort=<%= s[0] %>"><%= t(s[1]) %></a>
     <% }); %>
   </div>
+  <% if (typeof categoryTags !== 'undefined' && categoryTags && categoryTags.length) { %>
+  <div class="tag-strip">
+    <span class="muted small"><%= t('tags.popularInCategory', { name: heading }) %></span>
+    <div class="tagcloud">
+      <% categoryTags.forEach(function (item) { %>
+      <a class="chip chip-sm" href="/tag/<%= encodeURIComponent(item.slug) %>"><%= item.display %> <span class="chip-n"><%= fmt(item.count) %></span></a>
+      <% }); %>
+      <a class="chip chip-sm chip-ghost" href="/tags"><%= t('tags.all') %></a>
+    </div>
+  </div>
+  <% } %>
   <% if (games.length) { %>
   <div class="grid-cards"><% games.forEach(function (g, i) { %><%- include('partials/gamecard', { g: g, eager: i < 4 }) %><% }); %></div>
   <%- include('partials/pagination', { page: page, pages: pages, base: basePath + 'sort=' + sort + '&' }) %>
   <% } else { %>
   <p class="empty"><%= t('list.noResults') %></p>
+  <% } %>
+  <% if (typeof tagHub !== 'undefined' && tagHub) { %>
+  <section class="panel tag-hub">
+    <h2><%= t('tags.aboutTitle', { name: tagHub.display }) %></h2>
+    <p><%= tagHub.intro %></p>
+    <% if (tagHub.related && tagHub.related.length) { %>
+    <h3><%= t('tags.relatedTitle') %></h3>
+    <div class="tagcloud">
+      <% tagHub.related.forEach(function (item) { %>
+      <a class="chip chip-sm" href="/tag/<%= encodeURIComponent(item.slug) %>"><%= item.display %> <span class="chip-n"><%= fmt(item.count) %></span></a>
+      <% }); %>
+      <a class="chip chip-sm chip-ghost" href="/tags"><%= t('tags.all') %></a>
+    </div>
+    <% } %>
+  </section>
   <% } %>
   <% if (typeof catContent !== 'undefined' && catContent) { %>
   <section class="panel cat-editorial">

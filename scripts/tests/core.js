@@ -92,6 +92,29 @@ module.exports = {
     } finally {
       for (const id of tagFixtureIds) db.prepare('DELETE FROM games WHERE id=?').run(id);
     }
+    // tag hub matrix: canonical spellings, blocked generic tags, related links.
+    // A tiny fresh catalog has no tag overlap yet, so seed one.
+    const matrixIds = [];
+    const insMatrix = db.prepare("INSERT INTO games(slug,title_en,category,thumb,embed_url,source,tags,published,updated_at) VALUES(?,?,?,?,?,?,?,1,datetime('now'))");
+    for (let i = 1; i <= 6; i++) {
+      matrixIds.push(insMatrix.run('matrix-fixture-' + i, 'Matrix Fixture ' + i, 'puzzle', '/img/games/default.svg', '/games/2048/', 'smoke', 'matrix-tag-a,matrix-tag-b').lastInsertRowid);
+    }
+    try {
+    const rAlias = await user.get('/tag/cars');
+    ok(rAlias.status === 301 && rAlias.location === '/tag/car', 'alias tag spellings 301 to the canonical hub', rAlias.status + ' ' + rAlias.location);
+    const rBlocked = await user.get('/tag/html5');
+    ok(rBlocked.status === 200 && rBlocked.text.includes('name="robots" content="noindex"'), 'generic tags are noindexed', rBlocked.status);
+    const rHub = await user.get('/tag/puzzle');
+    ok(rHub.text.includes('tag-hub') && rHub.text.includes('free Puzzle game'), 'tag hub renders a data-driven intro', rHub.status);
+    const rRelated = await user.get('/tag/matrix-tag-a');
+    ok(rRelated.text.includes('tag-hub') && rRelated.text.includes('/tag/matrix-tag-b'), 'tag hub links related tags', rRelated.status);
+    const rDir = await user.get('/tags');
+    ok(rDir.status === 200 && rDir.text.includes('/tag/') && rDir.text.includes('tagcloud'), 'tag directory lists tag hubs', rDir.status);
+    const rCatTag = await user.get('/category/puzzle');
+    ok(rCatTag.text.includes('tag-strip') && rCatTag.text.includes('/tags'), 'category page links its own tag hubs', rCatTag.status);
+    } finally {
+      for (const id of matrixIds) db.prepare('DELETE FROM games WHERE id=?').run(id);
+    }
     r = await user.get('/');
     ok(r.text.includes('cat-card'), 'home shows category strip');
     ok(r.text.includes('rel="preload" as="image"') && r.text.includes('fetchpriority="high"'), 'homepage preloads the hero image for LCP');

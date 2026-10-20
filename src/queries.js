@@ -1,5 +1,6 @@
 'use strict';
 const { db } = require('./db');
+const tagHubs = require('./tags');
 
 function decodeEntities(s) {
   if (s == null) return '';
@@ -128,13 +129,12 @@ function getPopularTags(limit = 40) {
       }
     }
     const list = Object.entries(counts)
-      .filter(([_, c]) => c >= 1)
+      .filter(([tag, c]) => c >= 1 && !tagHubs.BLOCKED.has(tag))
       .sort((a, b) => b[1] - a[1])
-      .map(([tag, count]) => ({
-        tag,
-        count,
-        slug: tag.replace(/\s+/g, '-')
-      }));
+      .map(([tag, count]) => {
+        const hub = tagHubs.resolve(tag);
+        return { tag, count, slug: hub.slug, display: hub.display };
+      });
     popularTagsCache = { at: Date.now(), tags: list };
     return list.slice(0, want);
   } catch (e) {

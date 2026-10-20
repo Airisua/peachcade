@@ -420,6 +420,16 @@ textarea {
 .footer-tags-label{font-weight:700;white-space:nowrap}
 .footer-tags-list{display:flex;gap:6px;flex-wrap:wrap}
 .chip-sm{padding:3px 9px;font-size:12px;border-radius:7px}
+.chip-n{font-size:11px;color:var(--muted);font-weight:500;opacity:.8}
+.chip-ghost{border-style:dashed;color:var(--muted)}
+.tagcloud{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.tag-strip{display:flex;flex-direction:column;gap:2px;margin:-6px 0 18px}
+.tag-strip .tagcloud{margin-top:6px;max-height:none}
+.tags-intro{font-size:14.5px;line-height:1.7;max-width:900px;margin:10px 0 20px}
+.tag-hub{padding:24px 28px;margin-top:24px}
+.tag-hub h3{font-size:14px;color:#d9d9ea;margin:18px 0 4px}
+.tag-letter h2{font-size:14px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.tag-letter .tagcloud{margin-top:8px}
 
 /* rating pill */
 .rating-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:#fde047;padding:2px 8px;border-radius:999px;font-weight:700}
