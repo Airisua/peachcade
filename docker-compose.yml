@@ -11,6 +11,10 @@ services:
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
       - NODE_OPTIONS=--max-old-space-size=1024
+      # Public origin. Pinning it keeps canonicals and sitemaps on one hostname
+      # even if a request arrives through www or an alias domain.
+      - SITE_URL=${SITE_URL:-}
+      - CANONICAL_HOST=${CANONICAL_HOST:-}
     volumes:
       - ./data:/app/data
       - ./public/uploads:/app/public/uploads

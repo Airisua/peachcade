@@ -34,6 +34,14 @@ module.exports = {
     ok(r.status === 200 && r.text.includes('Terms of Use'), 'terms page responds', r.status);
     r = await user.get('/robots.txt');
     ok(r.status === 200 && r.text.includes('Sitemap:'), 'robots.txt served', r.status);
+    // host canonicalisation: the catalog must answer on one hostname only
+    const host = require('../../src/host');
+    ok(host.redirectTarget('www.peachcat.fun', 'peachcat.fun') === 'peachcat.fun', 'www folds onto the apex host');
+    ok(host.redirectTarget('peachcat.fun', 'peachcat.fun') === '', 'apex host is served directly');
+    ok(host.redirectTarget('127.0.0.1:3000', 'peachcat.fun') === '', 'local probes are never redirected');
+    ok(host.redirectTarget('preview.example.com', 'peachcat.fun') === '', 'unrelated hosts are left alone');
+    ok(host.redirectTarget('www.peachcat.fun', '') === 'peachcat.fun', 'www folds even without CANONICAL_HOST');
+    ok(host.redirectTarget('peachcat.fun', '') === '', 'apex is untouched without CANONICAL_HOST');
     r = await user.get('/feed.xml');
     ok(r.status === 200 && r.text.includes('<rss') && r.text.includes('<item>'), 'rss feed served', r.status);
     r = await user.get('/manifest.webmanifest');

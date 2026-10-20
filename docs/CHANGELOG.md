@@ -4,6 +4,17 @@
 
 ---
 
+## [2026-10-21] 修复 www 与裸域双份收录（本轮最高影响）
+
+- **问题**：`https://www.peachcat.fun` 与 `https://peachcat.fun` 同时返回 200，且各自的 canonical 都指向自己，sitemap 也会随请求 Host 变化——等于 38,223 个页面在两个域名上各存在一份，权重被直接对半劈开；
+- **修复**：新增 `src/host.js` + 全局中间件，`www` 前缀一律 301 到裸域并保留 path 与 query（如 `/tag/car?sort=new` 原样带过去）；
+- 本地探测（127.0.0.1 / localhost）、`.internal`、`.local` 以及无关域名不会被重定向，容器 healthcheck 与预览环境不受影响；
+- `docker-compose.yml` 新增 `SITE_URL` 与 `CANONICAL_HOST` 环境变量，生产已配置为 `https://peachcat.fun`，sitemap / canonical / RSS 从此固定在裸域；
+- `REDIRECT_WWW=0` 可在边缘代理已处理跳转时关闭应用层规则；
+- 冒烟新增 6 条 `redirectTarget()` 单元断言（www 折叠、裸域直服、本地放行、无关域名放行）。
+
+---
+
 ## [2026-10-21] 新增 /feed.xml RSS 订阅源
 
 - 新增 `src/feed.js` 与 `/feed.xml` 路由：输出最新 50 款已发布游戏的 RSS 2.0 源（标题、链接、简介、分类、封面、发布时间）；

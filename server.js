@@ -12,6 +12,7 @@ const { loadUser } = require('./src/auth');
 const { csrfMiddleware, csrfGuard } = require('./src/csrf');
 const common = require('./src/common');
 const { ASSET_VERSION } = require('./src/assets');
+const { redirectTarget } = require('./src/host');
 
 const siteRouter = require('./src/routes/site');
 const authRouter = require('./src/routes/auth');
@@ -30,6 +31,18 @@ app.set('trust proxy', 1);
 app.disable('x-powered-by');
 // cache-busting token for /css + /js + the icon sprite (see src/assets.js)
 app.locals.assetV = ASSET_VERSION;
+
+// One hostname, one copy of the catalog (see src/host.js). CANONICAL_HOST pins
+// the host explicitly; REDIRECT_WWW=0 disables the www fold when the edge proxy
+// already handles it.
+const CANONICAL_HOST = String(process.env.CANONICAL_HOST || '').trim();
+const REDIRECT_WWW = process.env.REDIRECT_WWW !== '0';
+app.use((req, res, next) => {
+  if (!REDIRECT_WWW) return next();
+  const target = redirectTarget(req.headers.host, CANONICAL_HOST);
+  if (!target) return next();
+  return res.redirect(301, 'https://' + target + (req.originalUrl || '/'));
+});
 
 app.use(helmet({
   contentSecurityPolicy: false,
