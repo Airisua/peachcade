@@ -35,6 +35,7 @@ router.get('/', (req, res) => {
   const total = db.prepare('SELECT COUNT(*) n FROM games WHERE published=1').get().n;
   res.render('index', {
     pageTitle: null, hero, featured, popular, newest, topRated, continueList, total,
+    metaDesc: res.locals.t('seo.home', { count: Math.floor(total / 1000) * 1000, site: res.locals.site.name }).slice(0, 300),
     schema: [
       schemaLd.website(res.locals.site, res.locals.siteUrl),
       Object.assign(
@@ -50,8 +51,9 @@ router.get('/games', (req, res) => {
   const data = listGames({ sort, page: page(req.query.page), per: GAMES_PER_PAGE });
   const heading = res.locals.t('common.allGames');
   const suffix = data.page > 1 ? ' — ' + res.locals.t('pager.pageN', { n: data.page }) : '';
+  const allGamesTitle = res.locals.t('seo.allGamesTitle', { count: Math.floor(data.total / 1000) * 1000 });
   res.render('list', {
-    pageTitle: heading + suffix,
+    pageTitle: allGamesTitle + suffix,
     heading,
     games: data.games, page: data.page, pages: data.pages,
     basePath: '/games?', sort, totalGames: data.total,

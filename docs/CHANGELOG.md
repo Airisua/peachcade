@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-10-21] 首页描述、游戏页 H1、/games 标题与 SEO 运行手册
+
+- 首页 meta description 从 45 字符的 tagline 换成 149 字符的完整描述（含“38000+”与品类枚举），这是搜索结果里最常被点击的一段文案；
+- `/games` 标题从 “All games” 改为 “All 38000 Free Online Games”，直接对准 “free online games” 头部词；
+- 游戏页 H1 增加副行 “Free online {分类} game”（`<span class="h1-type">`），H1 同时承载品牌名与品类词，视觉上仍是游戏名主导；
+- 新增 `docs/SEO.md` 运行手册：已落地的 URL/sitemap/schema/多语言机制、必须人工完成的 GSC 与 Cloudflare 步骤、失效信号排查表、自检命令。
+
+---
+
 ## [2026-10-21] URL 大小写与尾斜杠规范化
 
 - Express 路由大小写不敏感，导致 `/GAMES`、`/games/`、`/tag/Car` 都能返回 200 且 canonical 自指，与规范地址抢排名；

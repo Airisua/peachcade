@@ -372,5 +372,8 @@
   "game.similar": "You may also like",
   "game.noDesc": "{title} is a free online {category} game on Peachcade. Play it instantly in your browser — no download, no install, no sign-up. Use the buttons above to like, favorite, or switch to fullscreen.",
   "game.specReleased": "Added",
-  "game.specPlayed": "Times played"
+  "game.specPlayed": "Times played",
+  "seo.home": "Play {count}+ free online browser games on {site} — action, puzzle, racing, shooting, sports, board and more. Instant play, no download, no sign-up.",
+  "seo.allGamesTitle": "All {count} Free Online Games",
+  "game.h1Type": "Free online {category} game"
 }

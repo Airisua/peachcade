@@ -9,7 +9,7 @@
   </nav>
   <% if (!game.published) { %><div class="notice warn"><%= t('game.unpublishedBadge') %></div><% } %>
   <div class="game-head">
-    <h1><%= gt(game) %></h1>
+    <h1><%= gt(game) %><span class="h1-type"><%= t('game.h1Type', { category: catLabel }) %></span></h1>
     <div class="game-stats muted small">
       <span class="rating-pill" title="<%= rating.score %> / 5.0 · <%= rating.percent %>%"><svg class="ic ic-gold"><use href="/img/icons.svg?v=<%= assetV %>#i-star"></use></svg><b><%= rating.score %></b> <small>(<%= rating.percent %>%)</small></span>
       <span><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-play"></use></svg><%= fmt(game.plays) %> <%= t('game.plays') %></span>

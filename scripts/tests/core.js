@@ -28,7 +28,9 @@ module.exports = {
     ok(r.status === 200 && r.text.includes('aria-current="page">2<'), 'pager marks the current page', r.status);
     ok(r.text.includes('name="robots" content="noindex"'), 'paginated game listings are noindex,follow', 'page2 should be noindex');
     ok(/href="\/games\?[^"]*page=1"/.test(r.text), 'pager links back to page one');
-    ok(r.text.includes('name="robots" content="noindex"'), 'all-games page one is indexable', 'page1 should not be noindex');
+    const p1 = await user.get('/games');
+    ok(!p1.text.includes('name="robots" content="noindex"'), 'all-games page one is indexable', 'page1 must not be noindex');
+    ok(/<title>All \d+ Free Online Games/.test(p1.text), 'all-games title targets the head term with a count', (p1.text.match(/<title>([^<]*)<\/title>/) || [])[1]);
     r = await user.get('/category/puzzle');
     ok(r.text.includes('class="pagination"'), 'category listing uses the same pager', r.status);
     r = await user.get('/lang/zh?next=/games');
@@ -62,6 +64,8 @@ module.exports = {
   const homeLd = ldBlocks(r.text);
   ok(homeLd.length > 0 && homeLd.every(Boolean) && homeLd.some((b) => b['@type'] === 'WebSite' && b.potentialAction && b.alternateName && b.alternateName.includes('PeachCat Games')), 'home has WebSite + SearchAction + alternateName JSON-LD', JSON.stringify(homeLd.map((b) => b && b['@type'])));
   ok(homeLd.some((b) => b['@type'] === 'ItemList' && b.itemListElement && b.itemListElement.length > 0), 'home links an ItemList of its popular rail', JSON.stringify(homeLd.map((b) => b && b['@type'])));
+    const homeDesc = (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
+    ok(homeDesc.length >= 100 && !/\{[a-z]+\}/.test(homeDesc), 'homepage meta description is substantial and fully filled', homeDesc.length + 'ch');
   r = await user.get('/game/2048');
   const gameLd = ldBlocks(r.text);
   ok(gameLd.length > 0 && gameLd.every(Boolean) && gameLd.some((b) => b['@type'] === 'VideoGame' && b.name === '2048' && b.offers), 'game page has valid VideoGame JSON-LD');

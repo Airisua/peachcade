@@ -25,6 +25,7 @@ module.exports = {
   ok(r.text.includes('AggregateRating'), 'game page includes aggregateRating schema for Google stars');
   ok(r.text.includes('game-specs') && r.text.includes('Game Specifications'), 'game page shows visible game specifications', r.status);
   ok(r.text.includes('Times played') && /<span class="specs-val">[^<]*plays/.test(r.text), 'specs carry real play and release facts');
+  ok(/<h1>[^<]*<span class="h1-type">Free online [^<]*game<\/span><\/h1>/.test(r.text), 'game H1 carries the category type');
   ok(!/<p>—<\/p>/.test(r.text), 'no placeholder dash where provider copy is missing');
   ok(r.text.includes('game-faq') && r.text.includes('Can I play 2048 on mobile and tablet?'), 'game page renders the game FAQ visibly', r.status);
   // cross-category rails need a game outside the category that shares a tag
