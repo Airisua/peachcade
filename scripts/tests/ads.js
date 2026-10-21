@@ -46,7 +46,9 @@ module.exports = {
       ok(!r.text.includes('ad-slot-header') && !r.text.includes('ad-slot-home-mid'), 'ads can be disabled', r.status);
       resp = await setAds({ ads_enabled: 'on' });
       r = await user.get('/');
-      ok(r.text.includes('ad-slot-header'), 'ads re-enabled with placeholders', r.status);
+      // No ad is configured for the header slot at this point: an empty slot must
+      // stay out of the HTML instead of rendering a placeholder box.
+      ok(!r.text.includes('ad-slot-header') && !r.text.includes('ad-ph'), 'empty slots render no markup', r.status);
       r = await user.get('/ads.txt');
       ok(r.status === 200 && r.text.includes('pub-2264028095354486'), 'ads.txt served with google adsense snippet', r.status);
       const smokeAdsTxt = 'google.com, pub-2264028095354486, DIRECT, f08c47fec0942fa0\n\n#GameMonetize.com\ngoogle.com, pub-5519830896693885, DIRECT, f08c47fec0942fa0\ngoogle.com, pub-4764333688337558, DIRECT, f08c47fec0942fa0';

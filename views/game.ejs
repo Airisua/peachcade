@@ -23,7 +23,11 @@
         <span class="player-loader-text"><%= t('game.loading') %></span>
         <a class="player-loader-fallback small muted" href="<%= game.embed_url %>" target="_blank" rel="noopener"><%= t('game.trouble') %> <%= t('game.newTab') %></a>
       </div>
-      <iframe id="game-frame" src="<%= game.embed_url %>" title="<%= gt(game) %>" allowfullscreen sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups allow-orientation-lock"></iframe>
+      <%# Ad creatives inside GameMonetize games open their landing page in a popup;
+           without allow-popups-to-escape-sandbox that popup inherits the sandbox
+           and never loads. allow-top-navigation stays out on purpose: it lets an
+           ad replace the whole tab on a tap, which is the mobile hijack we removed. %>
+      <iframe id="game-frame" src="<%= game.embed_url %>" title="<%= gt(game) %>" allowfullscreen sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads allow-orientation-lock"></iframe>
     </div>
     <div class="player-bar">
       <button class="btn btn-icon <%= liked ? 'on' : '' %>" id="like-btn" data-like="<%= game.id %>" title="<%= t('game.like') %>"><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-heart"></use></svg><span class="n"><%= fmt(game.likes) %></span></button>

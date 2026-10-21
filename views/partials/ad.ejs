@@ -1,14 +1,15 @@
-<% if (adsEnabled) { const ad = adFor(slot); %>
+<%#
+  Only emit markup for slots that actually have an ad. An unconfigured slot used
+  to render a dashed "Ad space - configure in Admin / Ads" box on every page,
+  which is dead space for visitors and reads as an unfinished site.
+%>
+<% if (adsEnabled) { const ad = adFor(slot); if (ad) { %>
 <div class="ad-slot ad-slot-<%= slot %>">
   <span class="ad-label"><%= t('common.advertisement') %></span>
-  <% if (ad) { %>
-    <% if (ad.type === 'image' && ad.image_url) { %>
-    <a href="<%= ad.link_url || '#' %>" target="_blank" rel="noopener nofollow sponsored"><img src="<%= ad.image_url %>" alt="<%= ad.title || 'Sponsor' %>"></a>
-    <% } else { %>
-    <%- ad.html %>
-    <% } %>
+  <% if (ad.type === 'image' && ad.image_url) { %>
+  <a href="<%= ad.link_url || '#' %>" target="_blank" rel="noopener nofollow sponsored"><img src="<%= ad.image_url %>" alt="<%= ad.title || 'Sponsor' %>" loading="lazy" decoding="async"></a>
   <% } else { %>
-  <div class="ad-ph"><b><%= t('ads.slot_' + slot) %></b><small><%= t('ads.placeholder') %></small></div>
+  <%- ad.html %>
   <% } %>
 </div>
-<% } %>
+<% } } %>

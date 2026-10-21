@@ -4,6 +4,16 @@
 
 ---
 
+## [2026-10-21] 游戏 iframe 放宽沙箱 + 空广告位不再占位 + Adsterra 确认清空
+
+- **游戏 iframe 沙箱**（`views/game.ejs`）：补上 `allow-popups-to-escape-sandbox`、`allow-modals`、`allow-downloads`。GameMonetize 游戏内的广告点击是开新窗口的，之前弹窗会继承父级沙箱，落地页基本白屏——曝光之外连点击收益也一起丢了；
+- 刻意**没有**加 `allow-top-navigation-by-user-activation`：它允许广告在手机上一按就顶掉当前页面，正是之前 Adsterra 那轮的强制跳转，不能为了 eCPM 把体验再搭进去；
+- **空广告位不再渲染**（`views/partials/ad.ejs`）：过去首页/游戏页各有两个虚线框写着 “Ad space - configure in Admin / Ads”，访客看到的是「这站没做完」。现在没配广告就整段不输出，图片广告同时补 `loading="lazy" decoding="async"`；冒烟断言同步改为「空广告位不产生任何标记」；
+- **Adsterra 复核**：仓库全部源码、数据库全部表、线上 HTML（首页 + 游戏页）、nginx 网关配置四处检索 `adsterra / highperformanceformat / profitablecpm / topcreativeformat / displaycontentnetwork`，**0 命中**，站点上已无任何 Adsterra 代码；当前在跑的是 Ezoic（页头 CMP + 主脚本）和后台 `home-mid` 的 6v6 脚本；
+- 新增 `docs/GAMEMONETIZE.md`：把 GameMonetize 的收益链路、后台为什么可能一直 0、30 秒自检方法固化下来。
+
+---
+
 ## [2026-10-21] 首页描述、游戏页 H1、/games 标题与 SEO 运行手册
 
 - 首页 meta description 从 45 字符的 tagline 换成 149 字符的完整描述（含“38000+”与品类枚举），这是搜索结果里最常被点击的一段文案；
