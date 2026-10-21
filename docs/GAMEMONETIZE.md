@@ -33,39 +33,61 @@ https://html5.gamemonetize.co/<hash>/
 
 - **域名归属靠 referrer**。第 2 步把 `peachcat.fun` 报给了 GameMonetize，所以 iframe 没有把域名藏掉；
 - **后台统计的是广告曝光/收益，不是「游戏被打开」**。第 4 步没有填充，就没有曝光，后台就一直空白；
+- **sdk.js 不一定是写死在 HTML 里的**。很多游戏（如 `stickman-bow-clash-gm-88749`）由 `js/monetization.js` 在运行时动态插入，静态 grep 会漏判——所以「HTML 里没有 sdk.js」不代表没有广告，只有运行时 Network 才算数；
 - 收益分成 45%，NET 30，满 $30 起付（PayPal / USDT ERC20）。
 
 ---
 
-## 3. 后台一直「无数据」的四个原因
+## 3. 域名白名单与广告填充（2026-10-22 补充）
 
-按可能性排序：
+GameMonetize 的 SDK 会拉一份域名清单 `https://api.gamemonetize.com/datax.json`（约 2,970 条，包含 y8.com / poki.com / crazygames.com 等）。实测 **`peachcat.fun` 已在这份清单里**，说明站点域名侧没有问题。
 
-1. **后台没把站点加进 Publisher → Websites**。官方 FAQ 明确要求 “add your site in the dashboard”；未登记的域名没有对应广告需求，请求返回空 VAST；
-2. **广告请求被拦截或该地区无需求**。国内网络对 `doubleclick` / `googlesyndication` 基本不通，AdBlock 也会全部拦掉。自测请用海外节点并关闭广告拦截；
-3. **报表按天更新**，不是实时；
-4. **游戏本身没有广告代码**。随机抽样 120 款已发布游戏：**51 款（42.5%）加载 `api.gamemonetize.com` SDK，69 款（57.5%）一行广告代码都没有**，玩这些永远不会有数据。
+真正的卡点在**广告填充**。用线上真实参数直接请求 GameMonetize 的 GAM 广告单元：
+
+```
+https://pubads.g.doubleclick.net/gampad/ads?iu=/21739493398/ca-games-pub-5519830896693885-tag
+  &output=xml_vast4&ref=https://peachcat.fun/game/...&url=https://peachcat.fun/game/...
+```
+
+返回的是**空 VAST**：
+
+```xml
+<VAST xmlns:xsi="..." xsi:noNamespaceSchemaLocation="vast.xsd" version="4.0"/>
+```
+
+没有任何 `<Ad>` 节点 = 这次请求没有广告可放。也就是说：请求、域名、referrer 全部正确，**是 Google 侧没有给这个地域/这个流量返回广告**。
+
+同一时间在测试浏览器里访问我们自己的游戏页，`doubleclick` / `googlesyndication` 全部 `net::ERR_CONNECTION_CLOSED`——网络层直接掐断，广告更没有机会播放。
 
 ---
 
-## 4. 30 秒自检
+## 4. 后台一直「无数据」的原因
 
-打开任意游戏页 → F12 → Console：
+按可能性排序：
 
-```js
-performance.getEntriesByType('resource').map(e => e.name)
-  .filter(n => /gamemonetize|doubleclick|googlesyndication/.test(n))
-```
+1. **没有广告填充（no fill）——目前的主因**。请求正常发出，但广告服务器返回空 VAST（见上一节）。中文/HK 地域、机房 IP、无 Cookie 的新会话，填充率都非常低；
+2. **广告域名被拦截**。国内网络对 `doubleclick` / `googlesyndication` 基本不通，AdBlock 也会全部拦掉。自测请用海外家宽节点并关闭广告拦截；
+3. **报表按天更新**，不是实时；
+4. **少量游戏确实没有广告代码**。静态抽样 120 款里 51 款 HTML 直接引用 SDK，其余多为运行时注入（见上一节的说明），静态统计只能算下限。
+
+---
+
+## 5. 30 秒自检
+
+**推荐用 Network 面板**（能看到所有 frame 的请求）：打开任意游戏页 → F12 → Network → 过滤框输入 `gamemonetize` → 刷新 → 等 10 秒。
+
+如果坚持用 Console：必须先点 Console 左上角的上下文下拉，把 `top` 切到 `html5.gamemonetize.co` 那个 frame。**在 top 里跑 `performance.getEntriesByType('resource')` 永远只能看到 iframe 自己的 URL**，看不到里面的 sdk.js——这是同源策略，不是没加载。
 
 | 看到什么 | 说明 |
 |---|---|
-| 有 `sdk.js` + `event.php?page_url=peachcat.fun`，没有 `gampad/ads` | 域名未被批准，广告根本没请求 |
-| 有 `gampad/ads` 但后台空 | 有请求、没填充（地区/拦截/延迟） |
+| 有 `sdk.js` + `event.php?page_url=peachcat.fun`，没有 `gampad/ads` | SDK 起了但没到广告请求，通常是游戏没实现广告位 |
+| 有 `gampad/ads`，Response 是空 `<VAST/>` | **当前线上就是这种**：有请求、没填充 |
+| 有 `gampad/ads` 但状态是 `(failed)` | 网络/AdBlock 拦截 |
 | 只有 `sdk.js`，没有 `event.php` | referrer 被中间层剥掉（本站目前不存在此问题） |
 
 ---
 
-## 5. 本站的取舍
+## 6. 本站的取舍
 
 - 游戏 iframe 的 sandbox 已放开 `allow-popups-to-escape-sandbox`，保证广告落地页能正常打开；
 - **没有**放开 `allow-top-navigation-by-user-activation`：那会让广告在手机上一按就顶掉当前页，即之前 Adsterra 的强制跳转体验；
