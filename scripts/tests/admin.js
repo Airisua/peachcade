@@ -35,6 +35,24 @@ module.exports = {
     ok(r.status === 200 && r.text.indexOf('/wyj/online.json') >= 0 && r.text.indexOf('online-total') >= 0, 'online page renders with live refresh', r.status);
     r = await user.get('/wyj/online');
     ok(r.status === 302 && String(r.location).indexOf('/login') === 0, 'online page is admin only', r.status + ' ' + r.location);
+    // Heartbeat: a long game session pings /api/ping so it stays inside the
+    // presence window, and the ping must not turn into an "/api/ping" page entry.
+    const beatSlug = 'presence-beat-fixture';
+    db.prepare("DELETE FROM games WHERE slug=?").run(beatSlug);
+    db.prepare("INSERT INTO games(slug,title_en,category,thumb,embed_url,source,plays,likes,published) VALUES(?,?,?,?,?,?,0,0,1)")
+      .run(beatSlug, 'Presence Beat Fixture', 'puzzle', '/img/games/default.svg', 'https://example.com/beat', 'smoke');
+    try {
+      r = await user.get('/game/' + beatSlug);
+      ok(r.status === 200 && r.text.indexOf("'/api/ping?p='") >= 0, 'game page ships the presence heartbeat', r.status);
+      r = await user.get('/api/ping?p=' + encodeURIComponent('/game/' + beatSlug));
+      ok(r.status === 204, 'presence heartbeat answers 204', r.status);
+      r = await admin.get('/wyj/online.json');
+      let beatData = {};
+      try { beatData = JSON.parse(r.text); } catch (e) { beatData = {}; }
+      ok(!(beatData.recent || []).some((v) => v.path.indexOf('/api/') === 0), 'heartbeat does not pollute the page list', (beatData.recent || []).length);
+    } finally {
+      db.prepare('DELETE FROM games WHERE slug=?').run(beatSlug);
+    }
   // admin bulk selection: the row checkboxes are tied to the bulk form with the HTML5
   // form="..." attribute (they live outside the <form> element), so "select all" and the
   // bulk buttons must resolve the form owner instead of querying inside the form element

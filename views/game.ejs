@@ -138,4 +138,19 @@
     </aside>
   </div>
 </main>
+<script>
+// Keep a long game session counted as "online": the presence window is 5 minutes,
+// so one tiny no-store request every 4 minutes is enough. Skipped while the tab
+// is hidden — a background tab is not somebody playing.
+(function () {
+  function beat() {
+    if (document.visibilityState === 'hidden') return;
+    fetch('/api/ping?p=' + encodeURIComponent(location.pathname), {
+      method: 'GET', cache: 'no-store', credentials: 'same-origin', keepalive: true
+    }).catch(function () {});
+  }
+  setTimeout(beat, 60 * 1000);
+  setInterval(beat, 4 * 60 * 1000);
+})();
+</script>
 <%- include('partials/footer') %>

@@ -107,6 +107,40 @@ function track(req) {
   evictIfNeeded();
 }
 
+/**
+ * Refresh an existing visitor without touching their page path.
+ *
+ * Used by the game-page heartbeat: someone who has been playing for 20 minutes
+ * without navigating is still on the site, but a plain request counter would
+ * have dropped them after 5. A heartbeat never rewrites `path` (otherwise every
+ * long session would show up as "/api/ping" in the admin table), and a brand new
+ * visitor gets the page they claim to be on, sanitised.
+ */
+function touch(req, fallbackPath) {
+  const now = Date.now();
+  sweep(now);
+  const key = keyFor(req);
+  const prev = visitors.get(key);
+  if (prev) {
+    prev.last = now;
+    prev.hits += 1;
+    return;
+  }
+  const claimed = typeof fallbackPath === 'string' ? fallbackPath.slice(0, 120) : '';
+  visitors.set(key, {
+    key,
+    first: now,
+    last: now,
+    hits: 1,
+    path: claimed.charAt(0) === '/' ? claimed : '/',
+    userId: (req.user && req.user.id) || null,
+    username: (req.user && req.user.username) || '',
+    ip: maskIp(req.ip || (req.socket && req.socket.remoteAddress) || ''),
+    device: deviceLabel(req.headers['user-agent'])
+  });
+  evictIfNeeded();
+}
+
 function middleware(req, res, next) {
   try {
     track(req);
@@ -160,4 +194,4 @@ function reset() {
   lastSweep = 0;
 }
 
-module.exports = { middleware, snapshot, reset, WINDOW_MS };
+module.exports = { middleware, touch, snapshot, reset, WINDOW_MS };

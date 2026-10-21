@@ -4,8 +4,18 @@ const router = express.Router();
 const { db } = require('../db');
 const { listGames } = require('../queries');
 const { requireLogin } = require('../auth');
+const online = require('../online');
 
 const CPALEAD_POSTBACK_PASSWORD = process.env.CPALEAD_PASSWORD || 'peachcade123';
+
+// Presence heartbeat from game pages: keeps a long session in the "online now"
+// count without a page navigation. GET + no CSRF on purpose (it writes nothing),
+// and it refreshes the existing entry instead of creating a "/api/ping" page hit.
+router.get('/ping', (req, res) => {
+  online.touch(req, String(req.query.p || ''));
+  res.set('Cache-Control', 'no-store');
+  res.status(204).end();
+});
 
 router.get('/postback/cpalead', (req, res) => {
   const pwd = String(req.query.password || '').trim();
