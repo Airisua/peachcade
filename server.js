@@ -11,6 +11,7 @@ const { i18nMiddleware } = require('./src/i18n');
 const { loadUser } = require('./src/auth');
 const { csrfMiddleware, csrfGuard } = require('./src/csrf');
 const common = require('./src/common');
+const online = require('./src/online');
 const { ASSET_VERSION } = require('./src/assets');
 const { redirectTarget, pathTarget } = require('./src/host');
 
@@ -58,6 +59,8 @@ app.use(express.json({ limit: '300kb' }));
 app.use(cookieParser());
 app.use(i18nMiddleware);
 app.use(loadUser);
+// Presence counter: needs req.user, so it sits after loadUser and before routing.
+app.use(online.middleware);
 app.use(csrfMiddleware);
 app.use(common);
 app.use(csrfGuard);

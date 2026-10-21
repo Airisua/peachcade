@@ -12,6 +12,7 @@ const { makeT } = require('../i18n');
 const { isValid } = require('../csrf');
 const upload = require('../upload');
 const providers = require('../providers');
+const online = require('../online');
 
 // server-side bulk import (scripts/import-all.js) writes a cursor + log next to the database;
 // the admin import page surfaces it so a long run is visible without opening a shell
@@ -72,7 +73,18 @@ router.get('/', (req, res) => {
   const latestUsers = db.prepare('SELECT id,username,email,role,created_at FROM users ORDER BY id DESC LIMIT 6').all();
   const topGames = db.prepare('SELECT id,slug,title_en,plays,likes FROM games ORDER BY plays DESC LIMIT 6').all();
   const latestComments = db.prepare('SELECT cm.id, cm.content, cm.created_at, u.username, g.slug AS game_slug, g.title_en AS game_title_en FROM comments cm JOIN users u ON u.id=cm.user_id JOIN games g ON g.id=cm.game_id ORDER BY cm.id DESC LIMIT 6').all();
-  res.render('admin/dashboard', { pageTitle: res.locals.t('admin.dashboard'), stats, latestUsers, topGames, latestComments });
+  res.render('admin/dashboard', { pageTitle: res.locals.t('admin.dashboard'), stats, latestUsers, topGames, latestComments, online: online.snapshot() });
+});
+
+// Live presence: the HTML page renders a first snapshot, then refreshes itself
+// from /wyj/online.json every 10s. In-memory only (see src/online.js).
+router.get('/online', (req, res) => {
+  res.render('admin/online', { pageTitle: res.locals.t('admin.online'), online: online.snapshot() });
+});
+
+router.get('/online.json', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(online.snapshot());
 });
 
 router.get('/games', (req, res) => {

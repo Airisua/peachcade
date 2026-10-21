@@ -18,10 +18,23 @@ module.exports = {
     await admin.get('/login');
     resp = await admin.post('/login', { _csrf: admin.csrf(), username: process.env.ADMIN_USERNAME || 'mqx', password: process.env.ADMIN_PASSWORD || 'mqx331606110' });
     ok(resp.status === 302 && resp.location === '/', 'admin login', resp.status + ' ' + resp.location);
-    for (const p of ['/wyj', '/wyj/games', '/wyj/import', '/wyj/users', '/wyj/comments', '/wyj/ads', '/wyj/settings']) {
+    for (const p of ['/wyj', '/wyj/online', '/wyj/games', '/wyj/import', '/wyj/users', '/wyj/comments', '/wyj/ads', '/wyj/settings']) {
       r = await admin.get(p);
       ok(r.status === 200, 'admin page ' + p, r.status);
     }
+    // Live presence: the visitor traffic from the other clients has to show up in
+    // the admin feed, and the feed must stay admin-only.
+    await user.get('/');
+    r = await admin.get('/wyj/online.json');
+    let onlineData = {};
+    try { onlineData = JSON.parse(r.text); } catch (e) { onlineData = {}; }
+    ok(r.status === 200 && typeof onlineData.total === 'number', 'online json exposes a count', r.status);
+    ok(onlineData.total >= 1, 'visitors are counted as online', JSON.stringify(onlineData).slice(0, 120));
+    ok(Array.isArray(onlineData.recent) && onlineData.recent.some((v) => v.path === '/'), 'online feed lists the visited path', (onlineData.recent || []).length);
+    r = await admin.get('/wyj/online');
+    ok(r.status === 200 && r.text.indexOf('/wyj/online.json') >= 0 && r.text.indexOf('online-total') >= 0, 'online page renders with live refresh', r.status);
+    r = await user.get('/wyj/online');
+    ok(r.status === 302 && String(r.location).indexOf('/login') === 0, 'online page is admin only', r.status + ' ' + r.location);
   // admin bulk selection: the row checkboxes are tied to the bulk form with the HTML5
   // form="..." attribute (they live outside the <form> element), so "select all" and the
   // bulk buttons must resolve the form owner instead of querying inside the form element

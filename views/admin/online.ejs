@@ -1,0 +1,90 @@
+<%- include('../partials/admin_top', { pageTitle: pageTitle }) %>
+<div class="stat-grid">
+  <div class="stat"><b id="online-total"><%= fmt(online.total) %></b><span><%= t('admin.onlineTotal') %></span></div>
+  <div class="stat"><b id="online-logged"><%= fmt(online.loggedIn) %></b><span><%= t('admin.onlineLogged') %></span></div>
+  <div class="stat"><b id="online-guests"><%= fmt(online.guests) %></b><span><%= t('admin.onlineGuests') %></span></div>
+  <div class="stat"><b><%= online.windowMinutes %><%= t('admin.onlineMinutesUnit') %></b><span><%= t('admin.onlineWindow') %></span></div>
+</div>
+<p class="muted small online-hint"><span class="live-dot"></span><%= t('admin.onlineHint', { minutes: online.windowMinutes }) %> <span id="online-updated"></span></p>
+<div class="admin-cols">
+  <section class="panel">
+    <h2><%= t('admin.onlineRecent') %></h2>
+    <div class="tbl-wrap">
+      <table class="tbl" id="online-recent">
+        <thead>
+          <tr>
+            <th><%= t('admin.tblTime') %></th>
+            <th><%= t('admin.tblUser') %></th>
+            <th><%= t('admin.tblPath') %></th>
+            <th><%= t('admin.tblDevice') %></th>
+            <th><%= t('admin.tblIp') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!online.recent.length) { %>
+          <tr><td colspan="5" class="muted"><%= t('admin.onlineEmpty') %></td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="panel">
+    <h2><%= t('admin.onlineTopPages') %></h2>
+    <ul class="page-list" id="online-pages"></ul>
+  </section>
+</div>
+<script>
+(function () {
+  var L = <%- JSON.stringify({
+    guest: t('admin.onlineGuestLabel'),
+    seconds: t('admin.onlineSeconds'),
+    minutes: t('admin.onlineMinutes'),
+    updated: t('admin.onlineUpdated'),
+    empty: t('admin.onlineEmpty')
+  }) %>;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function ago(sec) {
+    var n = Number(sec) || 0;
+    return n < 60 ? L.seconds.replace('{n}', n) : L.minutes.replace('{n}', Math.round(n / 60));
+  }
+  function render(d) {
+    document.getElementById('online-total').textContent = d.total;
+    document.getElementById('online-logged').textContent = d.loggedIn;
+    document.getElementById('online-guests').textContent = d.guests;
+    document.getElementById('online-updated').textContent =
+      L.updated.replace('{time}', new Date(d.generatedAt).toLocaleTimeString());
+
+    var body = document.querySelector('#online-recent tbody');
+    if (!d.recent.length) {
+      body.innerHTML = '<tr><td colspan="5" class="muted">' + esc(L.empty) + '</td></tr>';
+    } else {
+      body.innerHTML = d.recent.map(function (v) {
+        return '<tr>' +
+          '<td class="muted small">' + esc(ago(v.secondsAgo)) + '</td>' +
+          '<td>' + (v.loggedIn ? esc(v.username) : '<span class="muted">' + esc(L.guest) + '</span>') + '</td>' +
+          '<td class="mono small">' + esc(v.path) + '</td>' +
+          '<td class="muted small">' + esc(v.device) + '</td>' +
+          '<td class="muted small">' + esc(v.ip) + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    var list = document.getElementById('online-pages');
+    list.innerHTML = d.topPages.length ? d.topPages.map(function (p) {
+      return '<li><span class="mono">' + esc(p.path) + '</span><b>' + p.count + '</b></li>';
+    }).join('') : '<li class="muted">' + esc(L.empty) + '</li>';
+  }
+  render(<%- JSON.stringify(online) %>);
+  setInterval(function () {
+    fetch('/wyj/online.json', { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d) render(d); })
+      .catch(function () { /* keep the last snapshot on a blip */ });
+  }, 10000);
+})();
+</script>
+<%- include('../partials/admin_bottom') %>
