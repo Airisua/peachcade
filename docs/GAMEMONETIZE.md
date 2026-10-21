@@ -59,6 +59,22 @@ https://pubads.g.doubleclick.net/gampad/ads?iu=/21739493398/ca-games-pub-5519830
 
 同一时间在测试浏览器里访问我们自己的游戏页，`doubleclick` / `googlesyndication` 全部 `net::ERR_CONNECTION_CLOSED`——网络层直接掐断，广告更没有机会播放。
 
+**2026-10-22 定位到的具体原因**：本机跑着 Clash Verge（系统代理 `127.0.0.1:7897`），订阅里的广告拦截规则把广告域名直接 REJECT：
+
+```yaml
+- 'DOMAIN-SUFFIX,doubleclick.net,REJECT'
+- 'DOMAIN-SUFFIX,doubleclick.net,🛑 广告拦截'
+```
+
+实测同一条 URL：
+
+```
+curl 直连（--noproxy）      -> 200
+curl 走 Clash（:7897）      -> 000（连接被拒）
+```
+
+也就是说：**只要本机开着这套规则，自己怎么点都不会产生曝光**，后台当然一直是 0。自测前必须先在 Clash 里放行 `doubleclick.net` / `googlesyndication.com`，或临时关掉系统代理，否则看到的永远是失败请求。
+
 ---
 
 ## 4. 后台一直「无数据」的原因
