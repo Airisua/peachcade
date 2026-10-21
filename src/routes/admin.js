@@ -317,7 +317,7 @@ router.post('/ads/:id/toggle', (req, res) => {
   res.redirect(ADMIN_BASE + '/ads?ok=updated');
 });
 
-const SETTING_KEYS = ['site_name', 'tagline_en', 'tagline_zh', 'tagline_ja', 'footer_text_en', 'footer_text_zh', 'footer_text_ja', 'ads_enabled', 'registration_open', 'ads_txt', 'ezoic_enabled', 'ezoic_adstxt_redirect'];
+const SETTING_KEYS = ['site_name', 'tagline_en', 'tagline_zh', 'tagline_ja', 'footer_text_en', 'footer_text_zh', 'footer_text_ja', 'ads_enabled', 'registration_open', 'ads_txt', 'ezoic_enabled', 'ezoic_adstxt_redirect', 'rewards_enabled'];
 
 router.get('/settings', (req, res) => {
   const values = {};
@@ -336,7 +336,7 @@ router.post('/settings', (req, res) => {
   }
   for (const k of SETTING_KEYS) {
     if (k === 'ads_txt') continue;
-    if (k === 'ads_enabled' || k === 'registration_open' || k === 'ezoic_enabled' || k === 'ezoic_adstxt_redirect') {
+    if (k === 'ads_enabled' || k === 'registration_open' || k === 'ezoic_enabled' || k === 'ezoic_adstxt_redirect' || k === 'rewards_enabled') {
       if (k in b) setSetting(k, isOn(b[k]) ? '1' : '0');
       continue;
     }

@@ -7,7 +7,7 @@
     <nav class="main-nav">
       <a href="/" class="<%= path === '/' ? 'active' : '' %>"><%= t('nav.home') %></a>
       <a href="/games" class="<%= path.indexOf('/games') === 0 || path.indexOf('/category') === 0 ? 'active' : '' %>"><%= t('nav.games') %></a>
-      <a href="/rewards" class="<%= path === '/rewards' ? 'active' : '' %>"><%= t('nav.rewards') %></a>
+      <% if (rewardsEnabled) { %><a href="/rewards" class="<%= path === '/rewards' ? 'active' : '' %>"><%= t('nav.rewards') %></a><% } %>
       <details class="dropdown">
         <summary><%= t('nav.categories') %><svg class="ic"><use href="/img/icons.svg?v=<%= assetV %>#i-chevron"></use></svg></summary>
         <div class="dropdown-panel">

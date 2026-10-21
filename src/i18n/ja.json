@@ -217,6 +217,7 @@
   "admin.settings_footer_text_zh": "フッター文言（中国語）",
   "admin.settings_footer_text_ja": "フッター文言（日本語）",
   "admin.settings_ads_enabled": "広告表示を有効にする",
+  "admin.settings_rewards_enabled": "「Rewards（福利タスク）」入口を表示",
   "admin.settings_registration_open": "新規ユーザー登録を受け付ける",
   "admin.settings_ezoic_enabled": "Ezoic JavaScript連携を有効化（ヘッダースクリプト＆CMP）",
   "admin.settings_ezoic_adstxt_redirect": "/ads.txt を Ezoic AdstxtManager (srv.adstxtmanager.com) に301リダイレクト",

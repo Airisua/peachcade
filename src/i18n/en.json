@@ -212,6 +212,7 @@
   "admin.settings_footer_text_en": "Footer text (English)",
   "admin.settings_footer_text_zh": "Footer text (Chinese)",
   "admin.settings_ads_enabled": "Ads enabled",
+  "admin.settings_rewards_enabled": "Show the Rewards entry",
   "admin.settings_registration_open": "Registration open",
   "admin.settings_ezoic_enabled": "Ezoic JavaScript Integration",
   "admin.settings_ezoic_adstxt_redirect": "Redirect /ads.txt to Ezoic AdstxtManager (srv.adstxtmanager.com)",

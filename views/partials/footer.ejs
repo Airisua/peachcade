@@ -10,7 +10,7 @@
       <a href="/"><%= t('nav.home') %></a>
       <a href="/games"><%= t('common.allGames') %></a>
       <a href="/tags"><%= t('tags.all') %></a>
-      <a href="/rewards"><%= t('nav.rewards') %></a>
+      <% if (rewardsEnabled) { %><a href="/rewards"><%= t('nav.rewards') %></a><% } %>
       <a href="/random"><%= t('nav.random') %></a>
       <a href="/about"><%= t('footer.about') %></a>
       <a href="/privacy"><%= t('footer.privacy') %></a>

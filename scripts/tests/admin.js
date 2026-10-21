@@ -53,6 +53,24 @@ module.exports = {
     } finally {
       db.prepare('DELETE FROM games WHERE slug=?').run(beatSlug);
     }
+    // Rewards (CPAlead offerwall) is opt-in: no nav entry and a hard 404 until an
+    // admin flips it on in Settings.
+    r = await user.get('/');
+    ok(r.text.indexOf('href="/rewards"') < 0, 'rewards entry hidden by default');
+    r = await user.get('/rewards');
+    ok(r.status === 404, 'rewards page 404s while hidden', r.status);
+    try {
+      resp = await admin.post('/wyj/settings', { _csrf: admin.csrf(), rewards_enabled: 'on' });
+      ok(resp.status === 302, 'rewards setting saved', resp.status);
+      r = await user.get('/');
+      ok(r.text.indexOf('href="/rewards"') >= 0, 'rewards entry appears when enabled');
+      r = await user.get('/rewards');
+      ok(r.status === 200, 'rewards page renders when enabled', r.status);
+    } finally {
+      await admin.post('/wyj/settings', { _csrf: admin.csrf(), rewards_enabled: '0' });
+      r = await user.get('/');
+      ok(r.text.indexOf('href="/rewards"') < 0, 'rewards entry hidden again after reset');
+    }
   // admin bulk selection: the row checkboxes are tied to the bulk form with the HTML5
   // form="..." attribute (they live outside the <form> element), so "select all" and the
   // bulk buttons must resolve the form owner instead of querying inside the form element

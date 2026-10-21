@@ -350,6 +350,11 @@ router.get('/terms', (req, res) => {
 });
 
 router.get('/rewards', (req, res) => {
+  // Opt-in feature: when the admin has not switched it on, the page behaves
+  // like any other missing URL (no nav entry, no indexable copy, hard 404).
+  if (!res.locals.rewardsEnabled) {
+    return res.status(404).render('error', { status: 404, message: res.locals.t('err.notFound') });
+  }
   res.render('rewards', { 
     pageTitle: res.locals.t('rewards.title'),
     metaDesc: res.locals.t('rewards.desc')
