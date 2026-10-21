@@ -111,4 +111,35 @@
 - 想彻底重置：docker compose down && rm -rf data/app.db* public/uploads/* && docker compose up -d
 - 中文 / 英文内容：站点默认英文；点击页头右上角 EN/中文 切换。后台双语文案可随时编辑。
 - 广告不显示：确认 /wyj/settings 中 ads_enabled 已开启，且对应广告位有启用的广告
-  （未配置时前台只显示占位框）。
+  （未配置的广告位现在整段不输出，不会留占位框，见 `views/partials/ad.ejs`）。
+
+## 8. 网关容器（Cloudflare Tunnel 拓扑）
+
+生产环境用 `peachcade-gateway`（nginx:1.27-alpine）占用宿主机 3000 端口，作为
+Cloudflare Tunnel 的唯一源站；配置文件是 `/home/ubuntu/gateway/nginx.conf`，
+仓库内的副本是 `deploy/gateway/nginx.conf`（改完记得同步到服务器）。
+
+一条必须记住的规则：**上游用变量 + Docker DNS 解析**。
+
+    resolver 127.0.0.11 valid=10s ipv6=off;   # server 块内
+
+    location / {
+        set $app_upstream pixelplay:3000;
+        proxy_pass http://$app_upstream;      # 不再写死 http://pixelplay:3000
+    }
+
+原因：nginx 默认只在启动时解析一次 `proxy_pass` 里的主机名。这带来两个生产事故：
+
+1. `docker compose up -d --build` 重建游戏站后容器 IP 变了，nginx 仍打旧 IP → 全站 502，
+   必须重启网关才恢复；
+2. 某个可选上游（如 `gcli2api`）被停掉后，网关**直接启动失败**
+   （`host not found in upstream "gcli2api"`），整站跟着挂——2026-10-22 就这样发生过一次。
+
+改成变量后，解析推迟到每次请求，`valid=10s` 让新 IP 在 10 秒内生效；停掉的上游只影响
+它自己的 location（返回 502），游戏站照常。
+
+改完后的验证：
+
+    docker run --rm -v /home/ubuntu/gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro nginx:1.27-alpine nginx -t
+    docker restart peachcade-gateway
+    curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3000/

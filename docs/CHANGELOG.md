@@ -4,6 +4,17 @@
 
 ---
 
+## [2026-10-22] 网关改为按请求解析上游（重建容器后的 502 根因）
+
+- **事故**：发版重建 `pixelplay` 之后全站 502；重启网关又启动失败，日志是
+  `host not found in upstream "gcli2api"`——因为 `gcli2api` 已被停掉，而 nginx 在启动时就要解析所有 `proxy_pass` 主机名；
+- **根因**：nginx 只在启动时解析一次上游地址。容器重建 → IP 变了 → 打旧 IP；可选上游停机 → 配置直接加载失败，整站跟着挂；
+- **修复**：`/home/ubuntu/gateway/nginx.conf` 增加 `resolver 127.0.0.11 valid=10s ipv6=off;`，三处 `proxy_pass` 改成「变量 + 请求时解析」（`set $app_upstream pixelplay:3000; proxy_pass http://$app_upstream;`）。现在重建容器 10 秒内自动生效，停掉的上游只影响它自己的 location；
+- 网关配置首次入库：`deploy/gateway/nginx.conf`，并在 `docs/DEPLOY.md` 第 8 节写清为什么必须这么写；
+- 线上验证：`https://peachcat.fun/` 200，`/gcli2api/` 独立返回 502（服务本来是停的），游戏站不受影响。
+
+---
+
 ## [2026-10-21] 游戏 iframe 放宽沙箱 + 空广告位不再占位 + Adsterra 确认清空
 
 - **游戏 iframe 沙箱**（`views/game.ejs`）：补上 `allow-popups-to-escape-sandbox`、`allow-modals`、`allow-downloads`。GameMonetize 游戏内的广告点击是开新窗口的，之前弹窗会继承父级沙箱，落地页基本白屏——曝光之外连点击收益也一起丢了；
