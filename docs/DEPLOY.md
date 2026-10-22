@@ -31,7 +31,7 @@
     # 编辑 .env：至少修改 JWT_SECRET 与 ADMIN_PASSWORD
     docker compose up -d --build
 
-首次构建会拉取 node:22-slim 并安装依赖，视网络约 1-5 分钟。
+首次构建会拉取 node:24-slim 并安装依赖，视网络约 1-5 分钟。
 
 验证：
 

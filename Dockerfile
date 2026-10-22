@@ -1,4 +1,4 @@
-FROM node:22-slim AS deps
+FROM node:24-slim AS deps
 WORKDIR /app
 # Build tools are only needed as a fallback when the better-sqlite3 prebuilt
 # binary cannot be downloaded, so the produced image itself stays slim.
@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
 COPY package*.json ./
 RUN npm ci --omit=dev || npm install --omit=dev
 
-FROM node:22-slim
+FROM node:24-slim
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
