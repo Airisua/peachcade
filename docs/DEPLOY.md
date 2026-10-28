@@ -150,7 +150,27 @@ Cloudflare Tunnel 的唯一源站；配置文件是 `/home/ubuntu/gateway/nginx.
 （`/usr/local/bin/cloudflared` 是指向它的软链），启动参数来自
 `/etc/cloudflared/token`。
 
-**这台机器没有配置 Cloudflare 的 apt 源**，`apt upgrade` 不会带上它，需要手动升：
+**已接入 Cloudflare 官方 apt 源**（2026-10-28 配置），日常跟着系统一起升：
+
+    sudo apt-get update
+    sudo apt-get install --only-upgrade cloudflared
+    sudo systemctl restart cloudflared
+    systemctl is-active cloudflared
+    sudo journalctl -u cloudflared -n 20 --no-pager | grep "Registered tunnel connection"
+
+源的配置（换机器时照抄）：
+
+    curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg \
+      | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main" \
+      | sudo tee /etc/apt/sources.list.d/cloudflared.list
+    sudo apt-get update
+
+验证源生效（Candidate 应来自 `pkg.cloudflare.com`）：
+
+    apt-cache policy cloudflared
+
+源不可用时的兜底（手动装 deb，dpkg 会同步版本元数据）：
 
     curl -L -o /tmp/cloudflared.deb \
       https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
@@ -165,5 +185,6 @@ Cloudflare Tunnel 的唯一源站；配置文件是 `/home/ubuntu/gateway/nginx.
 `Registered tunnel connection`）。回滚：把 `/root` 下的备份拷回
 `/usr/bin/cloudflared` 再 restart。
 
-2026-10-28 已从 2026.10.0 升到 **2026.10.5**（Cloudflare 公告：2026.10.2 以下
-仍信任已泄露私钥的 eMudhra 中间证书）。
+2026-10-28 已从 2026.10.0 升到 **2026.10.5** 并接入官方源（Cloudflare 公告：
+2026.10.2 以下仍信任已泄露私钥的 eMudhra 中间证书）。当前 `apt-cache policy`
+显示 Candidate 来自 `pkg.cloudflare.com`，已是最新。
