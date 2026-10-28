@@ -143,3 +143,27 @@ Cloudflare Tunnel 的唯一源站；配置文件是 `/home/ubuntu/gateway/nginx.
     docker run --rm -v /home/ubuntu/gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro nginx:1.27-alpine nginx -t
     docker restart peachcade-gateway
     curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3000/
+
+### 8.1 cloudflared（隧道客户端）
+
+隧道由宿主机上的 systemd 服务跑，二进制在 `/usr/bin/cloudflared`
+（`/usr/local/bin/cloudflared` 是指向它的软链），启动参数来自
+`/etc/cloudflared/token`。
+
+**这台机器没有配置 Cloudflare 的 apt 源**，`apt upgrade` 不会带上它，需要手动升：
+
+    curl -L -o /tmp/cloudflared.deb \
+      https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+    sudo cp -a /usr/bin/cloudflared /root/cloudflared-$(cloudflared --version | awk '{print $3}').bak
+    sudo dpkg -i /tmp/cloudflared.deb
+    sudo systemctl restart cloudflared
+    systemctl is-active cloudflared                       # active
+    sudo journalctl -u cloudflared -n 20 --no-pager | grep "Registered tunnel connection"
+    curl -s -o /dev/null -w '%{http_code}\n' https://peachcat.fun/
+
+重启会断几条连接，Cloudflare 会在几秒内重新注册（正常看到 4 条
+`Registered tunnel connection`）。回滚：把 `/root` 下的备份拷回
+`/usr/bin/cloudflared` 再 restart。
+
+2026-10-28 已从 2026.10.0 升到 **2026.10.5**（Cloudflare 公告：2026.10.2 以下
+仍信任已泄露私钥的 eMudhra 中间证书）。
