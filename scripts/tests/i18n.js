@@ -14,7 +14,6 @@ module.exports = {
   let r = await user.get('/');
   ok(r.status === 200 && r.text.includes('/game/2048') && !r.text.includes('热门游戏'), 'home renders EN with games', r.status);
   ok(r.text.includes('Peachcade'), 'home renders new brand name Peachcade');
-  ok(r.text.includes('cmp.gatekeeperconsent.com') && r.text.includes('ezstandalone'), 'home includes Ezoic privacy & header scripts');
   r = await user.get('/lang/zh?next=/');
   ok(r.status === 302, 'lang switch to zh', r.status);
   r = await user.get('/');

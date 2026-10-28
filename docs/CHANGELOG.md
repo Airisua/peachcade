@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-10-29] 关闭 Ezoic（默认 opt-in）
+
+- 线上实测 Ezoic 每页拉 15+ 个第三方请求（CMP、sa.min.js、analytics、dpv.gif 等），但后台埋点 `ad_pixel_count` / `ad_density` 均为 0——账号没有可投放的 placement，等于只增加请求和首屏开销；
+- `settings.ezoic_enabled` 默认值从 `1` 改为 `0`，模板兜底值也改为关闭；后台开关保留，拿到 placement ID 后可随时勾选恢复；
+- 同步更新 `docs/ADS.md`（新增第 6 节说明）与冒烟用例：`ads` 套件新增「开启注入 / 关闭不注入」两条断言，`i18n` 套件不再依赖 Ezoic 脚本存在；
+- 线上库执行 `UPDATE settings SET value='0' WHERE key='ezoic_enabled'`，部署后首页 HTML 不再出现 `gatekeeperconsent.com` / `ezstandalone` / `ezojs.com`。
+
+---
+
 ## [2026-10-28] 广告位样式修正 + 广告排障文档
 
 - `.ad-slot img` 原来是 `max-height:110px`：728×90 的横幅没问题，但 300×250 / 300×600 会被压扁成一条，看起来像「广告挂了」。改成 `max-width:100%; height:auto; max-height:none`，按宽度自适应；

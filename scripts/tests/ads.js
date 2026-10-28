@@ -2,7 +2,7 @@
 const { ctx, client, snapshotSettings, restoreSettings } = require('./context');
 
 module.exports = {
-  title: 'Ad slots, ads.txt, Ezoic redirect',
+  title: 'Ad slots, ads.txt, Ezoic redirect & toggle',
   async run() {
     const ok = ctx.ok;
     const db = ctx.db;
@@ -63,6 +63,18 @@ module.exports = {
       resp = await setAds({ ads_enabled: 'on', ads_txt: smokeAdsTxt, ezoic_adstxt_redirect: '0' });
       r = await user.get('/ads.txt');
       ok(r.status === 200 && r.text.includes('pub-2264028095354486'), 'ads.txt returns to standard content when redirect disabled', r.status);
+
+      // Ezoic is opt-in: the header/CMP stack is only injected after an admin
+      // explicitly enables it. This keeps 15+ third-party requests off pages
+      // while the account has no approved placements.
+      resp = await setAds({ ads_enabled: 'on', ads_txt: smokeAdsTxt, ezoic_enabled: 'on' });
+      ok(resp.status === 302, 'enable Ezoic JavaScript', resp.status);
+      r = await user.get('/');
+      ok(r.text.includes('cmp.gatekeeperconsent.com') && r.text.includes('ezstandalone'), 'Ezoic privacy & header scripts render when enabled', r.status);
+      resp = await setAds({ ads_enabled: 'on', ads_txt: smokeAdsTxt, ezoic_enabled: '' });
+      ok(resp.status === 302, 'disable Ezoic JavaScript', resp.status);
+      r = await user.get('/');
+      ok(!r.text.includes('cmp.gatekeeperconsent.com') && !r.text.includes('ezstandalone'), 'Ezoic scripts stay out of the page when disabled', r.status);
     } finally {
       db.prepare("DELETE FROM ads WHERE title='Smoke Ad'").run();
       for (const a of headerAds) db.prepare('UPDATE ads SET enabled=? WHERE id=?').run(a.enabled, a.id);

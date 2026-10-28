@@ -232,7 +232,10 @@ function seed() {
     ads_txt: 'google.com, pub-2264028095354486, DIRECT, f08c47fec0942fa0\n\n# GameMonetize publisher ads.txt\ngoogle.com, pub-5519830896693885, DIRECT, f08c47fec0942fa0\ngoogle.com, pub-4764333688337558, DIRECT, f08c47fec0942fa0',
     ads_enabled: '1',
     registration_open: '1',
-    ezoic_enabled: '1',
+    // Ezoic's header stack pulls 15+ requests per page even when no placement
+    // is approved, so it is opt-in. Enable it in Admin / Settings when Ezoic
+    // actually has ads to serve.
+    ezoic_enabled: '0',
     ezoic_adstxt_redirect: '0'
   };
   const insSet = db.prepare('INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)');

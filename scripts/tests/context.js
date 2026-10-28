@@ -84,9 +84,9 @@ function reloadModules() {
   }
 }
 
-const SETTING_KEYS = ['ads_enabled', 'ads_txt', 'ezoic_adstxt_redirect'];
+const SETTING_KEYS = ['ads_enabled', 'ads_txt', 'ezoic_enabled', 'ezoic_adstxt_redirect'];
 function snapshotSettings() {
-  const rows = ctx.db.prepare("SELECT key, value FROM settings WHERE key IN ('ads_enabled','ads_txt','ezoic_adstxt_redirect')").all();
+  const rows = ctx.db.prepare("SELECT key, value FROM settings WHERE key IN ('ads_enabled','ads_txt','ezoic_enabled','ezoic_adstxt_redirect')").all();
   return new Map(rows.map((r) => [r.key, r.value]));
 }
 function restoreSettings(snapshot) {

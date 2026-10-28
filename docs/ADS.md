@@ -55,3 +55,15 @@ popunder；`socialbar` / `Social Bar` 是浮条。**这类代码不要贴进 `he
 `/ads.txt` 由后台「设置」里的 `ads_txt` 直接输出，目前是 Google AdSense + GameMonetize
 的两条 seller。Adsterra / HilltopAds 一般不要求 ads.txt；如果平台后台给了
 `ads.txt` 片段，直接追加到同一文本框即可，保存后立即生效。
+
+## 6. Ezoic 为什么默认关闭
+
+`settings.ezoic_enabled` 现在默认 `0`。原因不是 Ezoic 不能用，而是**没有 placement 时它
+仍然会加载整套 CMP + 广告引擎**：线上实测每个页面 15+ 个第三方请求（cmp.gatekeeperconsent.com、
+the.gatekeeperconsent.com、ezojs.com、ezoicanalytics.com 等），而埋点回报的
+`ad_pixel_count` / `ad_density` 都是 0——等于纯付出、没有广告收益。
+
+- 关掉后：页面不再出现 `gatekeeperconsent` / `ezstandalone` / `ezojs` 请求，首屏更干净；
+- 想恢复：后台 **设置 → 启用 Ezoic JavaScript 广告引擎** 勾上保存即可，代码没有删除；
+- 只有拿到 Ezoic 的 placement ID、并确认后台状态为 Active 后才建议重新开启；
+  开启后还需要在对应位置放 `ezoic-pub-ad-placeholder-XXX` 容器，否则依然不会有广告。

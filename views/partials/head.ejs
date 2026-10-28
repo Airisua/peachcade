@@ -6,7 +6,7 @@
 <% if (typeof preloadImage !== 'undefined' && preloadImage) { %><link rel="preload" as="image" href="<%= preloadImage %>" fetchpriority="high">
 <% } %>
 <% if (typeof adminCss === 'undefined' || !adminCss) { %>
-<% if (typeof ezoicEnabled !== 'undefined' ? ezoicEnabled : true) { %>
+<% if (typeof ezoicEnabled !== 'undefined' ? ezoicEnabled : false) { %>
 <link rel="preconnect" href="https://cmp.gatekeeperconsent.com" crossorigin>
 <link rel="preconnect" href="https://www.ezojs.com" crossorigin>
 <!-- Ezoic Privacy Scripts (Consent Management) -->
