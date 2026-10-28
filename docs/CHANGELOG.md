@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-10-28] 广告位样式修正 + 广告排障文档
+
+- `.ad-slot img` 原来是 `max-height:110px`：728×90 的横幅没问题，但 300×250 / 300×600 会被压扁成一条，看起来像「广告挂了」。改成 `max-width:100%; height:auto; max-height:none`，按宽度自适应；
+- 广告位容器改成纵向 flex 居中，`.ad-label` 和素材不再错位；`type=image` 的广告额外加 `.ad-slot-image`（`min-height:120px`）预留高度防跳动，**脚本类广告不预留**，避免 popunder 在页面上留一块空白；
+- 新增 `docs/ADS.md`：slot 对照表（header / list-top / home-mid / game-under / sidebar / footer）、三种广告形态的区别（Display Banner / Popunder / Social Bar）、30 秒排障（`200` / `403` / `failed` 分别代表什么）、素材填写规范和 ads.txt 说明；
+- 实测记录：站内三条广告里两条是 popunder（点击才弹新窗口，不占展示位），Adsterra 的两条标签在代理出口返回 `403`（直连 `200`），Hilltop 的 popunder 脚本 `200` 且回调正常。
+
+---
+
 ## [2026-10-22] 运行时升级到 Node 24 LTS
 
 - 镜像基础从 `node:22-slim` 换成 `node:24-slim`（deps 与运行阶段都改）。Node 22 已转入 Maintenance LTS，24 是当前 Active LTS，安全更新和性能修复都在这条线上；

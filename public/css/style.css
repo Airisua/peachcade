@@ -333,9 +333,15 @@ textarea {
 .badge.danger{color:#fca5a5;border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.1)}
 .badge.off{opacity:.6}
 .big-code{font-size:84px;margin:0;background:linear-gradient(135deg,var(--brand),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
-.ad-slot{position:relative;margin:18px auto;max-width:1000px;padding:0 18px;text-align:center}
-.ad-slot .ad-label{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5b5b74;margin-bottom:5px}
-.ad-slot img{max-height:110px;margin:0 auto;border-radius:8px}
+.ad-slot{position:relative;margin:18px auto;max-width:1000px;padding:0 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.ad-slot .ad-label{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5b5b74;margin-bottom:0}
+/* Creatives come in fixed sizes (728x90, 300x250, 300x600...). The old 110px cap
+   squashed anything taller than a leaderboard, so a 250px banner looked broken.
+   Size by width instead, and reserve height only for image creatives (see
+   .ad-slot-image) so script tags do not leave an empty gap. */
+.ad-slot img{max-width:100%;height:auto;max-height:none;margin:0 auto;border-radius:8px}
+.ad-slot iframe{max-width:100%;border:0}
+.ad-slot-image{min-height:120px;justify-content:center}
 .ad-ph{border:1px dashed #34344c;border-radius:11px;padding:16px;display:flex;flex-direction:column;gap:3px;color:#5f5f7a;background:rgba(255,255,255,.015)}
 .ad-ph b{font-size:13px;color:#7d7d99;font-weight:600}
 .ad-slot-footer{margin:30px auto 10px}

@@ -4,7 +4,7 @@
   which is dead space for visitors and reads as an unfinished site.
 %>
 <% if (adsEnabled) { const ad = adFor(slot); if (ad) { %>
-<div class="ad-slot ad-slot-<%= slot %>">
+<div class="ad-slot ad-slot-<%= slot %><%= (ad.type === 'image' && ad.image_url) ? ' ad-slot-image' : '' %>">
   <span class="ad-label"><%= t('common.advertisement') %></span>
   <% if (ad.type === 'image' && ad.image_url) { %>
   <a href="<%= ad.link_url || '#' %>" target="_blank" rel="noopener nofollow sponsored"><img src="<%= ad.image_url %>" alt="<%= ad.title || 'Sponsor' %>" loading="lazy" decoding="async"></a>
