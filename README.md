@@ -1,214 +1,45 @@
-# Peachcade - a self-hosted HTML5 games portal
+# Peachcade
 
-Peachcade is a dynamic, database-driven games website and a premier destination for instant, free HTML5 browser games with user accounts, community features, and management tooling.
+Peachcade 是一个自托管的动态 HTML5 在线小游戏门户网站，支持游戏聚合展示、用户账户与社区互动、多语言切换、SEO 优化、广告位管理以及独立后台运营。
 
-## Features
+## 项目功能
 
-- Dynamic server-rendered site (Node.js + Express + EJS + SQLite): game catalog,
-  categories, search with live suggestions, sorting, pagination, random game.
-- 5 built-in playable mini games (ported as standalone HTML5 pages, embedded in a
-  16:9 player): 2048, Snake Classic, Memory Match, Tic-Tac-Toe, Minesweeper.
-- Game integration model: like the big portals, Peachcade aggregates games.
-  Admins can embed any external HTML5 game by setting an embed URL per game
-  (iframe). Built-in games simply use a local embed URL, e.g. /games/2048/.
-- Accounts: register / login (bcrypt hashing + JWT in an httpOnly cookie),
-  favorites, play history, comments on games.
-- Independent admin panel at /wyj: dashboard stats, game CRUD with EN/ZH
-  fields and thumbnail upload, comment moderation, user management (roles /
-  ban), ad management, site settings (name, taglines, ads on-off, open
-  registration).
-- Advertising: 6 configurable slots (header, home-mid, list-top, game-under,
-  sidebar, footer). Each slot takes raw HTML (e.g. an AdSense snippet) or an
-  image banner; until configured, a placeholder box is shown.
-- Bilingual UI: English by default, one-click switch to Chinese (header /
-  footer language links, /lang/zh). Dictionaries live in src/i18n/*.json.
-- Docker one-command deployment with health check (GET /healthz).
+### 1. 游戏目录与聚合展示
+- **动态首页与榜单**：服务端动态渲染首页，提供 Hero 主推、Featured 精选轮换（后台未设置精选时自动从热门与高分游戏中随机轮换）、热门游戏、最新上线、最高好评与「继续游玩」栏目。
+- **分类、标签与分页**：内置 14 个游戏分类与标签聚合页/标签目录，支持按游玩量、最新上线、好评数和名称排序，以及带页码窗口的分页导航。
+- **内置与外部游戏接入**：内置 5 款独立 HTML5 小游戏（2048、Snake Classic、Memory Match、Tic-Tac-Toe、Minesweeper），同时支持通过 iframe 嵌入地址聚合外部平台游戏。
+- **搜索与随机发现**：提供顶部实时搜索建议、完整搜索结果页与随机游戏跳转。
 
-## Quick start (local)
+### 2. 游玩体验与社区账户
+- **16:9 游戏播放器**：支持加载过渡动画、重载、剧院模式、全屏播放、新标签页打开与链接分享，并配置 iframe `sandbox` 安全隔离。
+- **游戏详情页**：包含玩法说明、游戏简介、标签、规格参数表、可见 FAQ、同分类推荐以及跨分类相似标签推荐。
+- **用户体系**：支持注册、登录、退出与个人中心（收藏夹、游玩历史、个人评论、邮箱与密码修改）。
+- **互动功能**：支持游戏点赞、收藏与发表评论（含频率限制，作者和管理员可删除）。
 
-Requirements: Node.js >= 20.
+### 3. 多语言支持
+- **多语言界面**：默认英文，支持英文与日文一键切换；中文保留路由可达性与字典支持。
+- **多语言内容管理**：支持游戏标题、简介、玩法及站点标语的 EN / ZH / JA 多语言字段配置，后台管理界面统一采用中文。
 
-    npm install
-    npm start
+### 4. 独立后台管理
+- **数据概览与实时在线**：提供用户数、游戏数、总游玩数、评论数统计，以及基于活跃窗口与游戏页心跳的实时在线访客监控（含登录/游客分布、访问设备、脱敏 IP 与热门页面）。
+- **游戏管理与批量操作**：支持游戏新建、编辑、发布/隐藏、精选切换、封面上传，以及多选/全选批量发布、隐藏、删除和按热度/收藏/评论排序。
+- **平台游戏导入**：支持 GameMonetize 预设及自定义 RSS / JSON Feed 预览与事务化导入，自动去重并配备支持限流退避与断点续传的批量导入脚本。
+- **用户、评论与广告管理**：支持用户角色调整、封禁与删除，评论隐藏与删除；支持 6 个广告位（`header`、`home-mid`、`list-top`、`game-under`、`sidebar`、`footer`，HTML/图片双模式）、`ads.txt` 在线编辑、Ezoic 与 Rewards 功能开关及站点基础设置。
 
-Open http://localhost:3000
+### 5. SEO、性能与安全
+- **搜索引擎优化**：支持唯一域名与小写无尾斜杠 URL 规范化、标签别名 301 归并、分页 `noindex`、分片 `sitemap.xml`、RSS 订阅（`/feed.xml`）、`robots.txt`、IndexNow 推送以及 Schema.org 结构化数据（`WebSite`、`CollectionPage`、`BreadcrumbList`、`VideoGame`、`FAQPage`、`ItemList`）。
+- **性能优化**：外部游戏缩略图本地代理裁剪与磁盘缓存（`/thumb`）、静态资源内容哈希版本控制与长效缓存、Sitemap/标签/RSS 内存缓存。
+- **安全机制**：`bcryptjs` 密码加密、JWT（`httpOnly` Cookie）鉴权、Double-Submit CSRF 防护、登录/注册/评论限流以及 Helmet 安全响应头。
 
-Default accounts (created on first start, change them!):
+## 技术栈
 
-- Admin: mqx / mqx331606110  (admin panel: /wyj)
-- Demo player: player / player123
-
-Useful scripts:
-
-    npm run smoke        # every smoke suite against the running site
-    npm run smoke:quick  # health + read-only sanity, ~0.3s (safe on production)
-    npm run smoke:fresh   # throwaway sqlite + server, never touches ./data
-    npm run smoke:list    # list the suites (quick/i18n/core/games/user/ads/admin)
-    node scripts/smoke.js ads   # run only the suite you touched
-    npm run check:games  # validate the 5 built-in games (syntax + jsdom boot)
-    npm run check:i18n   # verify all translation keys exist in EN, ZH and JA
-    npm run check:providers  # unit checks for the game feed parsers
-    npm run reclassify   # dry run: re-sort imported games into the current categories
-    npm run reset:db     # delete the SQLite database (re-seeded on next start)
-
-## Docker deployment (one command)
-
-    docker compose up -d --build
-
-Open http://localhost:3000 . The database (./data) and uploaded thumbnails
-(./public/uploads) are bind-mounted and survive rebuilds.
-
-    docker compose logs -f      # follow logs
-    docker compose down         # stop
-    docker compose up -d --build  # rebuild + restart after code changes
-
-### Environment variables
-
-Create a .env file next to docker-compose.yml (see .env.example):
-
-    PORT=3000                               -- HTTP port (default 3000)
-    JWT_SECRET=change-me                    -- REQUIRED in production
-    ADMIN_USERNAME=admin                    -- initial admin (first start only)
-    ADMIN_EMAIL=admin@example.com
-    ADMIN_PASSWORD=mqx331606110              -- change it!
-
-The initial admin account is created only when the database is empty. After
-first start you can also change the password from the admin UI, or reset the
-database and set new values.
-
-## Documentation
-
-- docs/ARCHITECTURE.md - code layout, routes, data model, request pipeline
-- docs/DEPLOY.md - full deployment guide (Chinese): server prep, HTTPS reverse
-  proxy for Nginx/Caddy, backup / restore, upgrade, FAQ
-- docs/GAMES_SPEC.md - the contract for built-in game pages
-
-## Admin guide (short)
-
-- Games: /wyj/games -> New game. Fill EN/ZH titles, descriptions and "how to
-  play", pick a category, set a thumbnail (upload PNG/JPG/WebP/GIF <= 2 MB or
-  paste a URL), and set the Embed URL. For a built-in game use the local path
-  (/games/<slug>/); for an external game use its iframe URL. Check
-  "Published" to make it visible. The homepage featured row and hero rotate
-  randomly: through the games you marked "Featured" (when at least one is
-  published), otherwise through a random mix of the most popular and best
-  rated games, so the homepage changes on every visit.
-- Ads: /wyj/ads -> add an ad: choose slot, type html (paste an AdSense or
-  any ad-network snippet) or image (image URL + link). Toggle enabled/disabled
-  per ad; switch all ads off in /wyj/settings (ads_enabled).
-- Comments: /wyj/comments to hide or delete user comments.
-- Users: /wyj/users to promote/demote admins, ban or delete accounts.
-- Settings: /wyj/settings - site name, taglines (EN/ZH), footer text,
-  ads on/off, registration open/closed.
-
-## Importing games from a distribution platform
-
-The admin panel includes a feed importer at /wyj/import:
-
-- GameMonetize works out of the box: pick the preset and click "Preview feed".
-- GameDistribution / GamePix / any other platform: register as a publisher
-  there first, then choose "Custom JSON feed" (or RSS) and paste the feed URL
-  from the dashboard.
-- The preview shows title, thumbnail, mapped category and embed URL; games
-  that were already imported are detected and skipped automatically.
-- Imported games default to drafts (uncheck "Publish immediately") so you can
-  polish the EN/ZH copy before going live.
-- Whitelist your domain on the platform: ads and revenue tracking inside
-  embedded games are handled by the provider SDK, while your own ad slots keep
-  running around the player.
-
-## Categories
-
-- Games are sorted into 14 categories: Puzzle, Arcade, Action, Casual, Skill,
-  Board, Racing, Shooting, Sports, Platformer, Adventure, Simulation, Clicker
-  and Girls. Categories without games are hidden from the navigation
-  automatically.
-- Imported games keep the provider's own category when it is a known genre
-  (Racing, Shooting, Sports, Adventure, Clicker, Girls, ...) and otherwise fall
-  back to genre keywords in the feed tags, so a driving or dress-up game lands
-  on the right shelf without manual work.
-- `npm run reclassify` re-sorts games that were imported before a category
-  existed: it reads the feed again (`--feed-file <dump>` or `--pages N`),
-  prints the planned moves, and writes them with `--apply`.
-
-## Project structure
-
-    server.js               Express app entry (middleware order, routes, errors)
-    src/db.js               SQLite schema + first-run seed (games, admin, demo)
-    src/i18n.js, src/i18n/  i18n middleware + EN/ZH dictionaries
-    src/auth.js             JWT cookie auth (register/login/logout guards)
-    src/csrf.js             CSRF token issue + validation
-    src/ratelimit.js        small in-memory rate limiter for login/register
-    src/queries.js          shared game list/search queries
-    src/providers.js        game feed importers (GameMonetize, custom RSS/JSON)
-    src/common.js           per-request view locals (site, categories, helpers)
-    src/upload.js           multer upload for thumbnails (2 MB, png/jpg/webp/gif)
-    src/routes/site.js      home, listing, search, category, game page, comments
-    src/routes/auth.js      login/register/profile/password
-    src/routes/api.js       JSON API: game search, like, favorite
-    src/routes/wyj.js     admin panel (games, users, comments, ads, settings)
-    views/                  EJS templates (public site + admin panel)
-    public/css|js|img       styles, front-end JS, SVG icon sprite, thumbnails
-    public/games/<slug>/    the 5 built-in games (standalone HTML5 pages)
-    scripts/                smoke test, game checker, i18n checker, provider checker, db reset
-    Dockerfile, docker-compose.yml, .env.example
-
-## Security notes
-
-- Change JWT_SECRET and the admin password before going public.
-- Serve behind HTTPS (see docs/DEPLOY.md for Nginx/Caddy snippets); cookies are
-  httpOnly + SameSite=Lax and become secure behind TLS.
-- SQLite is single-writer: run one app instance (the compose file does).
-- Admin ad slots intentionally allow raw HTML (that is how ad networks work);
-  only trusted admins should have access.
-- Uploads are limited to raster images <= 2 MB.
-
-## Caching & releases
-
-- Every static asset URL (style.css, admin.css, main.js and the SVG icon sprite)
-  carries a `?v=<hash>` token computed from the asset contents (`src/assets.js`).
-  Browsers and a CDN in front of the site (Cloudflare caches `.js` / `.css` by
-  extension) therefore fetch a new build immediately after a deploy instead of
-  serving the previous one for up to an hour. HTML is never cached, so it always
-  points at the current hash.
-- Override the token with `ASSET_VERSION=...` if you want to bust caches by hand.
-- CSS / JS / SVG / thumbnails are served with `Cache-Control: immutable` for one
-  year; the `?v=<hash>` token makes a deploy invalidate them automatically.
-- Sitemaps and `robots.txt` are sent with a one-hour `s-maxage`. To let
-  Cloudflare answer crawlers from the edge, add a Cache Rule:
-  `URI Path matches /sitemap` -> Cache eligibility: Eligible, Edge TTL: 1 hour
-  (optionally also `/robots.txt` and `/ads.txt`). Without that rule Cloudflare
-  keeps treating them as dynamic, which is safe but slower for Googlebot.
-- HTML is intentionally **not** edge-cached: every page embeds a per-visitor
-  CSRF token and login state, so caching it would leak forms between visitors.
-
----
-
-## 中文摘要
-
-Peachcade 是一个可自托管的多人在线网页街机小游戏站（动态渲染，非静态页面），提供极速畅玩的精品网页小游戏，支持完整账号体系、社区互动与管理后台。核心能力：
-
-- 动态游戏库：分类 / 搜索（实时联想）/ 热门、最新、好评排序 / 随机开玩。
-- 内置 5 款可玩小游戏（2048、贪吃蛇、记忆翻牌、井字棋、扫雷），并以 iframe
-  方式嵌入 16:9 播放器；同时效仿大型游戏站，支持站长在后台通过 Embed URL
-  接入任意外部 HTML5 游戏。
-- 账号系统：注册 / 登录（bcrypt + httpOnly JWT Cookie）、收藏、最近玩过、评论。
-- 独立管理后台 /wyj：仪表盘、游戏增删改查（中英双语文案 + 缩略图上传）、
-  评论审核、用户管理（角色 / 封禁）、广告管理、站点设置。
-- 广告位：6 个可配置位置，支持 AdSense 等 HTML 代码或图片横幅，未配置时显示占位。
-- 中英文切换：默认英文，页头 / 页脚一键切换中文。
-- 游戏分类：14 个大类（益智 / 街机 / 动作 / 休闲 / 技巧 / 棋牌 / 赛车 / 射击 /
-  体育 / 闯关 / 冒险 / 模拟 / 放置 / 女生），没有游戏的分类自动隐藏；导入游戏时
-  优先采用分发平台自己的分类，其次按标签关键词归类，新分类会持续自动填充。
-- 首页精选：后台勾选「精选」并发布的游戏会随机轮换展示；一个都没设置时，
-  自动从热门榜与好评榜中随机挑选，首页每次刷新都有变化。
-- Docker 一键部署：docker compose up -d --build，含 /healthz 健康检查。
-- 静态资源版本化：CSS / JS / 图标 sprite 都带 `?v=<内容哈希>`，Cloudflare 等 CDN
-  与浏览器缓存不会再把上一版本的脚本喂给访客（发版后立即生效）。
-- 游戏导入：后台「导入游戏」(/wyj/import) 支持从 GameMonetize（免注册可先预览）
-  或任意自定义 RSS/JSON 游戏源批量导入，自动去重、默认存草稿；正式接入前请先在
-  平台注册出版商并登记你的站点域名。
-- 文档：README（本文件）、docs/ARCHITECTURE.md、docs/DEPLOY.md、docs/GAMES_SPEC.md。
-
-本地启动：npm install && npm start，默认管理员 mqx / mqx331606110（请尽快修改）。
-
+| 类别 | 技术选型 |
+|---|---|
+| 后端运行时与框架 | Node.js 24 LTS、Express 4 |
+| 服务端模板 | EJS 7（SSR） |
+| 数据库 | SQLite（`better-sqlite3` 13，WAL 模式） |
+| 认证与安全 | `bcryptjs`、`jsonwebtoken`、`cookie-parser`、`helmet`、CSRF 与限流中间件 |
+| 文件上传与图片处理 | `multer`、`sharp` |
+| 前端交互与样式 | 原生 HTML5 / CSS3 / JavaScript、SVG Sprite |
+| 部署与反向代理 | Docker、Docker Compose、Nginx、Cloudflare Tunnel |
+| 自动化验证与工具链 | `jsdom`、自研 Smoke 测试套件、i18n 与 Feed 解析校验脚本 |
